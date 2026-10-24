@@ -180,7 +180,10 @@ export default function Live() {
       setChecklist(s.checklist);
       photosLeftRef.current = s.checklist.photos_left;
       setMaxSeconds(s.max_seconds);
-      const { Conversation } = await import("@elevenlabs/react");
+      // Test seam: Playwright injects a scripted stand-in for the ElevenLabs session (window.__MOLDFLOW_FAKE_CONVERSATION__).
+      const fake = (window as unknown as { __MOLDFLOW_FAKE_CONVERSATION__?: Pick<typeof import("@elevenlabs/react").Conversation, "startSession"> })
+        .__MOLDFLOW_FAKE_CONVERSATION__;
+      const Conversation = fake ?? (await import("@elevenlabs/react")).Conversation;
       convRef.current = await Conversation.startSession({
         signedUrl: s.signed_url,
         connectionType: "websocket",
@@ -266,6 +269,29 @@ export default function Live() {
     return () => clearInterval(id);
   }, [phase]);
 
+  // Keep the screen on during the call. Wake Lock API where supported (Chrome/Android, Safari 16.4+); the playing camera
+  // <video> is the fallback that keeps most other browsers awake. Re-acquired when the tab becomes visible again.
+  useEffect(() => {
+    if (phase !== "live") return;
+    type WakeLockSentinel = { release: () => Promise<void> };
+    const nav = navigator as Navigator & { wakeLock?: { request: (t: "screen") => Promise<WakeLockSentinel> } };
+    let lock: WakeLockSentinel | null = null;
+    const acquire = () => {
+      if (document.visibilityState === "visible" && nav.wakeLock) {
+        nav.wakeLock.request("screen").then((l) => { lock = l; document.documentElement.dataset.wakeLock = "on"; }).catch(() => {});
+      } else if (!nav.wakeLock) {
+        document.documentElement.dataset.wakeLock = "video-fallback";
+      }
+    };
+    acquire();
+    document.addEventListener("visibilitychange", acquire);
+    return () => {
+      document.removeEventListener("visibilitychange", acquire);
+      lock?.release().catch(() => {});
+      delete document.documentElement.dataset.wakeLock;
+    };
+  }, [phase]);
+
   useEffect(() => {
     if (phase !== "live") return;
     const id = setInterval(() => setElapsed(Math.floor((Date.now() - startedAtRef.current) / 1000)), 1000);
@@ -323,7 +349,7 @@ export default function Live() {
 
       {inCall && (
         <div className="fixed inset-0 flex h-dvh flex-col text-white">
-          <header className="flex items-center gap-2 bg-gradient-to-b from-kit-navy/90 to-transparent px-4 pb-6 pt-4">
+          <header className="flex items-center gap-2 bg-gradient-to-b from-kit-navy/90 to-transparent px-4 pb-6 pt-[max(1rem,env(safe-area-inset-top))]">
             <span className={cx("inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-caption font-medium",
               phase === "connecting" ? "bg-white/15" : mode === "speaking" ? "bg-brand" : "bg-kit-green")}>
               <span className={cx("h-2 w-2 rounded-full bg-white", phase === "live" && "animate-pulse")} />
@@ -337,7 +363,7 @@ export default function Live() {
 
           <div className="relative flex-1">
             {hint && (
-              <p role="status" className="absolute left-1/2 top-2 -translate-x-1/2 whitespace-nowrap rounded-ds-xsm bg-kit-orange px-3 py-1.5 text-subtitle font-medium shadow-ds-normal">
+              <p role="status" className="absolute left-1/2 top-2 w-max max-w-[90vw] -translate-x-1/2 rounded-ds-xsm bg-kit-orange px-3 py-1.5 text-center text-subtitle font-medium shadow-ds-normal">
                 {HINT_TEXT[hint]}
               </p>
             )}
@@ -351,7 +377,7 @@ export default function Live() {
             )}
           </div>
 
-          <div className="space-y-3 bg-gradient-to-t from-kit-navy via-kit-navy/85 to-transparent px-4 pb-5 pt-10">
+          <div className="space-y-3 bg-gradient-to-t from-kit-navy via-kit-navy/85 to-transparent px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-10">
             <div aria-live="polite" className="min-h-12 space-y-1">
               {lastAi && <p className="text-body font-medium leading-snug">{lastAi.text}</p>}
               {lastCustomer && <p className="text-subtitle text-white/70">You: {lastCustomer.text}</p>}
@@ -384,9 +410,11 @@ export default function Live() {
               <RoundButton label={muted ? "Unmute microphone" : "Mute microphone"} onClick={toggleMute} active={muted} disabled={phase !== "live"}>
                 {muted ? <MicOff size={20} aria-hidden /> : <Mic size={20} aria-hidden />}
               </RoundButton>
-              <RoundButton label={torchOn ? "Turn flashlight off" : "Turn flashlight on"} onClick={toggleTorch} active={torchOn} disabled={!torchOk}>
-                {torchOn ? <FlashlightOff size={20} aria-hidden /> : <Flashlight size={20} aria-hidden />}
-              </RoundButton>
+              {torchOk ? (
+                <RoundButton label={torchOn ? "Turn flashlight off" : "Turn flashlight on"} onClick={toggleTorch} active={torchOn}>
+                  {torchOn ? <FlashlightOff size={20} aria-hidden /> : <Flashlight size={20} aria-hidden />}
+                </RoundButton>
+              ) : <span className="h-12 w-12" aria-hidden />}
               <button type="button" onClick={userShot} disabled={phase !== "live" || capturing || (checklist?.photos_left ?? 1) <= 0}
                 aria-label="Take a photo" title="Take a photo"
                 className="grid h-[68px] w-[68px] place-items-center rounded-full border-4 border-white/80 transition active:scale-95 disabled:opacity-40">

@@ -1,7 +1,7 @@
 {
  "model": "nvidia/nemotron-3.5-super-vl:free",
- "run_at": "2026-10-24 04:11",
- "label": "c2-prompt-v2+temp0",
+ "run_at": "2026-10-24 05:24",
+ "label": "c3-prompt-v3 (quality rules for live frames)",
  "rows": [
   {
    "key": "job1/01_No_thermal_anomalies_basement_1.jpg",
@@ -14,18 +14,18 @@
     "observations": [
      "Thermal camera screen shows a false-colour heat image.",
      "Cool blue band appears along the bottom of the screen.",
-     "Meter reads 23.36 degrees Celsius at the top left.",
-     "Hand holds the device in a room with wood framing."
+     "Meter reads 23.36 degrees Celsius.",
+     "Screen is held indoors near a wall and furniture."
     ],
     "regions": [],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Which wall or surface was the camera pointed at?",
+    "follow_up_question": "Is there a damp spot or leak near that cool area?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 3714,
+   "latency_ms": 2261,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -43,8 +43,8 @@
    "observations": [
     "Thermal camera screen shows a false-colour heat image.",
     "Cool blue band appears along the bottom of the screen.",
-    "Meter reads 23.36 degrees Celsius at the top left.",
-    "Hand holds the device in a room with wood framing."
+    "Meter reads 23.36 degrees Celsius.",
+    "Screen is held indoors near a wall and furniture."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -59,9 +59,9 @@
    "analysis": {
     "image_type": "thermal",
     "observations": [
-     "Thermal camera screen shows a false-colour heat image.",
-     "Cool blue area appears at the bottom of the screen.",
-     "A hand holds the device against a wall corner."
+     "Thermal camera held against a wall corner.",
+     "Screen shows a cool blue band near the bottom.",
+     "Yellow and green areas appear above the cool band."
     ],
     "regions": [],
     "visible_moisture": null,
@@ -71,7 +71,7 @@
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 2059,
+   "latency_ms": 12256,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -87,9 +87,9 @@
    },
    "image_type": "thermal",
    "observations": [
-    "Thermal camera screen shows a false-colour heat image.",
-    "Cool blue area appears at the bottom of the screen.",
-    "A hand holds the device against a wall corner."
+    "Thermal camera held against a wall corner.",
+    "Screen shows a cool blue band near the bottom.",
+    "Yellow and green areas appear above the cool band."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -104,7 +104,7 @@
    "analysis": {
     "image_type": "instrument",
     "observations": [
-     "A temperature and humidity meter sits on a wood surface.",
+     "A temperature and humidity meter sits on a wooden surface.",
      "The meter reads 77 degrees Fahrenheit.",
      "Relative humidity shows 44.2 percent.",
      "Dew point reads 53.6 degrees Fahrenheit."
@@ -117,7 +117,7 @@
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 4024,
+   "latency_ms": 1726,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -133,7 +133,7 @@
    },
    "image_type": "instrument",
    "observations": [
-    "A temperature and humidity meter sits on a wood surface.",
+    "A temperature and humidity meter sits on a wooden surface.",
     "The meter reads 77 degrees Fahrenheit.",
     "Relative humidity shows 44.2 percent.",
     "Dew point reads 53.6 degrees Fahrenheit."
@@ -152,8 +152,8 @@
     "image_type": "test_kit",
     "observations": [
      "A hand holds a swab against a wall surface.",
-     "The swab has a purple handle.",
-     "The wall appears light-colored and painted."
+     "The swab has a purple handle and a thin tip.",
+     "The wall appears light-colored with some shadowing."
     ],
     "regions": [],
     "visible_moisture": null,
@@ -163,7 +163,7 @@
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 1867,
+   "latency_ms": 1922,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -180,8 +180,8 @@
    "image_type": "test_kit",
    "observations": [
     "A hand holds a swab against a wall surface.",
-    "The swab has a purple handle.",
-    "The wall appears light-colored and painted."
+    "The swab has a purple handle and a thin tip.",
+    "The wall appears light-colored with some shadowing."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -196,19 +196,19 @@
    "analysis": {
     "image_type": "test_kit",
     "observations": [
-     "A hand holds a swab against the base of a wall.",
-     "The wall shows peeling paint near the floor.",
-     "The swab touches a discolored patch on the wall."
+     "A swab touches the wall near the baseboard.",
+     "The wall shows peeling paint and discoloration.",
+     "The floor looks damp near the wall."
     ],
     "regions": [],
-    "visible_moisture": null,
+    "visible_moisture": true,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Has this area had any recent water leaks?",
+    "follow_up_question": "Has there been any water damage in this room?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 2420,
+   "latency_ms": 7733,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -224,9 +224,9 @@
    },
    "image_type": "test_kit",
    "observations": [
-    "A hand holds a swab against the base of a wall.",
-    "The wall shows peeling paint near the floor.",
-    "The swab touches a discolored patch on the wall."
+    "A swab touches the wall near the baseboard.",
+    "The wall shows peeling paint and discoloration.",
+    "The floor looks damp near the wall."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -241,29 +241,29 @@
    "analysis": {
     "image_type": "regular",
     "observations": [
-     "Black pipe fitting against a white wall.",
-     "Greenish discoloration at the pipe joint.",
+     "Black pipe running along a wall.",
+     "Greenish staining at the pipe joint.",
      "Hand visible near the top of the frame."
     ],
     "regions": [
      {
-      "label": "look closer: pipe joint discoloration",
+      "label": "look closer: pipe joint staining",
       "box_2d": [
-       540,
        520,
-       620,
-       790
+       520,
+       800,
+       800
       ]
      }
     ],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Is this pipe near a bathroom or kitchen?",
+    "follow_up_question": "Is there any water leaking from that pipe joint?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 5002,
+   "latency_ms": 2222,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 0.0,
@@ -281,8 +281,8 @@
    },
    "image_type": "regular",
    "observations": [
-    "Black pipe fitting against a white wall.",
-    "Greenish discoloration at the pipe joint.",
+    "Black pipe running along a wall.",
+    "Greenish staining at the pipe joint.",
     "Hand visible near the top of the frame."
    ],
    "regions": 1,
@@ -298,19 +298,19 @@
    "analysis": {
     "image_type": "test_kit",
     "observations": [
-     "A swab test strip is held near plumbing pipes.",
-     "The strip tip touches the concrete floor.",
-     "Pipes run along the wall behind the strip."
+     "A test swab is held near pipes under a sink.",
+     "The swab tip touches the floor beside the plumbing.",
+     "The floor looks damp around the pipe area."
     ],
     "regions": [],
-    "visible_moisture": null,
+    "visible_moisture": true,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "What area were you testing with the swab?",
+    "follow_up_question": "Have you noticed any leaks under the sink?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 2318,
+   "latency_ms": 1462,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -326,9 +326,9 @@
    },
    "image_type": "test_kit",
    "observations": [
-    "A swab test strip is held near plumbing pipes.",
-    "The strip tip touches the concrete floor.",
-    "Pipes run along the wall behind the strip."
+    "A test swab is held near pipes under a sink.",
+    "The swab tip touches the floor beside the plumbing.",
+    "The floor looks damp around the pipe area."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -345,18 +345,17 @@
     "observations": [
      "Thermal camera screen shows a cool blue band across the wall.",
      "Center reading is 20.0 degrees Celsius.",
-     "Minimum reading shown is 17.8 degrees Celsius.",
-     "Cool area may need checking but is not proof of moisture or mold."
+     "Minimum reading shown is 17.8 degrees Celsius."
     ],
     "regions": [],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Have you noticed any dampness or water stains near that cool area?",
+    "follow_up_question": "Has this wall had any leaks or water damage before?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 1920,
+   "latency_ms": 1854,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -365,19 +364,16 @@
     "regions": 1.0,
     "quality": 1.0,
     "follow_up": 1.0,
-    "speakable": 0.0,
-    "total": 6.0,
+    "speakable": 1.0,
+    "total": 7.0,
     "overclaim": false,
-    "notes": [
-     "1 obs >12 words"
-    ]
+    "notes": []
    },
    "image_type": "thermal",
    "observations": [
     "Thermal camera screen shows a cool blue band across the wall.",
     "Center reading is 20.0 degrees Celsius.",
-    "Minimum reading shown is 17.8 degrees Celsius.",
-    "Cool area may need checking but is not proof of moisture or mold."
+    "Minimum reading shown is 17.8 degrees Celsius."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -392,19 +388,19 @@
    "analysis": {
     "image_type": "thermal",
     "observations": [
-     "Thermal camera screen shows a cool blue band across a yellow wall.",
-     "Screen reads center temperature 10.8 degrees Celsius.",
-     "A second handheld device is held beside the camera."
+     "Thermal camera screen shows a false-colour heat image.",
+     "A cool blue band runs across the middle of the screen.",
+     "The camera reads 16.4 degrees Celsius at the centre spot."
     ],
     "regions": [],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Is that cool band near a window or an exterior wall?",
+    "follow_up_question": "Where in the home was this thermal image taken?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 1908,
+   "latency_ms": 1594,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -420,9 +416,9 @@
    },
    "image_type": "thermal",
    "observations": [
-    "Thermal camera screen shows a cool blue band across a yellow wall.",
-    "Screen reads center temperature 10.8 degrees Celsius.",
-    "A second handheld device is held beside the camera."
+    "Thermal camera screen shows a false-colour heat image.",
+    "A cool blue band runs across the middle of the screen.",
+    "The camera reads 16.4 degrees Celsius at the centre spot."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -437,20 +433,20 @@
    "analysis": {
     "image_type": "thermal",
     "observations": [
-     "Thermal camera screen shows a cool blue band on a wall.",
+     "Thermal camera screen shows a cool blue band across the wall.",
      "Center reading is 19.3 degrees Celsius.",
-     "Maximum temperature shown is 210 degrees.",
-     "Minimum temperature shown is 16.4 degrees."
+     "Maximum reading is 210 degrees Celsius.",
+     "Minimum reading is 16.4 degrees Celsius."
     ],
     "regions": [],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Is that cool spot near a window or an exterior wall?",
+    "follow_up_question": "Do you feel any dampness near that cool blue band?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 3507,
+   "latency_ms": 1785,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -466,10 +462,10 @@
    },
    "image_type": "thermal",
    "observations": [
-    "Thermal camera screen shows a cool blue band on a wall.",
+    "Thermal camera screen shows a cool blue band across the wall.",
     "Center reading is 19.3 degrees Celsius.",
-    "Maximum temperature shown is 210 degrees.",
-    "Minimum temperature shown is 16.4 degrees."
+    "Maximum reading is 210 degrees Celsius.",
+    "Minimum reading is 16.4 degrees Celsius."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -493,11 +489,11 @@
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Has there been any water damage in this room?",
+    "follow_up_question": "Has there been any water leak or dampness in this room?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 2111,
+   "latency_ms": 1986,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -531,39 +527,30 @@
    "analysis": {
     "image_type": "regular",
     "observations": [
-     "Shower stall with light-colored wall and floor tiles.",
+     "Shower stall with light tiles on walls and floor.",
      "Water spots visible on the lower floor tiles.",
-     "Small gap between the floor tiles and the glass door track.",
-     "Orange ball sitting on the shower floor."
+     "Orange ball sitting on the shower floor.",
+     "Glass door frame meets the floor at the bottom edge."
     ],
     "regions": [
      {
       "label": "look closer: floor water spots",
       "box_2d": [
-       200,
+       210,
        520,
        750,
        850
-      ]
-     },
-     {
-      "label": "look closer: door track gap",
-      "box_2d": [
-       740,
-       390,
-       900,
-       860
       ]
      }
     ],
     "visible_moisture": true,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Have you noticed any dampness outside the shower after use?",
+    "follow_up_question": "Have you noticed any dampness or musty smell in the shower?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 3136,
+   "latency_ms": 2179,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -579,12 +566,12 @@
    },
    "image_type": "regular",
    "observations": [
-    "Shower stall with light-colored wall and floor tiles.",
+    "Shower stall with light tiles on walls and floor.",
     "Water spots visible on the lower floor tiles.",
-    "Small gap between the floor tiles and the glass door track.",
-    "Orange ball sitting on the shower floor."
+    "Orange ball sitting on the shower floor.",
+    "Glass door frame meets the floor at the bottom edge."
    ],
-   "regions": 2,
+   "regions": 1,
    "declined_to_confirm_mold": true,
    "mentions_mold_as_fact": false
   },
@@ -597,30 +584,30 @@
    "analysis": {
     "image_type": "regular",
     "observations": [
-     "Ceiling above the shower looks discolored.",
-     "Shower glass has black metal framing.",
-     "Bottles sit on glass shelves inside the shower.",
-     "Window beside the shower lets in daylight."
+     "Shower ceiling shows a bright spot with a darker edge around it.",
+     "Glass shower enclosure has black metal framing.",
+     "Tile walls inside the shower appear clean and dry.",
+     "Bottles sit on glass shelves inside the shower."
     ],
     "regions": [
      {
-      "label": "look closer: ceiling stain",
+      "label": "look closer: ceiling edge",
       "box_2d": [
-       0,
-       0,
-       420,
-       420
+       250,
+       200,
+       650,
+       450
       ]
      }
     ],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Have you noticed any water stains on that ceiling?",
+    "follow_up_question": "Have you noticed any water stains on the ceiling?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 2779,
+   "latency_ms": 2808,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -636,10 +623,10 @@
    },
    "image_type": "regular",
    "observations": [
-    "Ceiling above the shower looks discolored.",
-    "Shower glass has black metal framing.",
-    "Bottles sit on glass shelves inside the shower.",
-    "Window beside the shower lets in daylight."
+    "Shower ceiling shows a bright spot with a darker edge around it.",
+    "Glass shower enclosure has black metal framing.",
+    "Tile walls inside the shower appear clean and dry.",
+    "Bottles sit on glass shelves inside the shower."
    ],
    "regions": 1,
    "declined_to_confirm_mold": true,
@@ -656,7 +643,8 @@
     "observations": [
      "Yellowish stain on the ceiling near the corner.",
      "Small dark specks on the ceiling surface.",
-     "White tile wall below the stained ceiling area."
+     "White tiles on the shower wall below the stain.",
+     "Ceiling meets the tiled wall at a corner seam."
     ],
     "regions": [
      {
@@ -667,16 +655,25 @@
        780,
        580
       ]
+     },
+     {
+      "label": "look closer: ceiling specks",
+      "box_2d": [
+       560,
+       280,
+       790,
+       420
+      ]
      }
     ],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Has there been any water leak in this bathroom?",
+    "follow_up_question": "Has there been any water leak or dampness in this bathroom?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 2298,
+   "latency_ms": 2693,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -694,9 +691,10 @@
    "observations": [
     "Yellowish stain on the ceiling near the corner.",
     "Small dark specks on the ceiling surface.",
-    "White tile wall below the stained ceiling area."
+    "White tiles on the shower wall below the stain.",
+    "Ceiling meets the tiled wall at a corner seam."
    ],
-   "regions": 1,
+   "regions": 2,
    "declined_to_confirm_mold": true,
    "mentions_mold_as_fact": false
   },
@@ -710,19 +708,19 @@
     "image_type": "regular",
     "observations": [
      "White shower ceiling with a bright flashlight spot.",
-     "White subway tile walls around the shower area.",
-     "Shower head and hose mounted on the wall.",
-     "No visible stains or moisture on the ceiling or tile."
+     "White subway tile walls around the shower head.",
+     "Grout lines between the tiles look intact.",
+     "No visible stains or peeling on the ceiling."
     ],
     "regions": [],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Have you noticed any water stains or dampness in this shower?",
+    "follow_up_question": "Have you noticed any musty smell in the bathroom?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 1972,
+   "latency_ms": 1554,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -741,9 +739,9 @@
    "image_type": "regular",
    "observations": [
     "White shower ceiling with a bright flashlight spot.",
-    "White subway tile walls around the shower area.",
-    "Shower head and hose mounted on the wall.",
-    "No visible stains or moisture on the ceiling or tile."
+    "White subway tile walls around the shower head.",
+    "Grout lines between the tiles look intact.",
+    "No visible stains or peeling on the ceiling."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -759,38 +757,36 @@
     "image_type": "instrument",
     "observations": [
      "A hand holds a moisture meter against the bathroom floor.",
-     "The meter is pressed near the base of a black pole.",
-     "The floor tiles look dry around the meter."
+     "The meter probe touches the tile near the tub base.",
+     "The floor around the tub looks dry and intact."
     ],
     "regions": [],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Has this area had any recent leaks or flooding?",
+    "follow_up_question": "Has there been any water leaking from the tub area?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 1658,
+   "latency_ms": 1568,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
-    "mentions": 0.5,
+    "mentions": 1.0,
     "no_overclaim": 1.0,
     "regions": 1.0,
     "quality": 1.0,
     "follow_up": 1.0,
     "speakable": 1.0,
-    "total": 6.5,
+    "total": 7.0,
     "overclaim": false,
-    "notes": [
-     "missing: faucet"
-    ]
+    "notes": []
    },
    "image_type": "instrument",
    "observations": [
     "A hand holds a moisture meter against the bathroom floor.",
-    "The meter is pressed near the base of a black pole.",
-    "The floor tiles look dry around the meter."
+    "The meter probe touches the tile near the tub base.",
+    "The floor around the tub looks dry and intact."
    ],
    "regions": 0,
    "declined_to_confirm_mold": true,
@@ -805,96 +801,29 @@
    "analysis": {
     "image_type": "regular",
     "observations": [
-     "Pink insulation fills the crawlspace between wooden beams.",
-     "The lower part of the image is dark and hard to see.",
-     "No standing water or stains are visible on the insulation."
-    ],
-    "regions": [],
-    "visible_moisture": null,
-    "scale_reference_visible": false,
-    "quality": "ok",
-    "follow_up_question": "Has this crawlspace had any past water problems?",
-    "declined_to_confirm_mold": true
-   },
-   "tier": "live",
-   "latency_ms": 1755,
-   "model": "nvidia/nemotron-3.5-super-vl:free",
-   "score": {
-    "type": 1.0,
-    "mentions": 0.5,
-    "no_overclaim": 1.0,
-    "regions": 0.0,
-    "quality": 1.0,
-    "follow_up": 1.0,
-    "speakable": 1.0,
-    "total": 5.5,
-    "overclaim": false,
-    "notes": [
-     "missing: attic",
-     "regions: none"
-    ]
-   },
-   "image_type": "regular",
-   "observations": [
-    "Pink insulation fills the crawlspace between wooden beams.",
-    "The lower part of the image is dark and hard to see.",
-    "No standing water or stains are visible on the insulation."
-   ],
-   "regions": 0,
-   "declined_to_confirm_mold": true,
-   "mentions_mold_as_fact": false
-  },
-  {
-   "key": "job1/18_Attic_disturbed_insulation_2.jpg",
-   "photo": "18_Attic_disturbed_insulation_2.jpg",
-   "job": "job1",
-   "group": "attic",
-   "caption": "Attic disturbed insulation 2",
-   "analysis": {
-    "image_type": "regular",
-    "observations": [
-     "Wood beam shows white discoloration along its surface.",
-     "Ceiling panel appears stained near the beam.",
-     "Insulation below looks dark and possibly damp.",
-     "Wood framing shows signs of moisture exposure."
+     "Pink insulation covers the crawlspace floor.",
+     "Wood support posts rise through the insulation.",
+     "Dark shadow covers the lower part of the image."
     ],
     "regions": [
      {
-      "label": "look closer: white beam discoloration",
-      "box_2d": [
-       140,
-       330,
-       1000,
-       620
-      ]
-     },
-     {
-      "label": "look closer: ceiling staining",
+      "label": "look closer: insulation surface",
       "box_2d": [
        0,
-       0,
+       180,
        1000,
-       350
-      ]
-     },
-     {
-      "label": "look closer: dark insulation",
-      "box_2d": [
-       0,
-       720,
-       1000,
-       1000
+       650
       ]
      }
     ],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Has there been any water leak or flooding in this area?",
+    "follow_up_question": "Do you notice any musty smell in the crawlspace?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 8929,
+   "latency_ms": 2460,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -912,48 +841,56 @@
    },
    "image_type": "regular",
    "observations": [
-    "Wood beam shows white discoloration along its surface.",
-    "Ceiling panel appears stained near the beam.",
-    "Insulation below looks dark and possibly damp.",
-    "Wood framing shows signs of moisture exposure."
+    "Pink insulation covers the crawlspace floor.",
+    "Wood support posts rise through the insulation.",
+    "Dark shadow covers the lower part of the image."
    ],
-   "regions": 3,
+   "regions": 1,
    "declined_to_confirm_mold": true,
    "mentions_mold_as_fact": false
   },
   {
-   "key": "job1/19_Attic_disturbed_insulation_3.jpg",
-   "photo": "19_Attic_disturbed_insulation_3.jpg",
+   "key": "job1/18_Attic_disturbed_insulation_2.jpg",
+   "photo": "18_Attic_disturbed_insulation_2.jpg",
    "job": "job1",
    "group": "attic",
-   "caption": "Attic disturbed insulation 3",
+   "caption": "Attic disturbed insulation 2",
    "analysis": {
     "image_type": "regular",
     "observations": [
-     "Attic framing with wood beams and sheathing.",
-     "Dark shadowy areas around the wooden beams.",
-     "Some discoloration visible on the wood surface.",
-     "Insulation appears compressed in places."
+     "Exposed wood framing in an attic or crawlspace.",
+     "Dark staining on the wood beam near the center.",
+     "Pink insulation visible between the framing below.",
+     "Some wood surfaces look damp or discolored."
     ],
     "regions": [
      {
-      "label": "look closer: wood discoloration",
+      "label": "look closer: beam staining",
       "box_2d": [
-       350,
-       300,
-       700,
-       650
+       140,
+       330,
+       1000,
+       620
+      ]
+     },
+     {
+      "label": "look closer: vertical post stain",
+      "box_2d": [
+       130,
+       570,
+       270,
+       1000
       ]
      }
     ],
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Have you noticed any musty smells in the attic?",
+    "follow_up_question": "Have you noticed any musty smell in this area?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 4331,
+   "latency_ms": 2351,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -969,10 +906,65 @@
    },
    "image_type": "regular",
    "observations": [
-    "Attic framing with wood beams and sheathing.",
-    "Dark shadowy areas around the wooden beams.",
-    "Some discoloration visible on the wood surface.",
-    "Insulation appears compressed in places."
+    "Exposed wood framing in an attic or crawlspace.",
+    "Dark staining on the wood beam near the center.",
+    "Pink insulation visible between the framing below.",
+    "Some wood surfaces look damp or discolored."
+   ],
+   "regions": 2,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false
+  },
+  {
+   "key": "job1/19_Attic_disturbed_insulation_3.jpg",
+   "photo": "19_Attic_disturbed_insulation_3.jpg",
+   "job": "job1",
+   "group": "attic",
+   "caption": "Attic disturbed insulation 3",
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Wood framing in a dark attic space.",
+     "Some insulation visible between the rafters.",
+     "Dark shadow covers much of the lower area."
+    ],
+    "regions": [
+     {
+      "label": "look closer: rafter bay",
+      "box_2d": [
+       350,
+       300,
+       750,
+       650
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "too_dark",
+    "follow_up_question": "Can you turn on more light in the attic?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2353,
+   "model": "nvidia/nemotron-3.5-super-vl:free",
+   "score": {
+    "type": 1.0,
+    "mentions": 1.0,
+    "no_overclaim": 1.0,
+    "regions": 1.0,
+    "quality": 1.0,
+    "follow_up": 1.0,
+    "speakable": 1.0,
+    "total": 7.0,
+    "overclaim": false,
+    "notes": []
+   },
+   "image_type": "regular",
+   "observations": [
+    "Wood framing in a dark attic space.",
+    "Some insulation visible between the rafters.",
+    "Dark shadow covers much of the lower area."
    ],
    "regions": 1,
    "declined_to_confirm_mold": true,
@@ -987,17 +979,17 @@
    "analysis": {
     "image_type": "regular",
     "observations": [
-     "Wood beams and joists in a dark attic space.",
-     "Pink insulation fills the floor between the joists.",
-     "Some wood pieces lie loose on the insulation.",
-     "A flashlight beam lights part of the framing."
+     "Wooden beams and joists in a dark attic space.",
+     "Pink insulation visible between the wooden framing.",
+     "Some wood pieces look worn or damaged near the floor.",
+     "A flashlight beam lights part of the space."
     ],
     "regions": [
      {
-      "label": "look closer: loose wood on insulation",
+      "label": "look closer: worn wood near floor",
       "box_2d": [
        0,
-       510,
+       500,
        620,
        990
       ]
@@ -1006,11 +998,11 @@
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Has there been any water leak or dampness in this attic?",
+    "follow_up_question": "Have you noticed any musty smells in this area?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 2240,
+   "latency_ms": 2643,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -1026,10 +1018,10 @@
    },
    "image_type": "regular",
    "observations": [
-    "Wood beams and joists in a dark attic space.",
-    "Pink insulation fills the floor between the joists.",
-    "Some wood pieces lie loose on the insulation.",
-    "A flashlight beam lights part of the framing."
+    "Wooden beams and joists in a dark attic space.",
+    "Pink insulation visible between the wooden framing.",
+    "Some wood pieces look worn or damaged near the floor.",
+    "A flashlight beam lights part of the space."
    ],
    "regions": 1,
    "declined_to_confirm_mold": true,
@@ -1044,9 +1036,9 @@
    "analysis": {
     "image_type": "regular",
     "observations": [
-     "Downspout empties onto pavers beside the foundation.",
+     "Downspout empties onto pavers next to the foundation.",
      "Bushes grow close to the siding and downspout.",
-     "Pavers sit near the base of the house wall."
+     "Pavers show some damp-looking patches near the wall."
     ],
     "regions": [
      {
@@ -1054,17 +1046,17 @@
       "box_2d": [
        370,
        340,
-       680,
+       690,
        590
       ]
      },
      {
-      "label": "look closer: foundation edge",
+      "label": "look closer: damp pavers",
       "box_2d": [
-       430,
-       470,
-       1000,
-       690
+       450,
+       650,
+       800,
+       900
       ]
      }
     ],
@@ -1075,7 +1067,7 @@
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 9794,
+   "latency_ms": 127242,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -1091,9 +1083,9 @@
    },
    "image_type": "regular",
    "observations": [
-    "Downspout empties onto pavers beside the foundation.",
+    "Downspout empties onto pavers next to the foundation.",
     "Bushes grow close to the siding and downspout.",
-    "Pavers sit near the base of the house wall."
+    "Pavers show some damp-looking patches near the wall."
    ],
    "regions": 2,
    "declined_to_confirm_mold": true,
@@ -1108,27 +1100,27 @@
    "analysis": {
     "image_type": "regular",
     "observations": [
-     "Two braided hoses run through a wall opening.",
+     "Two braided water lines enter a wall opening.",
      "Peeling paint around the wall opening.",
-     "Dark specks inside the wall opening.",
-     "No standing water visible."
+     "Dark staining inside the wall recess.",
+     "No visible standing water."
     ],
     "regions": [
      {
-      "label": "look closer: wall opening",
+      "label": "look closer: wall recess staining",
       "box_2d": [
        280,
-       160,
+       170,
        640,
-       660
+       680
       ]
      },
      {
       "label": "look closer: peeling paint",
       "box_2d": [
-       0,
-       330,
-       140,
+       120,
+       340,
+       160,
        500
       ]
      }
@@ -1136,11 +1128,11 @@
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Is this area near a sink or washing machine?",
+    "follow_up_question": "Have you noticed any leaks or dampness near these water lines?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 4008,
+   "latency_ms": 3019,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
@@ -1156,10 +1148,10 @@
    },
    "image_type": "regular",
    "observations": [
-    "Two braided hoses run through a wall opening.",
+    "Two braided water lines enter a wall opening.",
     "Peeling paint around the wall opening.",
-    "Dark specks inside the wall opening.",
-    "No standing water visible."
+    "Dark staining inside the wall recess.",
+    "No visible standing water."
    ],
    "regions": 2,
    "declined_to_confirm_mold": true,
@@ -1176,7 +1168,7 @@
     "observations": [
      "Dark staining along the top edge of the wall.",
      "Horizontal lines on the wall surface.",
-     "Bright ceiling light fixture below the wall."
+     "Bright light fixture visible at the bottom."
     ],
     "regions": [
      {
@@ -1192,24 +1184,24 @@
     "visible_moisture": null,
     "scale_reference_visible": false,
     "quality": "ok",
-    "follow_up_question": "Have you noticed any water leaks near this wall?",
+    "follow_up_question": "Have you noticed any water leaks near this area?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 1715,
+   "latency_ms": 2938,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
-    "mentions": 0.5,
+    "mentions": 0.0,
     "no_overclaim": 1.0,
     "regions": 0.0,
     "quality": 1.0,
     "follow_up": 1.0,
     "speakable": 1.0,
-    "total": 5.5,
+    "total": 5.0,
     "overclaim": false,
     "notes": [
-     "missing: vent",
+     "missing: vent, ceiling",
      "regions: whole-image box"
     ]
    },
@@ -1217,7 +1209,7 @@
    "observations": [
     "Dark staining along the top edge of the wall.",
     "Horizontal lines on the wall surface.",
-    "Bright ceiling light fixture below the wall."
+    "Bright light fixture visible at the bottom."
    ],
    "regions": 1,
    "declined_to_confirm_mold": true,
@@ -1233,75 +1225,67 @@
     "image_type": "regular",
     "observations": [
      "White horizontal slats cover most of the image.",
-     "Dark spots are visible behind the slats.",
-     "The surface behind the slats looks damp or stained."
+     "Dark speckled material shows through gaps between slats.",
+     "Image is blurry and surface details are hard to see."
     ],
-    "regions": [
-     {
-      "label": "look closer: dark spots behind slats",
-      "box_2d": [
-       0,
-       0,
-       720,
-       1000
-      ]
-     }
-    ],
+    "regions": [],
     "visible_moisture": null,
     "scale_reference_visible": false,
-    "quality": "ok",
-    "follow_up_question": "What room is this vent or blind in?",
+    "quality": "blurry",
+    "follow_up_question": "Can you show a clearer view of the area behind the slats?",
     "declined_to_confirm_mold": true
    },
    "tier": "live",
-   "latency_ms": 2123,
+   "latency_ms": 3859,
    "model": "nvidia/nemotron-3.5-super-vl:free",
    "score": {
     "type": 1.0,
     "mentions": 1.0,
     "no_overclaim": 1.0,
-    "regions": 1.0,
+    "regions": 0.0,
     "quality": 1.0,
     "follow_up": 1.0,
     "speakable": 1.0,
-    "total": 7.0,
+    "total": 6.0,
     "overclaim": false,
-    "notes": []
+    "notes": [
+     "regions: none"
+    ]
    },
    "image_type": "regular",
    "observations": [
     "White horizontal slats cover most of the image.",
-    "Dark spots are visible behind the slats.",
-    "The surface behind the slats looks damp or stained."
+    "Dark speckled material shows through gaps between slats.",
+    "Image is blurry and surface details are hard to see."
    ],
-   "regions": 1,
+   "regions": 0,
    "declined_to_confirm_mold": true,
    "mentions_mold_as_fact": false
   }
  ],
  "summary": {
-  "total score": "160.5 / 168",
+  "total score": "162.0 / 168",
   "overclaims": 0,
   "image type agreement": "23/24",
   "photos analysed": "24/24",
   "median live latency (s)": 2.3,
   "by group (avg of 7)": {
-   "attic": 6.5,
+   "attic": 6.88,
    "exterior": 7.0,
-   "instrument": 6.75,
+   "instrument": 7.0,
    "test_kit": 6.62,
-   "thermal": 6.83,
-   "virtual": 6.5,
+   "thermal": 7.0,
+   "virtual": 6.0,
    "washroom": 6.75
   },
   "by metric": {
    "type": "23.0/24",
-   "mentions": "21.5/24",
+   "mentions": "22.0/24",
    "no_overclaim": "24.0/24",
    "regions": "21.0/24",
    "quality": "24.0/24",
    "follow_up": "24.0/24",
-   "speakable": "23.0/24"
+   "speakable": "24.0/24"
   }
  },
  "note": "Agreement with the organizer captions on the sample pack (n=24, illustrative). Not an accuracy benchmark."

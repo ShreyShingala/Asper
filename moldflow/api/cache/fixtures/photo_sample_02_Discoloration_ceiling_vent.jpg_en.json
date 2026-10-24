@@ -1,4 +1,4 @@
 {
  "model": "nvidia/nemotron-3.5-super-vl:free",
- "value": "{\"image_type\":\"regular\",\"observations\":[\"Ceiling vent with horizontal slats above the laundry area.\",\"White ceiling surface below the vent with a small screw hole.\",\"Bright circular light fixture visible at the bottom of the frame.\"],\"regions\":[{\"label\":\"look closer: ceiling vent\",\"box_2d\":[0,0,560,1000]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Do you notice any musty smells in the laundry room?\",\"declined_to_confirm_mold\":true}"
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"White ceiling with a small dark screw hole.\",\"Dark band along the top edge of the ceiling.\",\"Bright light fixture visible at the bottom.\"],\"regions\":[{\"label\":\"look closer: dark band at top\",\"box_2d\":[0,0,100,1000]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Have you noticed any water stains or dampness on this ceiling?\",\"declined_to_confirm_mold\":true}"
 }

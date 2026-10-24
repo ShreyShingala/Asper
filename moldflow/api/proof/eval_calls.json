@@ -1,0 +1,532 @@
+{
+ "run_at": "2026-10-24 05:12",
+ "label": "bruce-c2 prompt v3 (no repeats, vague->Not sure) + sim fidelity",
+ "summary": {
+  "total": "27.89 / 33",
+  "violations": 0,
+  "finished": "3/3",
+  "by_persona": {
+   "job1-washroom": 10.0,
+   "messy": 8.89,
+   "job2-virtual": 9.0
+  },
+  "backend": "local",
+  "customer": "rules",
+  "verified_with_live_call": false
+ },
+ "calls": [
+  {
+   "persona": "job1-washroom",
+   "case_id": "c80cdef9f",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 10.0,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 1.0,
+     "no_repeats": 0.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {
+     "symptoms": 3
+    },
+    "long_turns": [],
+    "checks": {
+     "mentions_moisture": true
+    },
+    "summary_unsupported": [],
+    "service": "onsite",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 111,
+    "turns": 14,
+    "llm_calls": 13,
+    "tools": [
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete"
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "There's staining on the ceiling and grout in our upstairs washroom, and the tub faucet has been leaking.",
+     "at_ms": 17923
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture that.",
+     "at_ms": 21030
+    },
+    {
+     "role": "ai",
+     "text": "The wide view shows a faint circular ceiling stain below the light and dark grout lines in the shower. Hold still while I capture a close-up.",
+     "at_ms": 35357
+    },
+    {
+     "role": "ai",
+     "text": "The close-up shows a yellow-brown ceiling stain near the corner. Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 45531
+    },
+    {
+     "role": "customer",
+     "text": "We own the house.",
+     "at_ms": 48069
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Is there a musty smell in the washroom?",
+     "at_ms": 52716
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell in the washroom?",
+     "at_ms": 56893
+    },
+    {
+     "role": "customer",
+     "text": "No, I don't really smell anything.",
+     "at_ms": 60200
+    },
+    {
+     "role": "ai",
+     "text": "Got it. Anyone in the home having health symptoms?",
+     "at_ms": 64462
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture a photo of what's directly above the stain.",
+     "at_ms": 70562
+    },
+    {
+     "role": "ai",
+     "text": "The photo above the stain shows a cool blue band on the ceiling, which can point to moisture. Anyone in the home having health symptoms?",
+     "at_ms": 82694
+    },
+    {
+     "role": "ai",
+     "text": "Anyone in the home having health symptoms?",
+     "at_ms": 87846
+    },
+    {
+     "role": "customer",
+     "text": "No, we're all fine.",
+     "at_ms": 90385
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 96185
+    },
+    {
+     "role": "ai",
+     "text": "What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 101516
+    },
+    {
+     "role": "customer",
+     "text": "It's K1A 0B1.",
+     "at_ms": 103669
+    },
+    {
+     "role": "ai",
+     "text": "K, 1, A, 0, B, 1, right?",
+     "at_ms": 107162
+    },
+    {
+     "role": "ai",
+     "text": "I'll put your pre-assessment together now.",
+     "at_ms": 110569
+    }
+   ]
+  },
+  {
+   "persona": "messy",
+   "case_id": "c0e8826b1",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 8.89,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 0.89,
+     "no_repeats": 0.0,
+     "summary_grounded": 0.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {
+     "leak": 3,
+     "location": 3
+    },
+    "long_turns": [
+     "Thanks. I'll save that as your concern. Can you tell me your postal code so I know your area?",
+     "The customer said it's in the bathroom. I'll save that. Is anyone in the home having health symptoms?"
+    ],
+    "checks": {},
+    "summary_unsupported": [
+     "leak"
+    ],
+    "service": "onsite",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 153,
+    "turns": 18,
+    "llm_calls": 17,
+    "tools": [
+     "save_answer",
+     "get_checklist",
+     "capture_photo",
+     "capture_photo",
+     "capture_photo",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete"
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "Uh, so, there's like, stuff on the ceiling? In the bathroom I think. It's been a while.",
+     "at_ms": 17538
+    },
+    {
+     "role": "ai",
+     "text": "Thanks. I'll save that as your concern. Can you tell me your postal code so I know your area?",
+     "at_ms": 25646
+    },
+    {
+     "role": "ai",
+     "text": "Got it \u2014 bathroom ceiling. Could you step back so I can see the whole wall and ceiling around it?",
+     "at_ms": 34738
+    },
+    {
+     "role": "ai",
+     "text": "I can see the ceiling patch. Come closer, about an arm's length, and hold still.",
+     "at_ms": 41333
+    },
+    {
+     "role": "ai",
+     "text": "I can see the yellowish stain and dark specks. Can you tilt up to show what's directly above that ceiling area?",
+     "at_ms": 52488
+    },
+    {
+     "role": "ai",
+     "text": "I can see the cool blue band above the ceiling. Now show me any plumbing, vent, window or appliance nearby.",
+     "at_ms": 62913
+    },
+    {
+     "role": "customer",
+     "text": "Sorry, wait, how much is this going to cost me?",
+     "at_ms": 74649
+    },
+    {
+     "role": "ai",
+     "text": "The team will include pricing with your pre-assessment. In the meantime, is this your home, or do you rent it?",
+     "at_ms": 83141
+    },
+    {
+     "role": "ai",
+     "text": "The customer said it's in the bathroom. I'll save that. Is anyone in the home having health symptoms?",
+     "at_ms": 91164
+    },
+    {
+     "role": "ai",
+     "text": "Is anyone in the home having health symptoms?",
+     "at_ms": 95341
+    },
+    {
+     "role": "customer",
+     "text": "I don't know, maybe? I don't know, maybe?",
+     "at_ms": 99418
+    },
+    {
+     "role": "ai",
+     "text": "I'll save that as not sure. Is there a musty smell?",
+     "at_ms": 104449
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell?",
+     "at_ms": 107472
+    },
+    {
+     "role": "customer",
+     "text": "I don't know, maybe?",
+     "at_ms": 110010
+    },
+    {
+     "role": "ai",
+     "text": "I'll save that as not sure. Any known leak or water damage nearby?",
+     "at_ms": 115810
+    },
+    {
+     "role": "ai",
+     "text": "Any known leak or water damage nearby?",
+     "at_ms": 119602
+    },
+    {
+     "role": "customer",
+     "text": "Hang on, my dog is barking. Okay, go ahead.",
+     "at_ms": 124064
+    },
+    {
+     "role": "ai",
+     "text": "Any known leak or water damage nearby?",
+     "at_ms": 127556
+    },
+    {
+     "role": "customer",
+     "text": "Maybe, I'm not sure.",
+     "at_ms": 130095
+    },
+    {
+     "role": "ai",
+     "text": "I'll save that as not sure. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 137433
+    },
+    {
+     "role": "ai",
+     "text": "What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 142764
+    },
+    {
+     "role": "customer",
+     "text": "K1A 0B1.",
+     "at_ms": 144533
+    },
+    {
+     "role": "ai",
+     "text": "K, 1, A, 0, B, 1 \u2014 is that right?",
+     "at_ms": 149179
+    },
+    {
+     "role": "ai",
+     "text": "I'll put your pre-assessment together now.",
+     "at_ms": 152587
+    }
+   ]
+  },
+  {
+   "persona": "job2-virtual",
+   "case_id": "c4ec23539",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 9.0,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 1.0,
+     "no_repeats": 0.0,
+     "summary_grounded": 0.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {
+     "odor": 3
+    },
+    "long_turns": [],
+    "checks": {},
+    "summary_unsupported": [
+     "leak"
+    ],
+    "service": "onsite",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 146,
+    "turns": 16,
+    "llm_calls": 15,
+    "tools": [
+     "save_answer",
+     "capture_photo",
+     "get_checklist",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete"
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "I keep finding black and white spots inside my washing machine and around the dryer vent, and there's a smell that won't go away.",
+     "at_ms": 20230
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture that spot.",
+     "at_ms": 23723
+    },
+    {
+     "role": "ai",
+     "text": "The wide shot shows dark spots inside the wall opening and peeling paint nearby. Where is this area in your home?",
+     "at_ms": 35924
+    },
+    {
+     "role": "ai",
+     "text": "Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 40485
+    },
+    {
+     "role": "customer",
+     "text": "It's in the laundry room, around the washer and dryer. I own the place.",
+     "at_ms": 46870
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 51900
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture that spot.",
+     "at_ms": 55693
+    },
+    {
+     "role": "ai",
+     "text": "The close-up shows dark buildup inside the vent slats. Is anyone in the home having health symptoms?",
+     "at_ms": 69909
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell near the washing machine?",
+     "at_ms": 74471
+    },
+    {
+     "role": "customer",
+     "text": "I own the place. No, nobody's sick.",
+     "at_ms": 78163
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Is there a musty smell near the washing machine?",
+     "at_ms": 83194
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture the area above the vent.",
+     "at_ms": 88140
+    },
+    {
+     "role": "ai",
+     "text": "The ceiling above shows some dark staining near the top edge. Is there a musty smell near the washing machine?",
+     "at_ms": 100982
+    },
+    {
+     "role": "customer",
+     "text": "Yes, there's a strong musty smell that doesn't go away even after cleaning.",
+     "at_ms": 106982
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Any known leak or water damage nearby?",
+     "at_ms": 111244
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 117344
+    },
+    {
+     "role": "customer",
+     "text": "Not that I know of. My postal code is H2X 1Y4.",
+     "at_ms": 122575
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Let me confirm your postal code: H, 2, X, 1, Y, 4 \u2014 is that right?",
+     "at_ms": 130298
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture the nearby area.",
+     "at_ms": 134775
+    },
+    {
+     "role": "ai",
+     "text": "The nearby shot shows braided water lines and dark spots inside the wall recess. I'll put your pre-assessment together now.",
+     "at_ms": 145735
+    }
+   ]
+  }
+ ],
+ "note": "Simulated calls on the sample-pack personas. Local stand-in (same prompt/tools, free OpenRouter model, text only): NOT verified with a live call."
+}

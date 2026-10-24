@@ -113,7 +113,7 @@ async def run(only: set[str] | None):
         try:
             res = await tasks.analyze_photo(case, ph, prepare_image(path.read_bytes()), None, fixture_key=None)  # measure: no fixture fallback
             row |= {"analysis": res.value.model_dump(), "tier": res.usage.tier, "latency_ms": res.usage.latency_ms, "model": res.usage.model}
-        except AgentFailure as e:
+        except Exception as e:  # one bad provider response must not lose the run
             row |= {"analysis": None, "tier": "error", "latency_ms": 0, "error": str(e)[:160]}
         rows.append(row)
         print(f"  {key:50} {row['tier']:8} {row['latency_ms'] / 1000:5.1f}s", flush=True)

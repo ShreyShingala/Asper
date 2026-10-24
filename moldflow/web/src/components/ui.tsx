@@ -31,10 +31,10 @@ export function ProvenancePill({ tier, ms, model, className }: { tier?: string |
   const live = tier === "live" || tier === "fallback";
   const short = (model ?? "").split("/").pop()?.replace(":free", "").split("-").slice(0, 2).join("-");
   return (
-    <span title={live ? `Generated live by ${model}` : "Replayed from a saved response (offline-safe demo mode)"} className="inline-flex">
+    <span title={live ? `Generated live by ${model}` : tier === "rule" ? "Answered by an on-server brightness check without calling the AI" : "Replayed from a saved response (offline-safe demo mode)"} className="inline-flex">
       <Tag tone={live ? "green" : "gray"} soft className={cn("gap-1", className)}>
         {live ? <Sparkles size={11} aria-hidden /> : <Database size={11} aria-hidden />}
-        {live ? `Live AI · ${short}${ms ? ` · ${(ms / 1000).toFixed(1)}s` : ""}${tier === "fallback" ? " · fallback" : ""}` : tier === "exact_cache" ? "Cached AI response" : "Replayed (fixture)"}
+        {live ? `Live AI · ${short}${ms ? ` · ${(ms / 1000).toFixed(1)}s` : ""}${tier === "fallback" ? " · fallback" : ""}` : tier === "exact_cache" ? "Cached AI response" : tier === "rule" ? "Too dark: brightness check, no AI" : "Replayed (fixture)"}
       </Tag>
     </span>
   );

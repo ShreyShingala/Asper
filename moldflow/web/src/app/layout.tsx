@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "MoldFlow · Mold Busters",
   description: "From first concern to verified quote: one evidence-linked case.",
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#F4F4F7" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#F4F4F7", viewportFit: "cover" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

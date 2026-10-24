@@ -17,6 +17,7 @@ sample pack (n=24, illustrative)**, never "accuracy". Reference reports were nev
 | When (EDT) | What | OpenRouter req | ElevenLabs calls / min |
 |---|---|---|---|
 | 04:00-04:35 | baseline + c1 + c2 photo runs (3x24), model probes (5), demo_api_run, FR fixtures | ~95 | 0 / 0 |
+| 04:35-05:35 | frames x2 (59 each + retries), Bruce sim: 1 probe + baseline 4 + c1 4 + c2 3 calls, photo c3 (24), demo_api_run + fixtures | ~470 | 0 / 0 |
 
 ## Photo analysis cycles (total = 7 metrics x 24 photos = 168)
 | Cycle | Change | Total | Overclaims | Type | Speakable | Median s | Decision |
@@ -24,3 +25,32 @@ sample pack (n=24, illustrative)**, never "accuracy". Reference reports were nev
 | baseline | as found (prompt from build day) | 140.0 | 0 | 20/24 | 5/24 | 11.8 | 2 rows were silently served from old fixtures and several by the fallback |
 | c1 | reliability: retry primary on 5xx/429 with backoff; fallback openrouter/free -> nemotron nano-omni (openrouter/free routes to Nemotron with reasoning forced on, burns tokens, returns empty content); eval no longer falls back to fixtures | 136.5 | 0 | 20/24 | 2/24 | **2.9** | keep: latency 11.8 -> 2.9 s, 0 fixture contamination. Score delta is sampling noise at T=0.2 (same prompt) |
 | c2 | photo prompt v2 (per image type rules, <=12-word spoken observations, region rules, flashlight != dark) + temperature 0 for photos | **160.5** | 0 | **23/24** | **23/24** | 2.3 | **keep**: every group up (test_kit 4.6 -> 6.6, instrument 5.5 -> 6.75). 2 photos -1/-1.5 (15 no region; 17 called the attic a crawlspace), no overclaim regressions |
+| c3 | prompt v3 (quality rules for live frames) | **162.0** | 0 | 23/24 | **24/24** | 2.3 | keep: total up, 0 overclaims. 2 photos -0.5/-1 (vent grille now "blurry" so no box; ceiling vent got a whole-image box -> such boxes are now dropped in the PhotoAnalysis validator) |
+
+## Walkthrough video frames (59 frames, 1 per 3 s, human labels: 8 unusable, 14 vent/hose close-ups)
+| Run | Unusable flagged | Vent/hose consistent with stills | Overclaims | Notes |
+|---|---|---|---|---|
+| prompt v2 | 3/7 | 11/14 | 0 | boxes / blank wall called "ok". 32/59 frames "blurry" (low-res video). (1 frame errored on a provider 502) |
+| c3: prompt v3 quality rules for live frames (people, boxes, furniture = not_relevant; judge soft frames by visible surface) + server brightness rule (mean luma < 28 -> too_dark, no model call) | **5/7** | **12/15** | 0 | keep. Correction: frame 59 was first labelled "black" from a contact sheet whose last tile was padding; it is a baseboard. Both runs re-scored with the fixed labels, no new calls |
+
+## Camera thresholds (web/src/lib/camera.ts), tuned on the walkthrough by emulating the 64x48 probe (scripts/camera_thresholds.py)
+- DARK_LUMA 42 kept: vent/hose close-ups never go below luma 96 -> 0 false "too dark"; only the 4 black transitions trip it.
+- MOVING_DIFF 22 -> 30: false "hold still" episodes on steady close-ups 5 -> 3 (overall 20 -> 19; real pans still caught).
+- Capture margin 6 -> 4 (rejects when steadiest frame diff > MOVING_DIFF + margin): close-up seconds rejected 11% -> 7%.
+
+## Bruce, simulated calls (local stand-in = NOT verified with a live call). Score /11 per call
+Parts: answers, concern, shots, finished, service, rules, short turns, no repeats, summary grounded, persona checks, in time.
+| Run | job2-virtual | job1-washroom | messy | quitter | Total /44 | Violations | Finished |
+|---|---|---|---|---|---|---|---|
+| baseline (original prompt + engine) | 6.87 | 10.45 | 5.80 | 9.86 | **32.98** | 0* | 2/4 |
+| c1: prompt v2 (save every fact immediately, never "noted" without saving, follow next_step, finish rule, price/health deflections, read back postal code) + engine: spoken-answer understanding + next_step | 8.92 | 9.67 | 7.52 | 10.00 | **36.11** | 0 | 3/4 |
+| c2: prompt v3 (vague answer -> save Not sure, save postal first then read back once, no repeating after a tool result) + simulator fidelity (customer confirms read-backs; several tool calls per step like the real agent) | **9.00** | **10.00** | **8.89** | (not re-run) | 27.89/33 on the 3 | 0 | 3/3 |
+
+\* The first scoring flagged "I can't give you a price right now" as a price violation; the check was corrected to only flag
+quoted amounts (the refusal is the required behaviour) and re-applied to the saved transcripts (no new calls).
+Notes: the baseline job2 score is depressed by a simulator bug fixed later (the rule-based customer didn't recognise
+"Where is this area?" as the room question). c1 job1 (-0.78 vs baseline) came from the new postal read-back that the
+rule-based customer could not answer (simulator gap, fixed in c2) and the one-tool-per-step stand-in. Kept c2 because every
+re-run persona improved over c1; job1 remains 0.45 under the (differently simulated) baseline, losing only "no repeats".
+Baseline failure modes seen in transcripts: says "I've noted..." without calling save_answer (job2: 0 of 6 answers saved);
+asks questions that were already answered; never calls finish_assessment when the customer goes quiet; 3-sentence turns.

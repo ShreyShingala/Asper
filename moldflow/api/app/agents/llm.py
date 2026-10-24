@@ -29,10 +29,27 @@ GUARDRAILS = """Rules you must always follow:
 
 _client: AsyncOpenAI | None = None
 _sem = asyncio.Semaphore(config.LLM_CONCURRENCY)
+_rate_lock = asyncio.Lock()
+_next_slot = 0.0
+
+
+async def _throttle() -> None:
+    """Space live requests evenly at LLM_RPM (process-wide), so bursts never trip the provider's per-minute limit."""
+    global _next_slot
+    async with _rate_lock:
+        now_ = time.monotonic()
+        wait = max(0.0, _next_slot - now_)
+        _next_slot = max(now_, _next_slot) + 60.0 / config.LLM_RPM
+    if wait:
+        await asyncio.sleep(wait)
 
 
 class AgentFailure(Exception):
     pass
+
+
+class TransientError(Exception):
+    """Provider returned an empty/malformed response (seen on free tiers): retry like a 5xx."""
 
 
 @dataclass
@@ -106,6 +123,7 @@ async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_
         extra: dict = {"usage": {"include": True}}
         if model == config.PRIMARY_MODEL and config.DISABLE_REASONING:
             extra["reasoning"] = {"enabled": False}  # ~3x faster on Nemotron; some routers (openrouter/free) reject this
+        await _throttle()
         async with _sem:
             resp = await client().chat.completions.create(model=model, messages=msgs, max_tokens=max_tokens,
                                                           temperature=temperature, extra_body=extra)
@@ -114,6 +132,8 @@ async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_
             tokens_in += u.prompt_tokens or 0
             tokens_out += u.completion_tokens or 0
             cost += float((u.model_extra or {}).get("cost") or 0)
+        if not getattr(resp, "choices", None):
+            raise TransientError(f"{model} returned no choices")
         raw = resp.choices[0].message.content or ""
         try:
             return model_cls.model_validate_json(_extract_json(raw)), {"tokens_in": tokens_in, "tokens_out": tokens_out, "cost_usd": cost}
@@ -138,6 +158,10 @@ async def structured(model_cls: type[T], *, agent: str, system: str, user_text: 
     def done(value, model, tier, meta=None) -> Result:
         return Result(value, AIUsage(agent=agent, model=model, latency_ms=int((time.monotonic() - t0) * 1000), tier=tier, **(meta or {})))
 
+    if config.E2E_STUB:
+        from app.agents.stubs import STUBS
+        if model_cls.__name__ in STUBS:
+            return done(model_cls.model_validate(STUBS[model_cls.__name__]), "e2e-stub", "fixture")
     if mode == "fixture" and fixture and (v := _read(fixture, model_cls)):
         return done(v, "fixture", "fixture")
     if mode in ("fixture", "hybrid") and (v := _read(exact, model_cls)):
@@ -165,7 +189,7 @@ async def structured(model_cls: type[T], *, agent: str, system: str, user_text: 
             log.warning("agent %s failed on %s: %s", agent, model, errors[-1])
             if tier == "live":
                 attempts[n + 1:] = [a for a in attempts[n + 1:] if a[0] != "live"]
-        except (APIStatusError, APITimeoutError, asyncio.TimeoutError) as e:
+        except (APIStatusError, APITimeoutError, asyncio.TimeoutError, TransientError) as e:
             errors.append(f"{model}: {type(e).__name__} {str(e)[:160]}")
             log.warning("agent %s failed on %s: %s", agent, model, errors[-1])
             status = getattr(e, "status_code", None)

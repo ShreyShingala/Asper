@@ -1,4 +1,4 @@
 {
  "model": "nvidia/nemotron-3.5-super-vl:free",
- "value": "{\"image_type\":\"regular\",\"observations\":[\"White slatted surface with dark gaps between slats.\",\"Dark speckled material visible behind the slats.\",\"Image is blurry and lacks clear surface detail.\"],\"regions\":[],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"blurry\",\"follow_up_question\":\"Can you take a clearer photo of the area behind the slats?\",\"declined_to_confirm_mold\":true}"
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"White slatted surface in the laundry room.\",\"Dark gaps between the slats show possible buildup.\",\"Lower area appears bright and out of focus.\"],\"regions\":[{\"label\":\"look closer: dark gaps\",\"box_2d\":[0,0,700,1000]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"blurry\",\"follow_up_question\":\"Is this a vent or a wall panel?\",\"declined_to_confirm_mold\":true}"
 }

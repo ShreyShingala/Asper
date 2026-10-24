@@ -5,8 +5,13 @@ import { Card, Spinner, StaffShell, Tag, cx } from "@/components/ui";
 
 type Row = { photo: string; job: string; caption: string; image_type: string; observations: string[]; regions: number; declined_to_confirm_mold: boolean;
   mentions_mold_as_fact: boolean; tier: string; latency_ms: number; error?: string };
+type CallScore = { total: number; max: number; parts: Record<string, number>; violations?: Record<string, string[]>; service?: string | null;
+  seconds?: number; turns?: number; finish_reason?: string | null; wrong_answers?: Record<string, string | null> };
 type Proof = {
-  eval: { model: string; run_at: string; rows: Row[]; summary: Record<string, number | string> } | null;
+  eval: { model: string; run_at: string; label?: string; rows: Row[]; summary: Record<string, unknown> } | null;
+  frames: { run_at: string; summary: Record<string, unknown> } | null;
+  calls: { run_at: string; label?: string; note: string; summary: { total: string; violations: number; finished: string; verified_with_live_call: boolean };
+    calls: { persona: string; backend?: string; score: CallScore }[] } | null;
   usage_by_agent: Record<string, { calls: number; avg_s: number; tokens_in: number; tokens_out: number; cost: number }>;
   calls_total: number; live_calls: number; model: string;
 };
@@ -29,12 +34,67 @@ export default function ProofPage() {
           body="SMS/email sending, booking, payment, CRM/FreshBooks/Calendar sync, customer identities, seeded inspector inputs (from job_timeline.json + photo filenames; reference reports never used as model input)." />
       </div>
 
+      <p className="mt-6 text-caption font-light text-ink-muted">Scores below are illustrative: agreement with the organizer captions on the sample pack
+        (24 photos, 2 jobs), not an accuracy benchmark.</p>
       {s && (
-        <div className="mt-6 grid gap-4 sm:grid-cols-4">
-          {Object.entries(s).map(([k, v]) => (
+        <div className="mt-3 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {Object.entries(s).filter(([, v]) => typeof v !== "object").map(([k, v]) => (
             <Card key={k} className="p-5"><p className="text-h5 font-semibold tabular-nums text-ink">{String(v)}</p><p className="mt-1 text-caption font-light text-ink-body">{k}</p></Card>
           ))}
         </div>
+      )}
+      {s && typeof s["by group (avg of 7)"] === "object" && (
+        <Card className="mt-4 p-5">
+          <h2 className="text-subheading font-semibold text-ink">Photo score by type (out of 7)</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {Object.entries(s["by group (avg of 7)"] as Record<string, number>).map(([g, v]) => (
+              <Tag key={g} tone={v >= 6.5 ? "green" : v >= 5.5 ? "orange" : "red"} soft>{g} {v}</Tag>
+            ))}
+          </div>
+          {d.frames && (
+            <p className="mt-3 text-subtitle text-ink-body">Walkthrough video frames (what Bruce sees on a call): {Object.entries(d.frames.summary)
+              .filter(([, v]) => typeof v !== "object").map(([k, v]) => `${k} ${String(v)}`).join(" · ")}</p>
+          )}
+        </Card>
+      )}
+
+      {d.calls && (
+        <Card className="mt-6 overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
+            <h2 className="text-subheading font-semibold text-ink">Bruce: simulated calls on sample-pack personas</h2>
+            <p className="text-caption font-light text-ink-muted">{d.calls.summary.total} · {d.calls.summary.finished} finished · {d.calls.summary.violations} rule violations · {d.calls.run_at}</p>
+          </div>
+          {!d.calls.summary.verified_with_live_call && (
+            <p className="mx-5 mb-3 rounded-ds-sm bg-alert-warning-bg p-3 text-caption text-ink">{d.calls.note}</p>
+          )}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-[13px]">
+              <caption className="sr-only">Simulated call scores per persona</caption>
+              <thead className="bg-kit-gray-faint text-[12px] text-ink-muted">
+                <tr className="border-b border-kit-gray-soft">
+                  <th scope="col" className={TH}>Persona</th><th scope="col" className={TH}>Score</th><th scope="col" className={TH}>Answers</th>
+                  <th scope="col" className={TH}>Shots</th><th scope="col" className={TH}>Finished</th><th scope="col" className={TH}>Service</th>
+                  <th scope="col" className={TH}>Rule violations</th><th scope="col" className={cx(TH, "text-right")}>Sim. length</th>
+                </tr>
+              </thead>
+              <tbody>
+                {d.calls.calls.map((c) => (
+                  <tr key={c.persona} className="border-b border-kit-gray-soft last:border-0">
+                    <td className="px-4 py-3 font-medium text-ink">{c.persona}</td>
+                    <td className="px-4 py-3 tabular-nums">{c.score.total} / {c.score.max}</td>
+                    <td className="px-4 py-3 tabular-nums">{Math.round((c.score.parts.answers ?? 0) * 100)}%</td>
+                    <td className="px-4 py-3 tabular-nums">{Math.round((c.score.parts.shots ?? 0) * 100)}%</td>
+                    <td className="px-4 py-3">{c.score.parts.finished ? "yes" : "no"}</td>
+                    <td className="px-4 py-3">{c.score.service ?? "—"}</td>
+                    <td className={cx("px-4 py-3", Object.keys(c.score.violations ?? {}).length ? "text-kit-red" : "text-kit-green")}>
+                      {Object.keys(c.score.violations ?? {}).join(", ") || "none"}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{c.score.seconds ?? "—"}s</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
 
       <Card className="mt-6 overflow-hidden">

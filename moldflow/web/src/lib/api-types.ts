@@ -612,7 +612,7 @@ export interface components {
              * Tier
              * @enum {string}
              */
-            tier: "live" | "fallback" | "exact_cache" | "fixture";
+            tier: "live" | "fallback" | "exact_cache" | "fixture" | "rule";
             /**
              * At
              * Format: date-time
@@ -1287,7 +1287,7 @@ export interface components {
             image_type: "regular" | "thermal" | "test_kit" | "instrument" | "other";
             /**
              * Observations
-             * @description Plain-language visible observations, 1-4 items
+             * @description 2-4 spoken-style sentences, each at most 12 words
              */
             observations: string[];
             /**

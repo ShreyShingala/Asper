@@ -44,9 +44,13 @@ class PhotoAnalysis(BaseModel):
         good = []
         for r in v or []:
             try:
-                good.append(Region.model_validate(r))
+                reg = Region.model_validate(r)
             except Exception:
                 continue
+            y0, x0, y1, x1 = reg.box_2d
+            if (y1 - y0) * (x1 - x0) > 850_000:  # a box over (almost) the whole photo is not "a closer look"
+                continue
+            good.append(reg)
         return good[:4]
 
     @field_validator("image_type", mode="before")

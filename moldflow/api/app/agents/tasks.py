@@ -1,4 +1,5 @@
 """All MoldFlow agents. Each = prompt + Pydantic output model + deterministic post-processing."""
+import io
 import json
 import re
 from datetime import date
@@ -6,7 +7,7 @@ from datetime import date
 from app.agents.llm import Result, structured
 from app.engine import checks
 from app.models.agents import AssessDraft, FindingsOut, FollowUpDraft, LiveSummary, PhotoAnalysis, ReportDraft
-from app.models.passport import ALLOWED_RESULTS, Case, Finding, Photo, Reading
+from app.models.passport import AIUsage, ALLOWED_RESULTS, Case, Finding, Photo, Reading
 
 LANG_NAME = {"en": "English", "fr": "French (Canadian)"}
 _STOP = {"the", "and", "with", "below", "above", "under", "from", "that", "this", "shows", "show", "there", "visible", "is", "was", "were", "has"}
@@ -38,8 +39,10 @@ aloud to the customer on a call, so write the way a calm inspector talks.
    damp mark, gap in caulking, disturbed insulation, water pooling). Never box the whole photo, a hand, or an instrument.
    Label = "look closer: " + 2 to 5 words. For thermal, test_kit and instrument photos return an empty list.
 
-4. quality: too_dark if surfaces can't be made out; blurry if motion blur hides detail; not_relevant if it shows nothing
-   about the home; otherwise ok. A bright flashlight spot alone does not make a photo too dark or blurry.
+4. quality: too_dark if surfaces can't be made out; blurry if motion or focus blur hides surface texture and edges;
+   not_relevant if it mainly shows a person or face, packaging or boxes, furniture, or other things that say nothing
+   about the building's surfaces, plumbing, vents or moisture; otherwise ok. A bright flashlight spot alone does not make
+   a photo too dark or blurry. Live video frames are often small and soft: judge them by whether a surface can be seen.
 
 5. follow_up_question: one short question (at most 15 words) an inspector would ask next, ending with "?".
 
@@ -47,7 +50,21 @@ Never say mold is present or confirmed and never name a species. "Possible mold"
 regular photo, never for thermal, meter or swab photos. declined_to_confirm_mold must be true."""
 
 
+DARK_MEAN_LUMA = 28  # a frame this dark (mean 0-255) shows nothing usable: answer without a model call
+
+
+def mean_luma(image: bytes) -> float:
+    from PIL import Image, ImageStat
+    return ImageStat.Stat(Image.open(io.BytesIO(image)).convert("L").resize((64, 64))).mean[0]
+
+
 async def analyze_photo(case: Case, photo: Photo, image: bytes, prompt_text: str | None, fixture_key: str | None) -> Result:
+    if mean_luma(image) < DARK_MEAN_LUMA:
+        dark = PhotoAnalysis(image_type="other", observations=["The photo is too dark to see anything." if case.language == "en"
+                                                                else "La photo est trop sombre pour voir quoi que ce soit."],
+                             quality="too_dark", follow_up_question="Can you turn on a light or your phone's flashlight?"
+                             if case.language == "en" else "Pouvez-vous allumer une lumière ou la lampe de votre téléphone?")
+        return Result(dark, AIUsage(agent="photo", model="brightness check", latency_ms=0, tier="rule"))
     system = PHOTO_SYSTEM + f"\nWrite observations, labels and the question in {LANG_NAME[case.language]}."
     ctx = {"room": photo.room or case.answers.get("room"), "photo_prompt": prompt_text,
            "customer_answers": {k: v for k, v in case.answers.items() if not k.startswith("skip:")}}
