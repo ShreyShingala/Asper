@@ -1,6 +1,7 @@
 """Reasons to reach out, computed from facts, estimates and the calendar. Revenue-linked moments first (estimate expiry,
 post-remediation check); personal moments come from fact follow-up hooks. Moments built from household facts (children,
-babies) are human talking points only, never automated messages."""
+babies) are human talking points only, never automated messages.
+Why household moments are human-only: docs/04_decisions.md D9."""
 from datetime import date, timedelta
 
 from app import clock

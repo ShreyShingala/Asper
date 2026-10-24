@@ -9,7 +9,7 @@ Rules implemented
 - Quiet hours (default 21:00-09:00 local): the message is held, not dropped.
 - Frequency cap: at most 1 marketing message per contact per 7 days.
 - Every message gets the sender identity + unsubscribe; AI-sent ones also disclose the automated assistant (Law 25 s.12.1).
-"""
+Why: docs/04_decisions.md D14-D16, docs/06_trust_safety_compliance.md."""
 import hashlib
 from datetime import date, datetime, timedelta
 

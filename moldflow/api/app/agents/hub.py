@@ -4,7 +4,8 @@ Every agent tries the model (llm.structured, Pydantic output) and falls back to 
 unavailable (quota, outage, offline demo). The result always says which produced it ("ai" vs "rule") so the UI is honest.
 Guardrails enforced in code, not left to the model: facts must quote the source verbatim; drafts only see facts that are
 approved and allowed for messages (never health; household/children never; life events only with personalised-reminders
-consent); prices never come from the model; the compliance footer is added later by messaging.send()."""
+consent); prices never come from the model; the compliance footer is added later by messaging.send().
+Why: docs/04_decisions.md D7, D9, D10, D17."""
 import json
 import re
 from datetime import date

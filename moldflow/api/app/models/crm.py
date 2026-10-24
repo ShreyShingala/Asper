@@ -1,7 +1,8 @@
 """Relationship hub entities: one Contact per person, with what we've learned about them (ProfileFact), everything that
 happened across the company's tools (Interaction), every SMS/email (Message), upcoming reasons to reach out (Moment),
 weather alerts (AlertEvent), human work (Task) and an audit trail. Legal rules (CASL consent, Law 25) live in the types
-where possible so they can't be skipped by a code path."""
+where possible so they can't be skipped by a code path.
+Why: docs/04_decisions.md D9-D16; docs/03_product.md (Part B)."""
 from datetime import date, datetime
 from typing import ClassVar, Literal
 

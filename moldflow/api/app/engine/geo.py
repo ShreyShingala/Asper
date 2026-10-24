@@ -1,7 +1,8 @@
 """Postal-area geography for alert matching. Precision is the forward sortation area (first 3 postal characters), about
 5-15 km: good enough to match an Environment Canada forecast zone, and we never guess for unknown FSAs.
 Zone outlines in app/data/forecast_zones.json are real Environment Canada public forecast zones
-(api.weather.gc.ca collection public-standard-forecast-zones), saved so alerts can be simulated offline."""
+(api.weather.gc.ca collection public-standard-forecast-zones), saved so alerts can be simulated offline.
+Verified: every service-area FSA lands in its real forecast zone (tests/test_hub.py); docs/04_decisions.md D11."""
 import json
 from functools import cache
 from pathlib import Path

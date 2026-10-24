@@ -3,6 +3,7 @@
 One continuous AI workflow for Mold Busters, built around an **Evidence Passport**: a single case record
 (Pydantic v2) that the customer pre-assessment, inspector, report/estimate review and follow-up all read and write.
 Plan and red-team history: [`../plan/PLAN.md`](../plan/PLAN.md), [`../plan/REDTEAM_LOG.md`](../plan/REDTEAM_LOG.md).
+**Why it's built this way** (problem, decisions, evidence, compliance, demo script, presentation outline): [`../docs/`](../docs/README.md).
 
 ## Run it
 ```bash

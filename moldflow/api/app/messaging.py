@@ -1,6 +1,7 @@
 """The only way a message leaves MoldFlow: draft -> (approve) -> send() -> consent.check() -> outbox.
 Inbound replies come in through receive(): STOP/HUMAN keywords, AI triage, fact extraction, estimate acceptance.
-Sending is SIMULATED (status sent_simulated) until Twilio/Resend keys are configured; the adapters below are the seam."""
+Sending is SIMULATED (status sent_simulated) until Twilio/Resend keys are configured; the adapters below are the seam.
+Why one exit for every message: docs/04_decisions.md D13-D15."""
 import logging
 import os
 import re

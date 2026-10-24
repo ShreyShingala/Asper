@@ -1,5 +1,6 @@
 """One clock for the whole app so the demo can time-travel (moments, consent windows, quiet hours, estimate expiry).
-MOLDFLOW_TODAY=YYYY-MM-DD (env) or POST /admin/clock sets an offset; everything calls today()/now() from here."""
+MOLDFLOW_TODAY=YYYY-MM-DD (env) or POST /admin/clock sets an offset; everything calls today()/now() from here.
+Why: docs/04_decisions.md D21."""
 import os
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo

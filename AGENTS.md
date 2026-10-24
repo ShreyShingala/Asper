@@ -20,3 +20,4 @@
 - Use `app.clock.today()/now()` (time-travel aware), never `date.today()`/`datetime.now()`.
 - New agent output models need a rule fallback; in e2e (`MOLDFLOW_E2E_STUB=1`) models without a stub fail fast to the fallback.
 - macOS bash 3.2: apostrophes inside `$(cat <<'EOF' ...)` break; write commit/PR bodies to a file and use `git commit -F` / `gh pr create --body-file`.
+- Docs: `docs/` explains WHY (decision log `docs/04_decisions.md`, evidence labels `docs/05_evidence.md`, compliance `docs/06_trust_safety_compliance.md`). When you make a product or architecture decision, add an entry to `docs/04_decisions.md` and a line to `docs/11_build_journal.md`; when numbers change, update `docs/05_evidence.md` (keep measured / projected / simulated labels).

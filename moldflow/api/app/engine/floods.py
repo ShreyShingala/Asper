@@ -3,7 +3,8 @@
 Live source: https://api.weather.gc.ca/collections/weather-alerts/items (GeoJSON, no key; Polygon/MultiPolygon in lon/lat).
 Only water-related alerts matter (rainfall, flood, storm surge, freezing rain, special statements that mention heavy
 rain/flooding). Matching is by postal-area centroid (FSA precision). Fixture/e2e modes never hit the network; the demo
-can simulate an alert over a real forecast-zone outline from app/data/forecast_zones.json."""
+can simulate an alert over a real forecast-zone outline from app/data/forecast_zones.json.
+Why official alerts + postal-area matching (and no age targeting): docs/04_decisions.md D11, D15."""
 import re
 from datetime import datetime, timedelta
 

@@ -1,5 +1,6 @@
 """Single entry point for every AI call: Pydantic-validated structured output with repair,
-model fallback, two-tier cache (exact + fixture), concurrency limit, and usage/provenance logging."""
+model fallback, two-tier cache (exact + fixture), concurrency limit, and usage/provenance logging.
+Why free models + fallbacks + quota breaker: docs/04_decisions.md D17."""
 import asyncio
 import base64
 import hashlib

@@ -3,7 +3,7 @@ lab result that already names a mould: never to guess a species from a photo. Re
 
 Key framing from Health Canada: "In most cases, there is no need to measure the actual concentration of mould in your
 indoor air, or to determine the specific species of mould. You just need to find and fix the moisture and mould problems."
-"""
+Why lab results only, never photos: docs/04_decisions.md D1."""
 HC_MOULD = ("Health Canada: Mould", "https://www.canada.ca/en/health-canada/services/air-quality/indoor-air-contaminants/reduce-humidity-moisture-mould.html")
 HC_PRO = ("Health Canada: Guidance for indoor air quality professionals",
           "https://www.canada.ca/en/health-canada/services/publications/healthy-living/guidance-indoor-air-quality-professionals.html")
