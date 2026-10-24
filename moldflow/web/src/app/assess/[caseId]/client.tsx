@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { Camera, ImageUp, Info, FileDown, CalendarCheck, Mail, Phone, CreditCard, MapPin, Check, HeartPulse } from "lucide-react";
 import { api, resizeImage, type Case, type CaseOut, type IntakeTurn, type Photo } from "@/lib/api";
 import { STRINGS } from "@/lib/i18n";
-import { AnnotatedPhoto, Button, Card, LangToggle, Logo, ProvenancePill, Spinner, cx } from "@/components/ui";
+import { AnnotatedPhoto, Button, Card, Eyebrow, LangToggle, Logo, Modal, ProgressBar, ProvenancePill, Spinner, TextArea, TextField, buttonClass, cx } from "@/components/ui";
 
 export default function Assess() {
   const { caseId } = useParams<{ caseId: string }>();
@@ -68,7 +68,7 @@ export default function Assess() {
     return out;
   });
 
-  if (err && !data) return <Center><p className="text-rust">{err}</p></Center>;
+  if (err && !data) return <Center><p role="alert" className="text-subtitle text-kit-red">{err}</p></Center>;
   if (!data) return <Center><Spinner label="Loading…" /></Center>;
   const c = data.case;
   const customerPhotos = c.photos.filter((p) => p.source === "customer");
@@ -79,8 +79,8 @@ export default function Assess() {
         <Logo small />
         <LangToggle lang={lang} onChange={setLang} />
       </div>
-      <p className="mt-3 flex gap-2 rounded-xl bg-paper-2 px-3 py-2 text-xs leading-snug text-ink-2">
-        <Info size={14} className="mt-0.5 shrink-0" /> {t.banner}
+      <p className="mt-4 flex gap-2 rounded-ds-sm bg-alert-info-bg px-3 py-2.5 text-caption text-ink-body">
+        <Info size={14} className="mt-0.5 shrink-0 text-alert-info-accent" aria-hidden /> {t.banner}
       </p>
 
       {c.stage === "intake" ? (
@@ -99,7 +99,7 @@ export default function Assess() {
             return api.post<CaseOut>(`/cases/${caseId}/pre-assessment`);
           })} />
       )}
-      {err && <p className="mt-4 rounded-xl border border-rust/30 bg-rust-2 p-3 text-sm text-rust">{err}</p>}
+      {err && <Card tone="danger" role="alert" className="mt-4 p-3 text-subtitle text-kit-red">{err}</Card>}
     </main>
   );
 }
@@ -130,9 +130,7 @@ function Intake({ c, turn, photos, pending, busy, tick, onUpload, onAnswer, onSk
 
   return (
     <div className="mt-4 space-y-4">
-      <div className="h-1.5 overflow-hidden rounded-full bg-paper-2">
-        <div className="h-full rounded-full bg-moss transition-all duration-500" style={{ width: `${Math.max(6, progress * 100)}%` }} />
-      </div>
+      <ProgressBar value={Math.round(Math.max(6, progress * 100))} label="Progress" />
 
       {(photos.length > 0 || pending) && (
         <div className="space-y-3">
@@ -153,55 +151,50 @@ function Intake({ c, turn, photos, pending, busy, tick, onUpload, onAnswer, onSk
       <div ref={actionRef} />
       {!busy && prompt && (
         <Card key={prompt.prompt_id} className="rise p-5">
-          <p className="stamp mb-1 text-amber">{t.photos.toUpperCase()} {photos.length + 1} / 4</p>
-          <h2 className="font-display text-2xl font-semibold leading-tight">{prompt.text}</h2>
-          <p className="mt-1 text-sm text-ink-2">{prompt.why}</p>
+          <Eyebrow color="text-kit-blue" className="mb-1">{t.photos} {photos.length + 1} / 4</Eyebrow>
+          <h2 className="text-h6 font-semibold text-ink">{prompt.text}</h2>
+          <p className="mt-1 text-subtitle font-light text-ink-body">{prompt.why}</p>
           <input ref={cam} type="file" accept="image/*" capture="environment" hidden
             onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0], prompt.prompt_id)} />
           <input ref={lib} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0], prompt.prompt_id)} />
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <Button onClick={() => cam.current?.click()}><Camera size={18} />{t.takePhoto}</Button>
-            <Button variant="outline" onClick={() => lib.current?.click()}><ImageUp size={18} />{t.library}</Button>
+            <Button size="lg" multiline leading={<Camera size={18} aria-hidden className="shrink-0" />} onClick={() => cam.current?.click()}>{t.takePhoto}</Button>
+            <Button size="lg" multiline variant="outline" leading={<ImageUp size={18} aria-hidden className="shrink-0" />} onClick={() => lib.current?.click()}>{t.library}</Button>
           </div>
           <div className="mt-2 flex justify-between">
             {photos.length === 0
-              ? <Button variant="ghost" className="text-xs" onClick={onSamples}>{t.useSamples}</Button>
-              : <Button variant="ghost" className="text-xs" onClick={() => onSkip(prompt.prompt_id)}>{t.skip}</Button>}
+              ? <Button variant="text" size="sm" onClick={onSamples}>{t.useSamples}</Button>
+              : <Button variant="text" size="sm" onClick={() => onSkip(prompt.prompt_id)}>{t.skip}</Button>}
           </div>
         </Card>
       )}
 
       {!busy && chip && chip.options.length > 0 && (
         <Card key={chip.key} className="rise p-5">
-          <h2 className="font-display text-2xl font-semibold leading-tight">{chip.text}</h2>
+          <h2 className="text-h6 font-semibold text-ink">{chip.text}</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {chip.options.map((o) => (
-              <button key={o} onClick={() => onAnswer(chip.key, o)}
-                className="min-h-11 rounded-full border border-ink/15 bg-card px-4 text-sm font-medium hover:border-moss hover:bg-moss-2">
-                {o}
-              </button>
+              <Button key={o} size="lg" multiline variant="outline" onClick={() => onAnswer(chip.key, o)}>{o}</Button>
             ))}
           </div>
-          {chip.key === "symptoms" && <p className="mt-3 flex gap-1.5 text-xs text-ink-2"><HeartPulse size={14} />{STRINGS[c.language].banner.split(".")[0]}.</p>}
+          {chip.key === "symptoms" && <p className="mt-3 flex gap-1.5 text-caption font-light text-ink-muted"><HeartPulse size={14} className="shrink-0" aria-hidden />{STRINGS[c.language].banner.split(".")[0]}.</p>}
         </Card>
       )}
 
       {!busy && chip && chip.options.length === 0 && (
         <Card key={chip.key} className="rise p-5">
-          <h2 className="font-display text-2xl font-semibold leading-tight">{chip.text}</h2>
-          <form className="mt-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (loc.trim()) onAnswer(chip.key, loc); }}>
-            <input value={loc} onChange={(e) => setLoc(e.target.value)} placeholder={t.postalPlaceholder}
-              className="min-h-11 flex-1 rounded-xl border border-ink/15 bg-white px-3 text-base outline-none focus:border-moss" />
-            <Button type="submit">{t.next}</Button>
+          <h2 className="text-h6 font-semibold text-ink">{chip.text}</h2>
+          <form className="mt-4 flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); if (loc.trim()) onAnswer(chip.key, loc); }}>
+            <TextField value={loc} onChange={(e) => setLoc(e.target.value)} placeholder={t.postalPlaceholder} aria-label={chip.text} />
+            <Button type="submit" size="lg" fullWidth>{t.next}</Button>
           </form>
         </Card>
       )}
 
       {!busy && turn?.ready && (
         <Card className="rise p-5">
-          <textarea value={extra} onChange={(e) => setExtra(e.target.value)} rows={3} placeholder={t.anythingElse}
-            className="w-full rounded-xl border border-ink/15 bg-white p-3 text-base outline-none focus:border-moss" />
-          <Button className="mt-3 h-14 w-full text-base" onClick={() => onAssess(extra)}>{t.getResult}</Button>
+          <TextArea value={extra} onChange={(e) => setExtra(e.target.value)} rows={3} placeholder={t.anythingElse} aria-label={t.anythingElse} />
+          <Button size="lg" fullWidth className="mt-3" onClick={() => onAssess(extra)}>{t.getResult}</Button>
         </Card>
       )}
 
@@ -209,8 +202,8 @@ function Intake({ c, turn, photos, pending, busy, tick, onUpload, onAnswer, onSk
         <Card className="p-5">
           <ul className="space-y-2">
             {t.preparing.map((s, i) => (
-              <li key={s} className={cx("flex items-center gap-2 text-sm transition", i <= tick ? "text-ink" : "text-ink-2/50")}>
-                {i < tick ? <Check size={16} className="text-moss" /> : i === tick ? <Spinner /> : <span className="w-4" />} {s.replace(" ✓", "")}
+              <li key={s} className={cx("flex items-center gap-2 text-subtitle transition", i <= tick ? "text-ink" : "text-ink-muted/50")}>
+                {i < tick ? <Check size={16} className="text-kit-green" aria-hidden /> : i === tick ? <Spinner /> : <span className="w-4" />} {s.replace(" ✓", "")}
               </li>
             ))}
           </ul>
@@ -233,21 +226,21 @@ function PhotoCard({ c, p }: { c: Case; p: Photo }) {
           <>
             <div className="flex flex-wrap gap-1.5">
               {a.observations.slice(0, 3).map((o, i) => (
-                <span key={i} className="rounded-lg bg-paper-2 px-2 py-1 text-xs leading-snug">{o}</span>
+                <span key={i} className="rounded-ds-xsm bg-kit-gray-faint px-2 py-1 text-caption text-ink-body">{o}</span>
               ))}
             </div>
-            {a.quality !== "ok" && <p className="text-xs text-amber">Photo looks {a.quality.replace("_", " ")}; a retake may help.</p>}
+            {a.quality !== "ok" && <p className="text-caption text-kit-orange">Photo looks {a.quality.replace("_", " ")}; a retake may help.</p>}
             <div className="flex items-center justify-between gap-2">
               <ProvenancePill tier={p.analysis_tier} ms={p.analysis_latency_ms} model={p.analysis_model} />
               {a.regions.length > 0 && (
-                <button onClick={() => setBoxes(!boxes)} className="stamp flex items-center gap-1 text-ink-2" title={t.lookCloserNote}>
-                  <Info size={12} /> {boxes ? "hide" : "show"} highlights
-                </button>
+                <Button variant="text" size="sm" onClick={() => setBoxes(!boxes)} title={t.lookCloserNote} leading={<Info size={12} aria-hidden />} aria-pressed={boxes}>
+                  {boxes ? "hide" : "show"} highlights
+                </Button>
               )}
             </div>
           </>
         ) : (
-          <p className="text-xs text-ink-2">Saved. Our team will review this photo.</p>
+          <p className="text-caption font-light text-ink-muted">Saved. Our team will review this photo.</p>
         )}
       </div>
     </Card>
@@ -279,105 +272,97 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
   return (
     <div className="mt-5 space-y-4">
       <section className="rise">
-        <div className="flex items-center justify-between">
-          <p className="stamp text-amber">{t.yourPA.toUpperCase()}</p>
+        <div className="flex items-center justify-between gap-2">
+          <Eyebrow color="text-kit-blue">{t.yourPA}</Eyebrow>
           <ProvenancePill tier={pa.tier} />
         </div>
-        <h1 className="mt-1 font-display text-3xl font-semibold leading-tight">{pa.summary.split(". ")[0]}.</h1>
-        <p className="mt-2 text-ink-2">{pa.summary.split(". ").slice(1).join(". ")}</p>
+        <h1 className="mt-1 text-h6 font-semibold text-ink">{pa.summary.split(". ")[0]}.</h1>
+        <p className="mt-2 text-body font-light text-ink-body">{pa.summary.split(". ").slice(1).join(". ")}</p>
       </section>
 
-      <Card className="rise overflow-hidden border-moss/30" style={{ animationDelay: "0.05s" }}>
-        <div className="bg-moss px-5 py-4 text-white">
-          <p className="stamp opacity-80">{t.nextStep.toUpperCase()}</p>
-          <p className="mt-1 font-display text-2xl font-semibold leading-tight">{pa.service_price_text.split(":")[0]}</p>
-          <p className="mt-1 text-lg font-semibold">{pa.service_price_text.split(":").slice(1).join(":").trim()}
-            <span title={t.priceNote} className="ml-1 inline-block align-middle opacity-80"><Info size={14} /></span>
+      <Card className="rise overflow-hidden" style={{ animationDelay: "0.05s" }}>
+        <div className="bg-kit-blue px-5 py-4 text-white">
+          <Eyebrow color="text-white/80">{t.nextStep}</Eyebrow>
+          <p className="mt-1 text-h6 font-semibold">{pa.service_price_text.split(":")[0]}</p>
+          <p className="mt-1 text-subheading font-semibold">{pa.service_price_text.split(":").slice(1).join(":").trim()}
+            <span title={t.priceNote} className="ml-1 inline-block align-middle opacity-80"><Info size={14} aria-label={t.priceNote} /></span>
           </p>
-          {remote && <p className="mt-2 text-sm opacity-90">{t.outside}</p>}
+          {remote && <p className="mt-2 text-subtitle text-white/90">{t.outside}</p>}
         </div>
         <div className="p-5">
-          <p className="stamp mb-2 text-ink-2">{t.why.toUpperCase()}</p>
-          <ul className="space-y-1.5 text-sm">{pa.reasons.map((r, i) => <li key={i} className="flex gap-2"><Check size={16} className="mt-0.5 shrink-0 text-moss" />{r}</li>)}</ul>
-          {pa.health_note && <p className="mt-4 flex gap-2 rounded-xl bg-amber-2 p-3 text-sm text-[#7a4e06]"><HeartPulse size={16} className="mt-0.5 shrink-0" />{pa.health_note}</p>}
+          <Eyebrow className="mb-2">{t.why}</Eyebrow>
+          <ul className="space-y-1.5 text-subtitle text-ink">{pa.reasons.map((r, i) => <li key={i} className="flex gap-2"><Check size={16} className="mt-0.5 shrink-0 text-kit-green" aria-hidden />{r}</li>)}</ul>
+          {pa.health_note && <p className="mt-4 flex gap-2 rounded-ds-sm bg-alert-warning-bg p-3 text-subtitle text-[#8a5a0a]"><HeartPulse size={16} className="mt-0.5 shrink-0 text-alert-warning-accent" aria-hidden />{pa.health_note}</p>}
           <div className="mt-5 grid gap-2">
             {remote ? (
-              paid ? <p className="rounded-xl bg-moss-2 p-3 text-sm text-moss">{t.paid}</p>
-                : <Button className="h-12" onClick={() => setModal("pay")}><CreditCard size={18} />{t.remote}</Button>
+              paid ? <p role="status" className="rounded-ds-sm bg-alert-success-bg p-3 text-subtitle font-medium text-alert-success-title">{t.paid}</p>
+                : <Button size="lg" multiline leading={<CreditCard size={18} aria-hidden className="shrink-0" />} onClick={() => setModal("pay")}>{t.remote}</Button>
             ) : booked ? (
-              <p className="flex items-center gap-2 rounded-xl bg-moss-2 p-3 text-sm text-moss"><CalendarCheck size={16} />{t.booked} · {c.booking?.slot_text}</p>
+              <p role="status" className="flex items-center gap-2 rounded-ds-sm bg-alert-success-bg p-3 text-subtitle font-medium text-alert-success-title"><CalendarCheck size={16} className="shrink-0" aria-hidden />{t.booked} · {c.booking?.slot_text}</p>
             ) : (
-              <Button className="h-12" onClick={() => setModal("book")}><CalendarCheck size={18} />{t.book}</Button>
+              <Button size="lg" multiline leading={<CalendarCheck size={18} aria-hidden className="shrink-0" />} onClick={() => setModal("book")}>{t.book}</Button>
             )}
-            {pa.next_actions.includes("landlord_letter") && <Button variant="outline" onClick={() => act("letter")}><Mail size={18} />{t.letter}</Button>}
-            <a href={`/api/cases/${c.id}/export/pre-assessment.pdf`} target="_blank" rel="noreferrer"
-              className={cx("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-ink/15 bg-card text-sm font-semibold",
-                remote && !paid && "pointer-events-none opacity-40")}>
-              <FileDown size={18} />{t.pdf}
+            {pa.next_actions.includes("landlord_letter") && <Button size="lg" multiline variant="outline" leading={<Mail size={18} aria-hidden className="shrink-0" />} onClick={() => act("letter")}>{t.letter}</Button>}
+            <a href={`/api/cases/${c.id}/export/pre-assessment.pdf`} target="_blank" rel="noreferrer" aria-disabled={remote && !paid ? true : undefined}
+              className={buttonClass({ variant: "outline", size: "lg", multiline: true, disabled: remote && !paid })}>
+              <FileDown size={18} aria-hidden className="shrink-0" />{t.pdf}
             </a>
-            <Button variant="ghost" className="text-xs"><Phone size={14} />{t.callMe}</Button>
+            <Button variant="text" size="sm" leading={<Phone size={14} aria-hidden />}>{t.callMe}</Button>
           </div>
         </div>
       </Card>
 
       <Card className="rise p-5" style={{ animationDelay: "0.1s" }}>
-        <p className="stamp mb-2 text-ink-2">{t.weSee.toUpperCase()}</p>
-        <ul className="space-y-1.5 text-sm">{pa.observed.map((o, i) => <li key={i}>• {o}</li>)}</ul>
-        <p className="stamp mb-2 mt-5 text-ink-2">{t.cantTell.toUpperCase()}</p>
-        <ul className="space-y-1.5 text-sm text-ink-2">{pa.cannot_tell.map((o, i) => <li key={i}>• {o}</li>)}</ul>
+        <Eyebrow className="mb-2">{t.weSee}</Eyebrow>
+        <ul className="space-y-1.5 text-subtitle text-ink">{pa.observed.map((o, i) => <li key={i}>• {o}</li>)}</ul>
+        <Eyebrow className="mb-2 mt-5">{t.cantTell}</Eyebrow>
+        <ul className="space-y-1.5 text-subtitle font-light text-ink-body">{pa.cannot_tell.map((o, i) => <li key={i}>• {o}</li>)}</ul>
       </Card>
 
       <div className="grid grid-cols-2 gap-2">
         {c.photos.filter((p) => p.source === "customer").map((p) => <AnnotatedPhoto key={p.id} caseId={c.id} photo={p} className="aspect-square" />)}
       </div>
-      <p className="text-xs text-ink-2">{t.lookCloserNote} {t.priceNote}</p>
+      <p className="text-caption font-light text-ink-muted">{t.lookCloserNote} {t.priceNote}</p>
 
       <div className="text-center">
         {!showLoc ? (
-          <button className="inline-flex items-center gap-1 text-xs text-ink-2 underline" onClick={() => setShowLoc(true)}><MapPin size={12} />{t.changeLoc}</button>
+          <Button variant="text" size="sm" leading={<MapPin size={12} aria-hidden />} onClick={() => setShowLoc(true)}>{t.changeLoc}</Button>
         ) : (
-          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (loc.trim()) onRelocate(loc); }}>
-            <input value={loc} onChange={(e) => setLoc(e.target.value)} placeholder={t.postalPlaceholder}
-              className="min-h-11 flex-1 rounded-xl border border-ink/15 bg-white px-3" />
-            <Button type="submit">{t.apply}</Button>
+          <form className="flex flex-col gap-3 text-left" onSubmit={(e) => { e.preventDefault(); if (loc.trim()) onRelocate(loc); }}>
+            <TextField value={loc} onChange={(e) => setLoc(e.target.value)} placeholder={t.postalPlaceholder} aria-label={t.changeLoc} />
+            <Button type="submit" size="lg" fullWidth>{t.apply}</Button>
           </form>
         )}
       </div>
 
-      {modal && (
-        <div className="fixed inset-0 z-50 flex items-end bg-ink/40 p-3 sm:items-center sm:justify-center" onClick={() => setModal(null)}>
-          <Card className="rise w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
-            {modal === "book" && (
-              <>
-                <h3 className="font-display text-xl font-semibold">{t.bookTitle}</h3>
-                <div className="mt-3 grid gap-2">
-                  {["Tomorrow · 9:00", "Tomorrow · 13:30", "Friday · 10:00"].map((s) => (
-                    <Button key={s} variant="outline" onClick={() => act("book", s)}>{s}</Button>
-                  ))}
-                </div>
-                <p className="stamp mt-3 text-ink-2">Simulated: in production this writes to the MB calendar + Close.</p>
-              </>
-            )}
-            {modal === "pay" && (
-              <>
-                <h3 className="font-display text-xl font-semibold">{t.payTitle}</h3>
-                <p className="mt-2 text-sm text-ink-2">{pa.summary}</p>
-                <Button className="mt-4 h-12 w-full" onClick={() => act("pay")}><CreditCard size={18} />{t.pay}</Button>
-                <p className="stamp mt-3 text-ink-2">Simulated checkout. Proposed product, pending Mold Busters approval.</p>
-              </>
-            )}
-            {modal === "letter" && (
-              <>
-                <h3 className="font-display text-xl font-semibold">{t.letterTitle}</h3>
-                <pre className="mt-3 max-h-[55vh] overflow-auto whitespace-pre-wrap rounded-xl bg-paper-2 p-3 font-sans text-sm">{letter}</pre>
-                <Button className="mt-3 w-full" onClick={() => { navigator.clipboard.writeText(letter); setCopied(true); }}>
-                  {copied ? t.copied : t.copy}
-                </Button>
-              </>
-            )}
-          </Card>
-        </div>
-      )}
+      <Modal open={!!modal} onClose={() => setModal(null)} className={modal === "letter" ? "max-w-[520px]" : undefined}
+        title={modal === "book" ? t.bookTitle : modal === "pay" ? t.payTitle : t.letterTitle}>
+        {modal === "book" && (
+          <>
+            <div className="grid gap-2">
+              {["Tomorrow · 9:00", "Tomorrow · 13:30", "Friday · 10:00"].map((s) => (
+                <Button key={s} size="lg" variant="outline" onClick={() => act("book", s)}>{s}</Button>
+              ))}
+            </div>
+            <p className="mt-3 text-caption text-ink-muted">Simulated: in production this writes to the MB calendar + Close.</p>
+          </>
+        )}
+        {modal === "pay" && (
+          <>
+            <p>{pa.summary}</p>
+            <Button size="lg" fullWidth multiline className="mt-4" leading={<CreditCard size={18} aria-hidden className="shrink-0" />} onClick={() => act("pay")}>{t.pay}</Button>
+            <p className="mt-3 text-caption text-ink-muted">Simulated checkout. Proposed product, pending Mold Busters approval.</p>
+          </>
+        )}
+        {modal === "letter" && (
+          <>
+            <pre className="max-h-[55vh] overflow-auto whitespace-pre-wrap rounded-ds-xsm bg-kit-gray-faint p-3 font-sans text-subtitle text-ink">{letter}</pre>
+            <Button fullWidth className="mt-3" onClick={() => { navigator.clipboard.writeText(letter); setCopied(true); }}>
+              {copied ? t.copied : t.copy}
+            </Button>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }
