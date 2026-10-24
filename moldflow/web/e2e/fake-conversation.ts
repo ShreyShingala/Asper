@@ -1,6 +1,7 @@
 /**
  * Injected into the page before load: a scripted stand-in for the ElevenLabs Conversation that drives the same four client
  * tools Bruce uses (get_checklist, save_answer, capture_photo, finish_assessment) through the real UI code paths.
+ * It follows the photo plan the way Bruce does: capture whatever the checklist's next_step asks for.
  * window.__E2E_SCRIPT__ picks the scenario; window.__E2E_LOG__ records what happened, in order.
  */
 export function installFakeConversation() {
@@ -10,6 +11,7 @@ export function installFakeConversation() {
     onMessage?: (x: { message: string; role: "agent" | "user" }) => void;
     onDisconnect?: (d: { reason: string; message?: string }) => void;
   };
+  type Checklist = { ready_to_finish?: boolean; photos_left?: number; next_step?: { do: string; shot?: string } };
   const w = window as unknown as Record<string, unknown>;
   const log: { events: string[]; results: { name: string; r: unknown }[]; spoken: { role: string; text: string }[] } = { events: [], results: [], spoken: [] };
   w.__E2E_LOG__ = log;
@@ -39,8 +41,8 @@ export function installFakeConversation() {
           opts.onDisconnect?.({ reason: "error", message: "connection lost" });
           return;
         }
-        say("agent", "Hi, I'm Bruce from Mold Busters. Point your camera at the spot.");
-        await tool("get_checklist");
+        say("agent", "Hi, I'm Bruce, Mold Busters' AI photo coach. This call is recorded and transcribed to help us.");
+        let cl = (await tool("get_checklist")) as Checklist;
         if (script === "zero") {
           say("user", "Actually I have to go.");
           say("agent", "No problem, I'll save what we have.");
@@ -49,31 +51,18 @@ export function installFakeConversation() {
         }
         say("user", "There are dark spots on the vent in my laundry room.");
         await tool("save_answer", { key: "concern", value: "Dark spots on the vent in the laundry room" });
-        const answers: [string, string][] = [["room", "the laundry room"], ["occupant", "I own it"], ["symptoms", "nope"],
-          ["odor", "kinda"], ["leak", "not that I know of"], ["location", "K1A 0B1"]];
-        const shots = ["wide", "close", "above", "nearby"];
-        for (let i = 0; i < answers.length; i++) {
-          const [k, v] = answers[i];
+        for (const [k, v] of [["occupant", "I own it"], ["symptoms", "nope"]]) {
           say("agent", `Quick question about the ${k}?`);
           say("user", v);
           await tool("save_answer", { key: k, value: v });
-          if (i % 2 === 1 && shots.length) {
-            const shot = shots.shift()!;
-            say("agent", "Hold still for me.");
-            for (let attempt = 0; attempt < 4; attempt++) {
-              const r = await tool("capture_photo", { shot });
-              if (r.captured) break;
-              await wait(700);
-            }
-          }
         }
-        for (const shot of shots) {
+        // Follow the photo plan: capture what next_step asks for (the camera may also auto-capture on its own).
+        for (let i = 0, captured = 0; i < 10 && captured < 3; i++) {
+          if (cl.ready_to_finish || (cl.photos_left ?? 1) <= 0) break;
+          const shot = cl.next_step?.do === "capture" ? cl.next_step.shot : "extra";
           say("agent", "Hold still for me.");
-          for (let attempt = 0; attempt < 4; attempt++) {
-            const r = await tool("capture_photo", { shot });
-            if (r.captured) break;
-            await wait(700);
-          }
+          const r = await tool("capture_photo", { shot });
+          if (r.captured) { captured++; cl = (r.checklist as Checklist) ?? cl; } else { await wait(700); cl = (await tool("get_checklist")) as Checklist; }
         }
         say("agent", "Thanks, I'll put your pre-assessment together now.");
         await tool("finish_assessment", { reason: "complete" });

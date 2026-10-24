@@ -39,10 +39,10 @@ These ran on a **stand-in**: the same prompt and tools on a free text model, not
 | Right next step recommended | n/a | **8 / 8** (tenant → landlord letter; Australia → remote report; health → air quality test) |
 
 ### Software checks (latest run)
-- Backend unit tests: **80 passed**, including 21 hub tests (consent windows, safety vs offer, opt-out, caps, quiet hours, footers, geography against real zone outlines, fact grounding, the health guard, moments, booking consent, research brief, the full hero loop, STOP/HUMAN, kill switch).
+- Backend unit tests: **84 passed**, including 21 hub tests (consent windows, safety vs offer, opt-out, caps, quiet hours, footers, geography against real zone outlines, fact grounding, the health guard, moments, booking consent, research brief, the full hero loop, STOP/HUMAN, kill switch).
 - **The demo script runs every beat through the API**, including the hub loop, with **no AI available** (quota exhausted).
-- Browser tests (Playwright): **19 / 19**.
-  - The live-call screen, with the real walkthrough video as the camera, at desktop, iPhone 13 and Pixel 7 sizes.
+- Browser tests (Playwright): **22 passed** (+2 desktop-only skips on phone sizes).
+  - The live-call screen (pre-call taps → photo plan → plan-driven capture), with the real walkthrough video as the camera, at desktop, iPhone 13 and Pixel 7 sizes.
   - Camera denied, quota exceeded, dropped call and zero photos all fall back to the upload flow.
   - The full hub loop in the browser.
 - Real Environment Canada geography: **all 38 service-area postal areas fall inside their correct forecast zone**.

@@ -45,6 +45,6 @@
 | How does it fit our 7 tools? | One timeline over all of them. FreshBooks and Calendar stay; Close sequences, Asana cards and Brain notes get replaced. Exports today; APIs next. |
 | What if the AI is wrong? | Every claim cites a photo, reading or quote; anything with money or personal facts needs a person; there's a kill switch; the proof page shows where it slipped. |
 | What does it cost? | The demo runs on free models. At paid rates, cents per case. Twilio SMS is about a cent per text. |
-| Was this measured? | Photo AI 140 → 162/168 and Bruce 33/44 → 85/88 (simulated personas), with 80 unit tests and 19 browser tests. Conversion lift is projected, not measured. |
+| Was this measured? | Photo AI 140 → 162/168 and Bruce 33/44 → 85/88 (simulated personas), with 84 unit tests and 22 browser tests. Conversion lift is projected, not measured. |
 | Quebec / French? | French drafts for French speakers, QC tax, a French privacy page. Full Bill 96 coverage is a production item. |
 | Global? | Out of area → $25 remote report; partner referrals on the roadmap. |

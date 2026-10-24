@@ -63,7 +63,7 @@ Follow [08_demo_script.md](08_demo_script.md):
 - **Show:**
   - Photo AI 140 → **162/168**, 0 overclaims, 2.3 s per photo.
   - Bruce 33/44 → **85/88** across 8 personas, 8/8 finished, 0 rule violations (simulated personas).
-  - 80 unit tests, 19 browser tests, the whole demo runs offline.
+  - 84 unit tests, 22 browser tests, the whole demo runs offline.
 - **Label clearly:** what's projected (conversion lift, staff hours) vs simulated (sending, payments, CRM sync, synthetic customers).
 - **Source:** [05_evidence.md](05_evidence.md).
 

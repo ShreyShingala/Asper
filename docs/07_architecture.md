@@ -45,7 +45,7 @@
 - **Backend:** Python 3.12, FastAPI, Pydantic v2, SQLite, ReportLab, `uv`.
 - **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind, npm; types generated from the API's OpenAPI schema (`npm run gen:types`).
 - **AI:** OpenRouter (`nvidia/nemotron-3.5-super-vl:free`, reasoning off; nano-omni fallback); ElevenLabs agent for Bruce.
-- **Tests:** pytest (80), `scripts/demo_api_run.py` (the whole demo through the API, also offline), Playwright (19; the walkthrough video as a fake camera, ElevenLabs mocked, API in stub mode).
+- **Tests:** pytest (84), `scripts/demo_api_run.py` (the whole demo through the API, also offline), Playwright (22; the walkthrough video as a fake camera, ElevenLabs mocked, API in stub mode).
 - **Evals:** `scripts/eval_photos.py`, `eval_frames.py`, `simulate_call.py`, `camera_thresholds.py`.
 
 ## Running it

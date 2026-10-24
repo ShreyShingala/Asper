@@ -20,6 +20,10 @@ A chronological record of what was built and why, taken from the git history (ti
 | 14:07 | `5a910fa` | **The Hub**: relationship engine, consent-safe outreach, flood check-ins | The user's ask: Rockefeller-style memory, flood outreach, SMS/email, one dashboard. Plan red-teamed by 4 subagents first (`plan/HUB_PLAN.md`) |
 | 14:21 | `31d1592` | Hub P1: booking consent + profile link, day sheet, research, settings, privacy | The legal reviewer's blocking items (consent collection, recording disclosure); inspector and research needs |
 
+| Oct 24 | `d3cb287` (Lucas) | Live call becomes a photo coach with a personalized shot plan | 5 taps before the camera build a plan; an orange focus box; auto-capture with keep/retake |
+| Oct 24 | `99355ad` | PR #2 merged (hub + docs), with main merged in | Kept the recording disclosure in Bruce's new first message |
+| Oct 24 | (this commit) | Live-call e2e updated to the photo-coach flow; auto-keep bug fixed | The tests caught a real bug: the call timer re-rendered every second and restarted the 2.5 s auto-keep countdown, so auto-captured photos never saved |
+
 ## Notable moments worth telling
 - **The idea that died:** "YOLO detects mold" lost to the owner, engineer and staff personas within the first debate round. We kept vision only as an evidence assistant.
 - **The evaluation that caught us:** the first photo evaluation showed the AI stating mold as fact on 4 of 24 photos. The prompt and the scoring were fixed, and it has been 0/24 since.
