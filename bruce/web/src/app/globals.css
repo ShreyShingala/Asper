@@ -1,0 +1,76 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/*
+ * Design tokens: see scripts/gen-tokens.mjs for colours (generated into tokens.css).
+ * Typography, radii and shadows below are taken from the Foundation + Patterns artboards
+ * of "Full Design System (Community)".
+ */
+@theme {
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+
+  /* Foundation > Typography Scale */
+  --text-h2: 64px;
+  --text-h2--line-height: 1.15;
+  --text-h3: 48px;
+  --text-h3--line-height: 1.15;
+  --text-h4: 40px;
+  --text-h4--line-height: 1.2;
+  --text-h5: 32px;
+  --text-h5--line-height: 1.25;
+  --text-h6: 24px;
+  --text-h6--line-height: 1.3;
+  --text-subheading: 18px;
+  --text-subheading--line-height: 1.4;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-subtitle: 14px;
+  --text-subtitle--line-height: 1.5;
+  --text-caption: 12px;
+  --text-caption--line-height: 1.4;
+
+  /* Patterns > Border-Radius */
+  --radius-ds-xsm: 4px;
+  --radius-ds-sm: 12px;
+  --radius-ds-normal: 16px;
+  --radius-ds-lg: 24px;
+  --radius-ds-xl: 70px;
+
+  /* Patterns > Shadows (measured from the artboard) */
+  --shadow-ds-xsm: 0 1px 2px 0 rgb(16 20 45 / 0.06);
+  --shadow-ds-sm: 0 1px 3px 0 rgb(16 20 45 / 0.12);
+  --shadow-ds-normal: 0 4px 8px -2px rgb(16 20 45 / 0.12);
+  --shadow-ds-lg: 0 12px 28px -4px rgb(16 20 45 / 0.14);
+  --shadow-ds-xl: 0 24px 48px -8px rgb(16 20 45 / 0.22);
+  --shadow-focus: 0 0 0 4px rgb(81 124 255 / 0.18);
+
+  /* Spinner animation used by Loader + validating input */
+  --animate-ds-spin: ds-spin 0.9s linear infinite;
+  @keyframes ds-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: var(--color-ink);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Anchor targets sit below the sticky header */
+[id] {
+  scroll-margin-top: 24px;
+}
