@@ -30,7 +30,7 @@ class Region(BaseModel):
 
 class PhotoAnalysis(BaseModel):
     image_type: Literal["regular", "thermal", "test_kit", "instrument", "other"] = "regular"
-    observations: list[str] = Field(description="Plain-language visible observations, 1-4 items")
+    observations: list[str] = Field(description="2-4 spoken-style sentences, each at most 12 words")
     regions: list[Region] = Field(default=[], description="Areas worth a closer look (may be empty)")
     visible_moisture: bool | None = None
     scale_reference_visible: bool = False

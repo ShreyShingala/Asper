@@ -18,7 +18,10 @@ EXACT_CACHE_DIR = CACHE_DIR / "exact"
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 PRIMARY_MODEL = os.getenv("PRIMARY_MODEL", "nvidia/nemotron-3.5-super-vl:free")
-FALLBACK_MODEL = os.getenv("FALLBACK_MODEL", "openrouter/free")
+# openrouter/free is NOT a usable fallback: it routes to the same Nemotron with reasoning forced on, which burns the token
+# budget and returns empty content. nano-omni is slow (~40 s, reasoning) but reliably returns valid JSON.
+FALLBACK_MODEL = os.getenv("FALLBACK_MODEL", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free")
+PRIMARY_RETRIES = int(os.getenv("PRIMARY_RETRIES", "2"))  # transient 5xx/429 from free providers are common
 LLM_TIMEOUT_S = float(os.getenv("LLM_TIMEOUT_S", "25"))
 DISABLE_REASONING = os.getenv("DISABLE_REASONING", "1") == "1"
 LLM_CONCURRENCY = int(os.getenv("LLM_CONCURRENCY", "3"))

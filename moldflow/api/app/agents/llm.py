@@ -96,7 +96,7 @@ def _write(path, value: BaseModel, model: str):
     path.write_text(json.dumps({"model": model, "value": value.model_dump_json()}, indent=1))
 
 
-async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_tokens: int) -> tuple[T, dict]:
+async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_tokens: int, temperature: float = 0.2) -> tuple[T, dict]:
     """One model, with up to 2 repair turns on invalid JSON / schema errors."""
     msgs = list(messages)
     tokens_in = tokens_out = 0
@@ -108,7 +108,7 @@ async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_
             extra["reasoning"] = {"enabled": False}  # ~3x faster on Nemotron; some routers (openrouter/free) reject this
         async with _sem:
             resp = await client().chat.completions.create(model=model, messages=msgs, max_tokens=max_tokens,
-                                                          temperature=0.2, extra_body=extra)
+                                                          temperature=temperature, extra_body=extra)
         u = resp.usage
         if u:
             tokens_in += u.prompt_tokens or 0
@@ -127,7 +127,7 @@ async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_
 
 async def structured(model_cls: type[T], *, agent: str, system: str, user_text: str,
                      images: list[bytes] | None = None, fixture_key: str | None = None,
-                     max_tokens: int = 1500, mode: str | None = None) -> Result:
+                     max_tokens: int = 1500, mode: str | None = None, temperature: float = 0.2) -> Result:
     images = images or []
     mode = mode or config.DEMO_MODE
     full_system = f"{system}\n\n{GUARDRAILS}\n\n{_schema_prompt(model_cls)}"
@@ -149,18 +149,28 @@ async def structured(model_cls: type[T], *, agent: str, system: str, user_text: 
     messages = [{"role": "system", "content": full_system}, {"role": "user", "content": content}]
 
     errors = []
-    for tier, model in (("live", config.PRIMARY_MODEL), ("fallback", config.FALLBACK_MODEL)):
+    attempts = [("live", config.PRIMARY_MODEL)] * (1 + config.PRIMARY_RETRIES) + [("fallback", config.FALLBACK_MODEL)]
+    for n, (tier, model) in enumerate(attempts):
+        if n and tier == "live":
+            await asyncio.sleep(1.5 * n)  # backoff before retrying a transient provider error
         try:
-            value, meta = await _call_model(model, model_cls, messages, max_tokens)
+            budget = max_tokens * 4 if "reasoning" in model else max_tokens  # reasoning tokens count against max_tokens
+            value, meta = await _call_model(model, model_cls, messages, budget, temperature)
             _write(exact, value, model)
             if fixture and not fixture.exists():
                 _write(fixture, value, model)
             return done(value, model, tier, meta)
-        except (APIStatusError, APITimeoutError, AgentFailure, asyncio.TimeoutError) as e:
+        except AgentFailure as e:  # invalid JSON after repairs: retrying the same model rarely helps, go to fallback
             errors.append(f"{model}: {type(e).__name__} {str(e)[:160]}")
             log.warning("agent %s failed on %s: %s", agent, model, errors[-1])
-            if mode == "live":
-                continue
+            if tier == "live":
+                attempts[n + 1:] = [a for a in attempts[n + 1:] if a[0] != "live"]
+        except (APIStatusError, APITimeoutError, asyncio.TimeoutError) as e:
+            errors.append(f"{model}: {type(e).__name__} {str(e)[:160]}")
+            log.warning("agent %s failed on %s: %s", agent, model, errors[-1])
+            status = getattr(e, "status_code", None)
+            if tier == "live" and status is not None and status not in (429, 500, 502, 503, 504):
+                attempts[n + 1:] = [a for a in attempts[n + 1:] if a[0] != "live"]  # 4xx won't fix itself
     if fixture and (v := _read(fixture, model_cls)):
         return done(v, "fixture", "fixture")
     raise AgentFailure("; ".join(errors) or "no model available")

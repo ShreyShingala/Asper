@@ -16,16 +16,43 @@ def _words(text: str) -> set[str]:
     return {w.rstrip("s") for w in re.findall(r"[a-z]{4,}", text.lower())} - _STOP
 
 
+PHOTO_SYSTEM = """You pre-screen ONE photo for Mold Busters, a mold inspection company. A voice assistant reads your observations
+aloud to the customer on a call, so write the way a calm inspector talks.
+
+1. Decide image_type first:
+- thermal: a thermal (infrared) camera or its screen with a false-colour heat image. Say it is a thermal image and describe
+  the colours or temperature readings. A cool band or spot is a clue that needs checking, never proof of moisture or mold.
+- test_kit: a swab, sampling stick, test strip, sample tube or test card being used or shown (often a thin stick with a
+  coloured cap held against a surface). Say it is a swab or test and which surface it touches. You cannot read a result from
+  a photo and a test kit never identifies a mold species.
+- instrument: a moisture meter, hygrometer or other gauge. Read the numbers if legible ("the meter reads 44% humidity") and
+  say what it is pressed against. A reading needs the inspector's context.
+- regular: a room, surface, fixture, vent, attic, crawlspace or exterior.
+- other: nothing to do with the home.
+
+2. observations: 2 to 4 items. Each is ONE short sentence of at most 12 words, everyday words, no brand or model numbers.
+   Lead with what and where: "Brown stain on the ceiling above the shower." Mention moisture clues (stains, standing water,
+   peeling, gaps, poor drainage) when visible.
+
+3. regions ("areas worth a closer look"): only for regular photos. Box a specific patch on a surface (stain, dark spots,
+   damp mark, gap in caulking, disturbed insulation, water pooling). Never box the whole photo, a hand, or an instrument.
+   Label = "look closer: " + 2 to 5 words. For thermal, test_kit and instrument photos return an empty list.
+
+4. quality: too_dark if surfaces can't be made out; blurry if motion blur hides detail; not_relevant if it shows nothing
+   about the home; otherwise ok. A bright flashlight spot alone does not make a photo too dark or blurry.
+
+5. follow_up_question: one short question (at most 15 words) an inspector would ask next, ending with "?".
+
+Never say mold is present or confirmed and never name a species. "Possible mold" is allowed only for visible spots on a
+regular photo, never for thermal, meter or swab photos. declined_to_confirm_mold must be true."""
+
+
 async def analyze_photo(case: Case, photo: Photo, image: bytes, prompt_text: str | None, fixture_key: str | None) -> Result:
-    system = ("You pre-screen ONE photo sent by a homeowner or tenant to a mold inspection company. Describe only what is visible. "
-              "Mark up to 3 'areas worth a closer look' as regions with labels starting 'look closer:'. "
-              "If the photo shows instruments, test kits or thermal screens, describe them factually and do not infer mold. "
-              "Set quality to too_dark/blurry if the photo is not usable. Ask one useful follow-up question an inspector would ask. "
-              f"Write observations and the question in {LANG_NAME[case.language]}.")
+    system = PHOTO_SYSTEM + f"\nWrite observations, labels and the question in {LANG_NAME[case.language]}."
     ctx = {"room": photo.room or case.answers.get("room"), "photo_prompt": prompt_text,
            "customer_answers": {k: v for k, v in case.answers.items() if not k.startswith("skip:")}}
     return await structured(PhotoAnalysis, agent="photo", system=system, user_text=json.dumps(ctx), images=[image],
-                            fixture_key=fixture_key, max_tokens=900)
+                            fixture_key=fixture_key, max_tokens=900, temperature=0.0)
 
 
 async def assess(case: Case, fixture_key: str | None) -> Result:

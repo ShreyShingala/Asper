@@ -1,6 +1,15 @@
-"""Run the photo agent over all 24 sample photos and compare with the organizer's captions (filenames).
-Illustrative only (n=24, mostly non-mold images): NOT an accuracy benchmark. Throttled for the 20 req/min free tier.
-Usage (from moldflow/api): uv run python ../scripts/eval_photos.py"""
+"""Score the photo agent on the 24 sample-pack photos against api/proof/golden_photos.json.
+
+Reports "agreement with the organizer captions on the sample pack (n=24, illustrative)", NOT accuracy:
+the README says the two jobs are worked examples, not a training set or benchmark.
+Throttled to 15 req/min for the OpenRouter free tier. Raw analyses are saved, so scoring changes can be re-applied
+without new model calls (--rescore).
+
+Usage (from moldflow/api):
+  MOLDFLOW_DEMO_MODE=live uv run python ../scripts/eval_photos.py           # measure (24 model calls)
+  uv run python ../scripts/eval_photos.py --rescore                         # re-score the last run, no calls
+  uv run python ../scripts/eval_photos.py --only thermal,attic              # subset by group"""
+import argparse
 import asyncio
 import json
 import re
@@ -15,67 +24,127 @@ from app.agents import tasks  # noqa: E402
 from app.agents.llm import AgentFailure, prepare_image  # noqa: E402
 from app.models.passport import Case, Photo  # noqa: E402
 
-HEDGE = re.compile(r"(\bno\b|\bnot\b|\bnone\b|without|absence|possibl|may |might|could|cannot|can't|can not|not confirm|unconfirm|resembl|suspect|sampling|consistent with|appears?|potential)", re.I)
-MOLD = re.compile(r"\b(mou?ld|fungal|fungus)\b", re.I)
+GOLDEN = json.loads((config.API_DIR / "proof" / "golden_photos.json").read_text())
+OUT = config.API_DIR / "proof" / "eval_photos.json"
+HEDGE = re.compile(r"(\bno\b|\bnot\b|\bnone\b|without|absence|possibl|may |might|could|cannot|can't|can not|not confirm|unconfirm|resembl|suspect|sampling|consistent with|appears?|potential|unclear|unknown)", re.I)
+MOLD = re.compile(r"\b(mou?ld|fungal|fungus|mildew)\b", re.I)
+SPACING_S = 4.0  # 15 requests/minute
+METRICS = ["type", "mentions", "no_overclaim", "regions", "quality", "follow_up", "speakable"]
 
 
-def overclaims(obs: list[str]) -> bool:
-    return any(MOLD.search(o) and not HEDGE.search(o) for o in obs)
+def overclaims(texts: list[str]) -> bool:
+    return any(MOLD.search(t) and not HEDGE.search(t) for t in texts)
 
 
-async def main():
-    photos = sorted((config.PACK_DIR / "01_OnSite_Sample/Photos").glob("*.jpg")) + sorted((config.PACK_DIR / "02_Virtual_Sample/Photos").glob("*.jpg"))
-    case = Case(id="eval", title="eval")
-    rows = []
+def covered(idea: str, text: str) -> bool:
+    return any(s in text for s in GOLDEN["synonyms"].get(idea, [idea]))
 
-    async def one(i: int, path: Path):
-        await asyncio.sleep(i * 3.2)
-        caption = re.sub(r"^\d+_", "", path.stem).replace("_", " ")
-        job = "job1" if "OnSite" in str(path) else "job2"
-        ph = Photo(id=path.stem[:2], path=str(path), source="customer")
-        try:
-            res = await tasks.analyze_photo(case, ph, prepare_image(path.read_bytes()), None, fixture_key=f"eval:{job}:{path.name}")
-            a = res.value
-            rows.append({"photo": path.name, "job": job, "caption": caption, "image_type": a.image_type, "observations": a.observations,
-                         "regions": len(a.regions), "declined_to_confirm_mold": a.declined_to_confirm_mold,
-                         "mentions_mold_as_fact": overclaims(a.observations), "tier": res.usage.tier, "latency_ms": res.usage.latency_ms,
-                         "model": res.usage.model})
-            print(f"{path.name:45} {res.usage.tier:8} {res.usage.latency_ms/1000:5.1f}s  {a.image_type:10} overclaim={overclaims(a.observations)}")
-        except AgentFailure as e:
-            rows.append({"photo": path.name, "job": job, "caption": caption, "image_type": "-", "observations": [], "regions": 0,
-                         "declined_to_confirm_mold": False, "mentions_mold_as_fact": False, "tier": "error", "latency_ms": 0, "error": str(e)[:120]})
-            print(path.name, "ERROR", str(e)[:120])
 
-    await asyncio.gather(*[one(i, p) for i, p in enumerate(photos)])
-    rows.sort(key=lambda r: (r["job"], r["photo"]))
-    ok = [r for r in rows if "error" not in r]
-    thermal = [r for r in ok if "thermal" in r["caption"].lower()]
-    live_lat = [r["latency_ms"] for r in ok if r["tier"] in ("live", "fallback")]
-    summary = {
+def score(key: str, a: dict | None) -> dict:
+    g = GOLDEN["photos"][key]
+    if not a:
+        return {m: 0.0 for m in METRICS} | {"total": 0.0, "overclaim": False, "notes": ["no analysis"]}
+    obs = a.get("observations", [])
+    text = " ".join(obs + [a.get("follow_up_question") or ""] + [r["label"] for r in a.get("regions", [])]).lower()
+    notes = []
+    s = {"type": float(a.get("image_type") in g["image_type"])}
+    hit = [i for i in g["must_mention"] if covered(i, text)]
+    s["mentions"] = len(hit) / len(g["must_mention"])
+    if s["mentions"] < 1:
+        notes.append("missing: " + ", ".join(i for i in g["must_mention"] if i not in hit))
+    banned = [b for b in GOLDEN["must_not_global"] + g["must_not"] if b in text]
+    over = overclaims(obs + [r["label"] for r in a.get("regions", [])]) or bool(banned) or not a.get("declined_to_confirm_mold", True)
+    s["no_overclaim"] = float(not over)
+    if over:
+        notes.append("OVERCLAIM" + (f": {banned}" if banned else ""))
+    regions = a.get("regions", [])
+    whole = [r for r in regions if (r["box_2d"][2] - r["box_2d"][0]) * (r["box_2d"][3] - r["box_2d"][1]) > 0.85 * 1e6]
+    s["regions"] = float(not whole and (bool(regions) if g["expect_regions"] else True))
+    if s["regions"] < 1:
+        notes.append("regions: " + ("whole-image box" if whole else "none"))
+    s["quality"] = float(a.get("quality") in g["quality"])
+    q = (a.get("follow_up_question") or "").strip()
+    s["follow_up"] = float(len(q) > 8 and q.endswith("?"))
+    long = [o for o in obs if len(o.split()) > 12]
+    s["speakable"] = float(bool(obs) and not long and len(obs) <= 4)
+    if long:
+        notes.append(f"{len(long)} obs >12 words")
+    s["total"] = sum(s[m] for m in METRICS)
+    return s | {"overclaim": over, "notes": notes}
+
+
+def summarize(rows: list[dict]) -> dict:
+    ok = [r for r in rows if r.get("analysis")]
+    groups = {}
+    for r in rows:
+        groups.setdefault(r["group"], []).append(r["score"]["total"])
+    lat = [r["latency_ms"] for r in ok if r["tier"] in ("live", "fallback")]
+    return {
+        "total score": f"{sum(r['score']['total'] for r in rows):.1f} / {len(rows) * len(METRICS)}",
+        "overclaims": sum(r["score"]["overclaim"] for r in rows),
+        "image type agreement": f"{sum(r['score']['type'] for r in rows):.0f}/{len(rows)}",
         "photos analysed": f"{len(ok)}/{len(rows)}",
-        "declined to confirm mold": f"{sum(r['declined_to_confirm_mold'] and not r['mentions_mold_as_fact'] for r in ok)}/{len(ok)}",
-        "overclaims (mold stated as fact)": sum(r["mentions_mold_as_fact"] for r in ok),
-        "median live latency (s)": round(statistics.median(live_lat) / 1000, 1) if live_lat else "-",
+        "median live latency (s)": round(statistics.median(lat) / 1000, 1) if lat else "-",
+        "by group (avg of 7)": {g: round(sum(v) / len(v), 2) for g, v in sorted(groups.items())},
+        "by metric": {m: f"{sum(r['score'][m] for r in rows):.1f}/{len(rows)}" for m in METRICS},
     }
-    if thermal:
-        summary["thermal/instrument photos recognised"] = f"{sum(r['image_type'] in ('thermal', 'instrument') for r in thermal)}/{len(thermal)}"
-    out = {"model": config.PRIMARY_MODEL, "run_at": datetime.now().strftime("%Y-%m-%d %H:%M"), "rows": rows, "summary": summary,
-           "note": "Illustrative (n=24), not an accuracy benchmark. Ground truth = organizer photo filenames."}
-    dest = config.API_DIR / "proof" / "eval_photos.json"
-    dest.parent.mkdir(exist_ok=True)
-    dest.write_text(json.dumps(out, indent=1))
+
+
+def table(rows: list[dict]) -> None:
+    print(f"{'photo':48} {'grp':10} {'type':10} " + " ".join(m[:5] for m in METRICS) + "  total  s")
+    for r in rows:
+        s = r["score"]
+        print(f"{r['key'][:48]:48} {r['group'][:10]:10} {(r.get('analysis') or {}).get('image_type', '-')[:10]:10} "
+              + " ".join(f"{s[m]:5.2f}" for m in METRICS) + f"  {s['total']:4.1f}  {r['latency_ms'] / 1000:4.1f}  {'; '.join(s['notes'])}")
+
+
+async def run(only: set[str] | None):
+    keys = [k for k, g in GOLDEN["photos"].items() if not only or g["group"] in only]
+    case = Case(id="eval", title="eval")
+    rows: list[dict] = []
+
+    async def one(i: int, key: str):
+        await asyncio.sleep(i * SPACING_S)
+        job, name = key.split("/")
+        path = config.PACK_DIR / ("01_OnSite_Sample" if job == "job1" else "02_Virtual_Sample") / "Photos" / name
+        ph = Photo(id=name[:2], path=str(path), source="customer")
+        row = {"key": key, "photo": name, "job": job, "group": GOLDEN["photos"][key]["group"],
+               "caption": re.sub(r"^\d+_", "", Path(name).stem).replace("_", " ")}
+        try:
+            res = await tasks.analyze_photo(case, ph, prepare_image(path.read_bytes()), None, fixture_key=None)  # measure: no fixture fallback
+            row |= {"analysis": res.value.model_dump(), "tier": res.usage.tier, "latency_ms": res.usage.latency_ms, "model": res.usage.model}
+        except AgentFailure as e:
+            row |= {"analysis": None, "tier": "error", "latency_ms": 0, "error": str(e)[:160]}
+        rows.append(row)
+        print(f"  {key:50} {row['tier']:8} {row['latency_ms'] / 1000:5.1f}s", flush=True)
+
+    await asyncio.gather(*[one(i, k) for i, k in enumerate(keys)])
+    return sorted(rows, key=lambda r: r["key"])
+
+
+def write(rows: list[dict], label: str | None) -> dict:
+    for r in rows:
+        r["score"] = score(r["key"], r.get("analysis"))
+        r |= {"image_type": (r.get("analysis") or {}).get("image_type", "-"), "observations": (r.get("analysis") or {}).get("observations", []),
+              "regions": len((r.get("analysis") or {}).get("regions", [])),
+              "declined_to_confirm_mold": not r["score"]["overclaim"], "mentions_mold_as_fact": r["score"]["overclaim"]}
+    summary = summarize(rows)
+    out = {"model": config.PRIMARY_MODEL, "run_at": datetime.now().strftime("%Y-%m-%d %H:%M"), "label": label, "rows": rows, "summary": summary,
+           "note": "Agreement with the organizer captions on the sample pack (n=24, illustrative). Not an accuracy benchmark."}
+    OUT.write_text(json.dumps(out, indent=1, default=str))
+    table(rows)
     print(json.dumps(summary, indent=1))
+    return out
 
 
-if __name__ == "__main__" and "--rescore" in sys.argv:
-    dest = config.API_DIR / "proof" / "eval_photos.json"
-    d = json.loads(dest.read_text())
-    for r in d["rows"]:
-        r["mentions_mold_as_fact"] = overclaims(r["observations"])
-    ok = [r for r in d["rows"] if "error" not in r]
-    d["summary"]["declined to confirm mold"] = f"{sum(r['declined_to_confirm_mold'] and not r['mentions_mold_as_fact'] for r in ok)}/{len(ok)}"
-    d["summary"]["overclaims (mold stated as fact)"] = sum(r["mentions_mold_as_fact"] for r in ok)
-    dest.write_text(json.dumps(d, indent=1))
-    print(json.dumps(d["summary"], indent=1))
-else:
-    asyncio.run(main())
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--rescore", action="store_true")
+    ap.add_argument("--only")
+    ap.add_argument("--label")
+    a = ap.parse_args()
+    if a.rescore:
+        prev = json.loads(OUT.read_text())
+        write(prev["rows"], a.label or prev.get("label"))
+    else:
+        write(asyncio.run(run(set(a.only.split(",")) if a.only else None)), a.label)
