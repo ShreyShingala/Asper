@@ -81,7 +81,7 @@ dashboard, `/cases/job1/inspect`, `/cases/job1/review`, `/compare`, `/proof` · 
 
 1. **0:00 Before.** "Customer emails photos at 11 pm, report arrives 45h after the inspection, four generic texts, both estimates ($4,779) viewed and not accepted."
 2. **0:30 Customer (phone).** QR -> photo -> highlights + observations (note the *Live AI* pill) -> taps: Laundry / Tenant / symptoms Yes ->
-   recommendation **IAQ $520** with reasons + health note + **landlord letter**. Toggle **FR**. "Different location?" -> `Australia` -> **$25 remote report**.
+   recommendation **IAQ $520** with reasons + health note + **landlord letter**. Toggle **FR**. "Different location?" -> `Australia` -> **$20 remote report**.
    *Any hiccup:* "Use sample photos".
 3. **2:00 Staff (Job 1).** Inspect -> Upstairs washrooms -> paste *"Tub faucet leaking, moisture meter shows elevated moisture below the faucet."* -> Structure with AI -> Confirm.
    Review -> Draft report (every sentence cites evidence; hover a chip) -> **approval locked**: "basement swab positive but not in scope" ->
@@ -89,7 +89,7 @@ dashboard, `/cases/job1/inspect`, `/cases/job1/review`, `/compare`, `/proof` · 
 4. **3:15 Before/After.** Generic texts vs MoldFlow's follow-up answering "where is it coming from?" + Dec 6 expiry.
 5. **4:00 Close.** Hold up the PDF. "Real: everything you saw. Simulated: sending, booking, payment, CRM sync." -> Proof page if asked.
 
-Checkpoints: at the staff screen by 2:00 (else drop FR + $25), at compare by 3:15 (else say the follow-up line verbally).
+Checkpoints: at the staff screen by 2:00 (else drop FR + $20), at compare by 3:15 (else say the follow-up line verbally).
 
 | Failure | Fallback |
 |---|---|

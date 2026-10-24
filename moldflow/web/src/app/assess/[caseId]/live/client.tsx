@@ -74,6 +74,9 @@ async function frameBlob(video: HTMLVideoElement, maxSide = 480): Promise<Blob |
   return new Promise((r) => c.toBlob(r, "image/jpeg", 0.75));
 }
 
+const DEMO_CLIP = "/demo/walkthrough-30s.mp4";
+const DEMO_MODE = () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "1";
+
 const UNAVAILABLE = "Live mode is temporarily unavailable. Please upload photos instead; it only takes a few minutes.";
 const friendly = (msg: string) => (/quota|credit|limit/i.test(msg) ? UNAVAILABLE : msg);
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart(2, "0")}`;
@@ -135,6 +138,7 @@ export default function Live() {
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    videoRef.current?.pause();
   }, []);
 
   const applyChecklist = useCallback((cl: Checklist) => {
@@ -264,15 +268,26 @@ export default function Live() {
     setPhase("connecting");
     setErr(null);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch(() => {});
+      if (DEMO_MODE()) {
+        // Demo mode: a real Mold Busters customer walkthrough (sample pack, 30 s) replays as the phone camera.
+        const v = videoRef.current;
+        if (v) {
+          v.srcObject = null;
+          v.src = DEMO_CLIP;
+          v.loop = true;
+          await v.play().catch(() => {});
+        }
+      } else {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false,
+        });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(() => {});
+        }
+        setTorchOk(torchSupported(stream.getVideoTracks()[0]));
       }
-      setTorchOk(torchSupported(stream.getVideoTracks()[0]));
     } catch {
       setErr(window.isSecureContext
         ? "We couldn't open your camera. Allow camera access in your browser, or upload photos instead."

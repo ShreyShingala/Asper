@@ -142,7 +142,7 @@ class Event(BaseModel):
     step: str
     system: str
     what: str
-    source: Literal["sample_pack", "moldflow", "simulated"]
+    source: Literal["sample_pack", "moldflow", "simulated", "mock"]
 
 
 class FollowUp(BaseModel):
@@ -221,6 +221,62 @@ class Booking(BaseModel):
     notes: str | None = None
 
 
+class Payment(BaseModel):
+    """Simulated checkout (no real card processing in the prototype)."""
+    id: str
+    product: Literal["ai_report", "tenant_pack"]
+    amount: Decimal
+    card_last4: str = "4242"
+    status: Literal["paid_simulated", "refunded_simulated"] = "paid_simulated"
+    at: datetime = Field(default_factory=now)
+
+
+class OutboxMessage(BaseModel):
+    """Every message the system wants to send. Nothing leaves without the required approval (tenant and/or owner)."""
+    id: str
+    kind: str                                   # e.g. landlord_letter, formal_notice, city_complaint, followup
+    to_role: Literal["landlord", "city", "public_health", "tribunal", "councillor", "customer", "tenant"]
+    to_name: str = ""
+    to_address: str = ""
+    channel: Literal["email", "sms", "form"] = "email"
+    from_address: str = "care@bustmold.com"
+    on_behalf_of: str | None = None
+    cc: list[str] = []
+    subject: str = ""
+    body: str
+    reason: str = ""                            # why the system drafted it (shown on the approval card)
+    step: int | None = None                     # tenant-pack ladder step
+    needs: list[Literal["tenant", "owner"]] = ["owner"]
+    approved_by: list[str] = []
+    status: Literal["awaiting_approval", "sent_simulated", "denied"] = "awaiting_approval"
+    denied_reason: str | None = None
+    created_at: datetime = Field(default_factory=now)
+    sent_at: datetime | None = None
+
+
+class TenantPack(BaseModel):
+    """$50 tenant action pack: the legal escalation ladder, one approved step at a time."""
+    status: Literal["active", "paused", "resolved", "completed"] = "active"
+    step: int = 1
+    tenant_name: str
+    tenant_email: str
+    landlord_name: str
+    landlord_email: str
+    started_at: datetime = Field(default_factory=now)
+    next_due: date | None = None
+    landlord_replied: bool = False
+
+
+class ChatMessage(BaseModel):
+    """Project chat (replaces one Telegram group per project). source says where it came from."""
+    id: str
+    author: str
+    role: Literal["staff", "customer", "ai", "system"] = "staff"
+    text: str
+    at: datetime = Field(default_factory=now)
+    source: Literal["app", "telegram", "sample_pack_mock"] = "app"
+
+
 class StoredReport(BaseModel):
     draft: ReportDraft
     dropped_claims: list[str] = []
@@ -254,6 +310,11 @@ class Case(BaseModel):
     language: Literal["en", "fr"] = "en"
     intake_mode: Literal["upload", "live"] = "upload"
     live: LiveSession | None = None
+    payments: list[Payment] = []
+    outbox: list[OutboxMessage] = []
+    tenant_pack: TenantPack | None = None
+    chat: list[ChatMessage] = []
+    project_no: int | None = None
     seeded_from: str | None = None
     customer: Customer = Customer()
     property: Property = Property()

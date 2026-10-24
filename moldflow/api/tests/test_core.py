@@ -307,3 +307,25 @@ def test_plan_checklist_has_no_questions():
                 for i, s in enumerate(cl["plan"])]
     cl = live.checklist(c)
     assert cl["ready_to_finish"] and cl["next_step"] == {"do": "finish"}
+
+
+def test_tenant_pack_ladder():
+    from app.engine import tenant_pack as tp
+    tp.reset_clock()
+    c = Case(id="tp", title="t", answers={"room": "Laundry", "odor": "Yes"}, health_flag=True)
+    first = tp.start(c, "Sam Tenant", "sam@example.com", "Lee Landlord", "lee@example.com")
+    assert first.step == 1 and first.needs == ["tenant"] and first.cc == ["sam@example.com"] and "on behalf of Sam Tenant" in first.body
+    assert "confirm" in first.body and "mold is present" not in first.body.lower()
+    assert tp.advance(c) is None                      # nothing until step 1 is sent and the deadline passes
+    first.status = "sent_simulated"; tp.on_sent(c, first)
+    assert c.tenant_pack.step == 2 and tp.advance(c) is None
+    tp.skip(7)
+    second = tp.advance(c)
+    assert second and second.kind == "formal_notice" and tp.advance(c) is None
+    kinds = [s.kind for s in tp.steps_for(c)]
+    assert kinds == ["landlord_letter", "formal_notice", "city_complaint", "public_health", "tribunal", "councillor"]
+    c.tenant_pack.landlord_replied = True
+    second.status = "sent_simulated"; tp.on_sent(c, second); tp.skip(30)
+    assert tp.advance(c) is None                      # landlord replied: escalation stops
+    tp.reset_clock()
+    assert tp.PRICES == {"ai_report": "20.00", "tenant_pack": "50.00"}

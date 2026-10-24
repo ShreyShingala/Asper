@@ -5,6 +5,7 @@ import re
 import shutil
 import uuid
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,18 +15,20 @@ from pydantic import BaseModel
 from app import config, store
 from app.agents import bruce, tasks
 from app.agents.llm import AgentFailure, Result, prepare_image, structured
-from app.engine import booking, checks, photo_plan, rules
+from app.engine import autopilot, booking, checks, photo_plan, rules, tenant_pack
 from app.engine import live as live_rules
 from app.exports import render
 from app.integrations import elevenlabs
 from app.models.agents import IntakeTurn
-from app.models.passport import (Approval, Booking, BookingContact, Case, Event, Flag, FollowUp, Letter, LiveSession, Photo, PreAssessment, Reading,
+from app.models.passport import (Approval, Booking, BookingContact, Case, Event, Flag, FollowUp, Letter, LiveSession, OutboxMessage, Payment, Photo, PreAssessment, Reading,
                                  StoredReport, TranscriptLine, now)
 from app.seed import seeds
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 app = FastAPI(title="MoldFlow API", version="1.0")
 app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
+from app.projects_api import router as projects_router  # noqa: E402
+app.include_router(projects_router)
 
 
 @app.on_event("startup")
@@ -396,6 +399,209 @@ async def live_end(case_id: str, body: LiveEndIn) -> CaseOut:
                 if not c.concern and res.value.concern.strip():
                     _apply_answer(c, "concern", res.value.concern.strip())
     return CaseOut(case=c, turn=rules.next_turn(c) if c.stage == "intake" else None)
+
+
+# ---------- checkout (simulated) + tenant action pack ----------
+class CheckoutIn(BaseModel):
+    product: str
+    card_name: str = ""
+    card_number: str = "4242 4242 4242 4242"
+    tenant_name: str | None = None
+    tenant_email: str | None = None
+    landlord_name: str | None = None
+    landlord_email: str | None = None
+
+
+@app.post("/cases/{case_id}/checkout")
+async def checkout(case_id: str, body: CheckoutIn) -> CaseOut:
+    """Fake checkout: records a simulated payment. No card data is stored beyond the last 4 digits."""
+    if body.product not in tenant_pack.PRICES:
+        raise HTTPException(422, "Unknown product.")
+    digits = "".join(ch for ch in body.card_number if ch.isdigit())
+    if len(digits) < 12:
+        raise HTTPException(422, "Enter a card number (test mode: 4242 4242 4242 4242).")
+    if body.product == "tenant_pack" and not all((body.tenant_name, body.tenant_email, body.landlord_name, body.landlord_email)):
+        raise HTTPException(422, "Your name and email and your landlord's name and email are needed to write on your behalf.")
+    async with store.editing(case_id) as c:
+        if any(p.product == body.product for p in c.payments):
+            raise HTTPException(409, "Already purchased.")
+        c.payments.append(Payment(id="pay_" + uuid.uuid4().hex[:8], product=body.product,
+                                  amount=Decimal(tenant_pack.PRICES[body.product]), card_last4=digits[-4:]))
+        what = "AI pre-assessment report" if body.product == "ai_report" else "Tenant action pack"
+        if body.product == "ai_report":
+            c.booking = c.booking or Booking(service="remote_report", slot_text="Remote report", status="paid_simulated")
+        else:
+            tenant_pack.start(c, body.tenant_name.strip(), body.tenant_email.strip(), body.landlord_name.strip(), body.landlord_email.strip())
+            c.customer.alias = body.tenant_name.strip()
+            c.customer.type = "tenant"
+        c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step=f"Paid: {what}", system="MoldFlow checkout (simulated)",
+                                what=f"${tenant_pack.PRICES[body.product]} · card ending {digits[-4:]}", source="simulated"))
+    return CaseOut(case=c)
+
+
+@app.get("/cases/{case_id}/pack")
+def pack_view(case_id: str) -> dict:
+    c = _get(case_id)
+    return {"pack": c.tenant_pack, "ladder": tenant_pack.ladder_view(c), "today": tenant_pack.today().isoformat(),
+            "outbox": [m for m in c.outbox if m.step is not None]}
+
+
+class DecisionIn(BaseModel):
+    by: str = "tenant"          # "tenant" or a staff name
+    body: str | None = None     # edited text, if any
+    reason: str | None = None   # for deny
+
+
+def _send(c: Case, m: OutboxMessage) -> None:
+    m.status, m.sent_at = "sent_simulated", now()
+    c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step=f"Sent: {m.subject or m.kind}",
+                            system="MoldFlow outbox (simulated)", what=f"To {m.to_name} <{m.to_address}>" + (f" on behalf of {m.on_behalf_of}" if m.on_behalf_of else ""),
+                            source="simulated"))
+    if m.step is not None:
+        tenant_pack.on_sent(c, m)
+
+
+@app.post("/cases/{case_id}/outbox/{mid}/approve")
+async def outbox_approve(case_id: str, mid: str, body: DecisionIn) -> CaseOut:
+    async with store.editing(case_id) as c:
+        m = next((x for x in c.outbox if x.id == mid), None)
+        if not m or m.status != "awaiting_approval":
+            raise HTTPException(404, "Nothing to approve.")
+        if body.body and body.body.strip():
+            m.body = body.body.strip()
+        role = "tenant" if body.by == "tenant" else "owner"
+        if role not in m.needs:
+            raise HTTPException(403, "This message must be approved by the tenant it is sent for.")
+        m.approved_by.append(body.by)
+        _send(c, m)
+    return CaseOut(case=c)
+
+
+@app.post("/cases/{case_id}/outbox/{mid}/deny")
+async def outbox_deny(case_id: str, mid: str, body: DecisionIn) -> CaseOut:
+    async with store.editing(case_id) as c:
+        m = next((x for x in c.outbox if x.id == mid), None)
+        if not m or m.status != "awaiting_approval":
+            raise HTTPException(404, "Nothing to deny.")
+        m.status, m.denied_reason = "denied", body.reason or f"Denied by {body.by}"
+    return CaseOut(case=c)
+
+
+class PackStateIn(BaseModel):
+    action: str  # pause | resume | landlord_replied
+
+
+@app.post("/cases/{case_id}/pack/state")
+async def pack_state(case_id: str, body: PackStateIn) -> CaseOut:
+    async with store.editing(case_id) as c:
+        p = c.tenant_pack
+        if not p:
+            raise HTTPException(404, "No tenant pack on this case.")
+        if body.action == "pause":
+            p.status = "paused"
+        elif body.action == "resume":
+            p.status = "active"
+        elif body.action == "landlord_replied":
+            p.landlord_replied, p.status = True, "resolved"
+            c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Landlord replied", system="MoldFlow (simulated)",
+                                    what=f"{p.landlord_name} replied and agreed to arrange an inspection. Escalation stopped.", source="simulated"))
+        else:
+            raise HTTPException(422, "Unknown action.")
+    return CaseOut(case=c)
+
+
+class SkipIn2(BaseModel):
+    days: int = 7
+
+
+@app.post("/demo/skip")
+async def demo_skip(body: SkipIn2) -> dict:
+    """Demo clock: move time forward and let every active tenant pack draft its next step if the landlord missed the deadline."""
+    day = tenant_pack.skip(max(1, min(body.days, 60)))
+    drafted = []
+    for case in store.list_all():
+        if case.tenant_pack and case.tenant_pack.status == "active":
+            async with store.editing(case.id) as c:
+                if msg := tenant_pack.advance(c):
+                    drafted.append({"case_id": c.id, "message_id": msg.id, "subject": msg.subject})
+    return {"today": day.isoformat(), "drafted": drafted}
+
+
+# ---------- autopilot inbox (owner: approve / edit / deny) ----------
+@app.get("/autopilot/inbox")
+async def autopilot_inbox() -> dict:
+    for case in store.list_all():
+        async with store.editing(case.id) as c:
+            autopilot.sync(c)
+    cases = store.list_all()
+    sent = [m for c in cases for m in c.outbox if m.status == "sent_simulated" and "owner" in m.needs]
+    sent_f = [f for c in cases for f in c.followups if f.status == "sent_simulated"]
+    return {"cards": autopilot.cards(cases), "today": tenant_pack.today().isoformat(),
+            "stats": {"approved": len(sent) + len(sent_f), "minutes_saved_estimate": sum(autopilot.MINUTES.get(m.kind, 5) for m in sent)
+                      + autopilot.MINUTES["followup"] * len(sent_f), "sent_on_behalf_of_tenants": sum(
+                          1 for c in cases for m in c.outbox if m.status == "sent_simulated" and m.on_behalf_of)}}
+
+
+class AutopilotDecision(BaseModel):
+    case_id: str
+    id: str
+    by: str = "Owner"
+    body: str | None = None
+    reason: str | None = None
+
+
+async def _owner_approve(case_id: str, item_id: str, by: str, body: str | None = None) -> bool:
+    async with store.editing(case_id) as c:
+        if m := next((x for x in c.outbox if x.id == item_id and x.status == "awaiting_approval"), None):
+            if "owner" not in m.needs:
+                raise HTTPException(403, "Only the tenant can approve messages sent on their behalf.")
+            if body and body.strip():
+                m.body = body.strip()
+            m.approved_by.append(by)
+            _send(c, m)
+            return True
+        if f := next((x for x in c.followups if x.id == item_id and x.status == "draft"), None):
+            if body and body.strip():
+                f.body = body.strip()
+            f.status = "sent_simulated"
+            c.approvals.append(Approval(what="followup", reviewed_by=by))
+            c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Follow-up sent", system="MoldFlow outbox (simulated)",
+                                    what=f.body[:120], source="simulated"))
+            return True
+    return False
+
+
+@app.post("/autopilot/approve")
+async def autopilot_approve(body: AutopilotDecision) -> dict:
+    if not await _owner_approve(body.case_id, body.id, body.by, body.body):
+        raise HTTPException(404, "Nothing to approve.")
+    return {"ok": True}
+
+
+@app.post("/autopilot/deny")
+async def autopilot_deny(body: AutopilotDecision) -> dict:
+    async with store.editing(body.case_id) as c:
+        if m := next((x for x in c.outbox if x.id == body.id and x.status == "awaiting_approval"), None):
+            m.status, m.denied_reason = "denied", body.reason or f"Denied by {body.by}"
+        elif f := next((x for x in c.followups if x.id == body.id and x.status == "draft"), None):
+            c.followups.remove(f)
+        else:
+            raise HTTPException(404, "Nothing to deny.")
+    return {"ok": True}
+
+
+class ApproveAllIn(BaseModel):
+    kind: str
+    by: str = "Owner"
+
+
+@app.post("/autopilot/approve-all")
+async def autopilot_approve_all(body: ApproveAllIn) -> dict:
+    done = 0
+    for card in autopilot.cards(store.list_all()):
+        if card["kind"] == body.kind and card["action"] == "approve":
+            done += await _owner_approve(card["case_id"], card["id"], body.by)
+    return {"approved": done}
 
 
 @app.get("/cases/{case_id}/export/pre-assessment.pdf")
@@ -777,4 +983,5 @@ def reset() -> dict:
         if d.is_dir() and d.parent == config.UPLOAD_DIR:
             shutil.rmtree(d, ignore_errors=True)
     cases = seeds.seed_all(store.save)
+    tenant_pack.reset_clock()
     return {"ok": True, "cases": [c.id for c in cases]}

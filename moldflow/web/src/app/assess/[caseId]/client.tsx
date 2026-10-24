@@ -317,6 +317,8 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
         </div>
       </Card>
 
+      <Offers c={c} />
+
       <Card className="rise p-5" style={{ animationDelay: "0.1s" }}>
         <Eyebrow className="mb-2">{t.weSee}</Eyebrow>
         <ul className="space-y-1.5 text-subtitle text-ink">{pa.observed.map((o, i) => <li key={i}>• {o}</li>)}</ul>
@@ -359,5 +361,34 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
         )}
       </Modal>
     </div>
+  );
+}
+
+/** Paid add-ons: the $20 AI report for everyone, the $50 tenant action pack for tenants. */
+function Offers({ c }: { c: Case }) {
+  const paid = (p: string) => (c.payments ?? []).some((x) => x.product === p);
+  const tenant = c.customer.type === "tenant" || c.answers.occupant === "Tenant";
+  return (
+    <Card className="rise space-y-3 p-5" style={{ animationDelay: "0.08s" }}>
+      <Eyebrow>Do more with your pre-assessment</Eyebrow>
+      {tenant && (
+        <div className="rounded-ds-sm border border-brand/30 bg-brand-tint p-4">
+          <p className="text-subtitle font-semibold text-ink">Renting? We contact your landlord for you · $50</p>
+          <p className="mt-1 text-caption text-ink-body">We write from a Mold Busters address on your behalf (you&apos;re copied), follow up automatically, then help with a city complaint and tribunal paperwork. You approve every message.</p>
+          <Link href={paid("tenant_pack") ? `/assess/${c.id}/pack` : `/assess/${c.id}/checkout?product=tenant_pack`} className={cx(buttonClass({ size: "md", fullWidth: true }), "mt-3")}>
+            {paid("tenant_pack") ? "Open my action pack" : "Get the tenant action pack"}
+          </Link>
+        </div>
+      )}
+      <div className="rounded-ds-sm border border-kit-gray-soft p-4">
+        <p className="text-subtitle font-semibold text-ink">Full AI pre-assessment report · $20</p>
+        <p className="mt-1 text-caption text-ink-body">Annotated photos, findings in plain language and next steps, as a PDF.</p>
+        {paid("ai_report") ? (
+          <a href={`/api/cases/${c.id}/export/pre-assessment.pdf`} target="_blank" rel="noreferrer" className={cx(buttonClass({ variant: "outline", size: "md", fullWidth: true }), "mt-3")}>Download my report</a>
+        ) : (
+          <Link href={`/assess/${c.id}/checkout?product=ai_report`} className={cx(buttonClass({ variant: "outline", size: "md", fullWidth: true }), "mt-3")}>Get the report</Link>
+        )}
+      </div>
+    </Card>
   );
 }

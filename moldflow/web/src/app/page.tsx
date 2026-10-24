@@ -26,7 +26,7 @@ export default function Landing() {
     try {
       const out = await api.post<CaseOut>("/cases", { language: mode === "live" ? "en" : lang });
       localStorage.setItem("moldflow_case", out.case.id);
-      router.push(mode === "live" ? `/assess/${out.case.id}/live` : `/assess/${out.case.id}`);
+      router.push(mode === "live" ? `/assess/${out.case.id}/live${new URLSearchParams(window.location.search).get("demo") === "1" ? "?demo=1" : ""}` : `/assess/${out.case.id}`);
     } catch (e) {
       setErr((e as Error).message || "Couldn't reach the server. Please try again.");
       setBusy(null);

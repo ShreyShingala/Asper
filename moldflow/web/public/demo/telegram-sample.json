@@ -1,0 +1,15 @@
+{
+  "name": "MB · Case 43 · Gatineau 6-plex (mock)",
+  "type": "private_group",
+  "id": 4300000043,
+  "messages": [
+    {"id": 1, "type": "service", "date": "2026-10-11T08:58:00", "actor": "Staff B", "action": "create_group", "title": "MB · Case 43 · Gatineau 6-plex (mock)"},
+    {"id": 2, "type": "message", "date": "2026-10-11T09:00:12", "from": "Staff B", "from_id": "user1001", "text": "Landlord booked units 2 and 5 for tomorrow 9:00. Tenants say windows drip every morning."},
+    {"id": 3, "type": "message", "date": "2026-10-11T09:03:40", "from": "Staff E", "from_id": "user1005", "text": "Confirmed with the landlord by phone. Key is in the lockbox, code in Close."},
+    {"id": 4, "type": "message", "date": "2026-10-12T09:41:05", "from": "Staff B", "from_id": "user1001", "text": [{"type": "bold", "text": "Unit 2: "}, "sill discoloration both bedrooms, RH 71% at 9am."]},
+    {"id": 5, "type": "message", "date": "2026-10-12T10:15:22", "from": "Staff B", "from_id": "user1001", "text": "Unit 5 same. Bathroom fans duct into the attic, not outside. That's the moisture source."},
+    {"id": 6, "type": "message", "date": "2026-10-12T10:16:01", "from": "Staff B", "from_id": "user1001", "photo": "photos/photo_1@12-10-2026_10-16-01.jpg", "text": "Fan duct ending in attic insulation"},
+    {"id": 7, "type": "message", "date": "2026-10-13T14:20:45", "from": "Staff C", "from_id": "user1003", "text": "Estimate drafted: sill cleanup both units + referral for fan ducting. Sending tomorrow after review."},
+    {"id": 8, "type": "message", "date": "2026-10-15T10:30:09", "from": "Staff E", "from_id": "user1005", "text": "Landlord asked if we can do one unit at a time so tenants stay. Told him yes."}
+  ]
+}

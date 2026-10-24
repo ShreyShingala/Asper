@@ -4,6 +4,120 @@
  */
 
 export interface paths {
+    "/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Projects List */
+        get: operations["projects_list_projects_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{case_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Project Detail */
+        get: operations["project_detail_projects__case_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{case_id}/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Project Chat
+         * @description Post to the project chat. Mention @muse (or @bruce) to get an answer with this project's full context.
+         */
+        post: operations["project_chat_projects__case_id__chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/muse/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Muse Ask
+         * @description Company assistant. Drafted messages go into the Autopilot inbox for approval; nothing is sent from here.
+         */
+        post: operations["muse_ask_muse_ask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{case_id}/evidence.zip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Evidence Bundle
+         * @description Everything on a project, dated, with a SHA-256 per file, for a lawyer or insurer.
+         */
+        get: operations["evidence_bundle_projects__case_id__evidence_zip_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{case_id}/import-telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Telegram
+         * @description Telegram Desktop export (result.json: {name, messages:[{type, date, from, text}]}) -> project chat messages.
+         */
+        post: operations["import_telegram_projects__case_id__import_telegram_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -195,6 +309,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cases/{case_id}/live/mock/turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Live Mock Turn
+         * @description Free test voice: Bruce's real prompt and tool contracts run on the OpenRouter model. The browser speaks the reply with
+         *     its built-in speech synthesis, runs the tools itself (same handlers as the ElevenLabs call) and sends the results back.
+         */
+        post: operations["live_mock_turn_cases__case_id__live_mock_turn_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/live/precall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Live Precall Options */
+        get: operations["live_precall_options_live_precall_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/live/precall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Live Precall
+         * @description The 5 tap questions before the call. Saves them as normal intake answers (so routing/pricing work unchanged) and
+         *     returns the personalized photo plan.
+         */
+        post: operations["live_precall_cases__case_id__live_precall_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/live/locate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Live Locate
+         * @description Focus box helper: where in this live frame is the target (e.g. 'the discoloured patch')? Not saved to the case.
+         */
+        post: operations["live_locate_cases__case_id__live_locate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cases/{case_id}/live/checklist": {
         parameters: {
             query?: never;
@@ -243,6 +436,182 @@ export interface paths {
         put?: never;
         /** Live End */
         post: operations["live_end_cases__case_id__live_end_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Checkout
+         * @description Fake checkout: records a simulated payment. No card data is stored beyond the last 4 digits.
+         */
+        post: operations["checkout_cases__case_id__checkout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/pack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pack View */
+        get: operations["pack_view_cases__case_id__pack_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/outbox/{mid}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Outbox Approve */
+        post: operations["outbox_approve_cases__case_id__outbox__mid__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/outbox/{mid}/deny": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Outbox Deny */
+        post: operations["outbox_deny_cases__case_id__outbox__mid__deny_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/pack/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pack State */
+        post: operations["pack_state_cases__case_id__pack_state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/demo/skip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Demo Skip
+         * @description Demo clock: move time forward and let every active tenant pack draft its next step if the landlord missed the deadline.
+         */
+        post: operations["demo_skip_demo_skip_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/autopilot/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Autopilot Inbox */
+        get: operations["autopilot_inbox_autopilot_inbox_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/autopilot/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Autopilot Approve */
+        post: operations["autopilot_approve_autopilot_approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/autopilot/deny": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Autopilot Deny */
+        post: operations["autopilot_deny_autopilot_deny_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/autopilot/approve-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Autopilot Approve All */
+        post: operations["autopilot_approve_all_autopilot_approve_all_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -646,12 +1015,38 @@ export interface components {
              */
             at?: string;
         };
+        /** ApproveAllIn */
+        ApproveAllIn: {
+            /** Kind */
+            kind: string;
+            /**
+             * By
+             * @default Owner
+             */
+            by: string;
+        };
         /** ApproveIn */
         ApproveIn: {
             /** What */
             what: string;
             /** Reviewed By */
             reviewed_by: string;
+        };
+        /** AutopilotDecision */
+        AutopilotDecision: {
+            /** Case Id */
+            case_id: string;
+            /** Id */
+            id: string;
+            /**
+             * By
+             * @default Owner
+             */
+            by: string;
+            /** Body */
+            body?: string | null;
+            /** Reason */
+            reason?: string | null;
         };
         /** BatchIn */
         BatchIn: {
@@ -662,6 +1057,18 @@ export interface components {
             ][];
             /** By */
             by: string;
+        };
+        /** Body_import_telegram_projects__case_id__import_telegram_post */
+        Body_import_telegram_projects__case_id__import_telegram_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_live_locate_cases__case_id__live_locate_post */
+        Body_live_locate_cases__case_id__live_locate_post: {
+            /** File */
+            file: string;
+            /** Target */
+            target: string;
         };
         /** Body_upload_photo_cases__case_id__photos_post */
         Body_upload_photo_cases__case_id__photos_post: {
@@ -755,6 +1162,21 @@ export interface components {
             /** Postal Code */
             postal_code: string;
         };
+        /** BruceTurn */
+        BruceTurn: {
+            /**
+             * Say
+             * @description Exactly what you say out loud now. Empty if you are only calling tools.
+             * @default
+             */
+            say: string;
+            /**
+             * Tools
+             * @description Tool calls to run, in order, after speaking (like parallel tool calls); empty list to wait for the customer.
+             * @default []
+             */
+            tools: components["schemas"]["ToolCall"][];
+        };
         /** Case */
         Case: {
             /**
@@ -790,6 +1212,24 @@ export interface components {
              */
             intake_mode: "upload" | "live";
             live?: components["schemas"]["LiveSession"] | null;
+            /**
+             * Payments
+             * @default []
+             */
+            payments: components["schemas"]["Payment"][];
+            /**
+             * Outbox
+             * @default []
+             */
+            outbox: components["schemas"]["OutboxMessage"][];
+            tenant_pack?: components["schemas"]["TenantPack"] | null;
+            /**
+             * Chat
+             * @default []
+             */
+            chat: components["schemas"]["ChatMessage"][];
+            /** Project No */
+            project_no?: number | null;
             /** Seeded From */
             seeded_from?: string | null;
             /**
@@ -891,6 +1331,68 @@ export interface components {
             case: components["schemas"]["Case"];
             turn?: components["schemas"]["IntakeTurn"] | null;
         };
+        /** ChatIn */
+        ChatIn: {
+            /** Text */
+            text: string;
+            /**
+             * Author
+             * @default Owner
+             */
+            author: string;
+        };
+        /**
+         * ChatMessage
+         * @description Project chat (replaces one Telegram group per project). source says where it came from.
+         */
+        ChatMessage: {
+            /** Id */
+            id: string;
+            /** Author */
+            author: string;
+            /**
+             * Role
+             * @default staff
+             * @enum {string}
+             */
+            role: "staff" | "customer" | "ai" | "system";
+            /** Text */
+            text: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at?: string;
+            /**
+             * Source
+             * @default app
+             * @enum {string}
+             */
+            source: "app" | "telegram" | "sample_pack_mock";
+        };
+        /** CheckoutIn */
+        CheckoutIn: {
+            /** Product */
+            product: string;
+            /**
+             * Card Name
+             * @default
+             */
+            card_name: string;
+            /**
+             * Card Number
+             * @default 4242 4242 4242 4242
+             */
+            card_number: string;
+            /** Tenant Name */
+            tenant_name?: string | null;
+            /** Tenant Email */
+            tenant_email?: string | null;
+            /** Landlord Name */
+            landlord_name?: string | null;
+            /** Landlord Email */
+            landlord_email?: string | null;
+        };
         /** ChipQuestion */
         ChipQuestion: {
             /** Key */
@@ -925,6 +1427,18 @@ export interface components {
             alias: string;
             /** Contact Simulated */
             contact_simulated?: string | null;
+        };
+        /** DecisionIn */
+        DecisionIn: {
+            /**
+             * By
+             * @default tenant
+             */
+            by: string;
+            /** Body */
+            body?: string | null;
+            /** Reason */
+            reason?: string | null;
         };
         /** Estimate */
         Estimate: {
@@ -1012,7 +1526,7 @@ export interface components {
              * Source
              * @enum {string}
              */
-            source: "sample_pack" | "moldflow" | "simulated";
+            source: "sample_pack" | "moldflow" | "simulated" | "mock";
         };
         /** Finding */
         Finding: {
@@ -1232,6 +1746,28 @@ export interface components {
             /** Summary Tier */
             summary_tier?: string | null;
         };
+        /** LiveStartIn */
+        LiveStartIn: {
+            /** Voice */
+            voice?: string | null;
+        };
+        /** MockTurnIn */
+        MockTurnIn: {
+            /**
+             * History
+             * @default []
+             */
+            history: {
+                [key: string]: unknown;
+            }[];
+        };
+        /** MuseIn */
+        MuseIn: {
+            /** Question */
+            question: string;
+            /** Case Id */
+            case_id?: string | null;
+        };
         /** NewCase */
         NewCase: {
             /**
@@ -1246,6 +1782,126 @@ export interface components {
             room: string;
             /** Text */
             text: string;
+        };
+        /**
+         * OutboxMessage
+         * @description Every message the system wants to send. Nothing leaves without the required approval (tenant and/or owner).
+         */
+        OutboxMessage: {
+            /** Id */
+            id: string;
+            /** Kind */
+            kind: string;
+            /**
+             * To Role
+             * @enum {string}
+             */
+            to_role: "landlord" | "city" | "public_health" | "tribunal" | "councillor" | "customer" | "tenant";
+            /**
+             * To Name
+             * @default
+             */
+            to_name: string;
+            /**
+             * To Address
+             * @default
+             */
+            to_address: string;
+            /**
+             * Channel
+             * @default email
+             * @enum {string}
+             */
+            channel: "email" | "sms" | "form";
+            /**
+             * From Address
+             * @default care@bustmold.com
+             */
+            from_address: string;
+            /** On Behalf Of */
+            on_behalf_of?: string | null;
+            /**
+             * Cc
+             * @default []
+             */
+            cc: string[];
+            /**
+             * Subject
+             * @default
+             */
+            subject: string;
+            /** Body */
+            body: string;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+            /** Step */
+            step?: number | null;
+            /**
+             * Needs
+             * @default [
+             *       "owner"
+             *     ]
+             */
+            needs: ("tenant" | "owner")[];
+            /**
+             * Approved By
+             * @default []
+             */
+            approved_by: string[];
+            /**
+             * Status
+             * @default awaiting_approval
+             * @enum {string}
+             */
+            status: "awaiting_approval" | "sent_simulated" | "denied";
+            /** Denied Reason */
+            denied_reason?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at?: string;
+            /** Sent At */
+            sent_at?: string | null;
+        };
+        /** PackStateIn */
+        PackStateIn: {
+            /** Action */
+            action: string;
+        };
+        /**
+         * Payment
+         * @description Simulated checkout (no real card processing in the prototype).
+         */
+        Payment: {
+            /** Id */
+            id: string;
+            /**
+             * Product
+             * @enum {string}
+             */
+            product: "ai_report" | "tenant_pack";
+            /** Amount */
+            amount: string;
+            /**
+             * Card Last4
+             * @default 4242
+             */
+            card_last4: string;
+            /**
+             * Status
+             * @default paid_simulated
+             * @enum {string}
+             */
+            status: "paid_simulated" | "refunded_simulated";
+            /**
+             * At
+             * Format: date-time
+             */
+            at?: string;
         };
         /** Photo */
         Photo: {
@@ -1361,6 +2017,17 @@ export interface components {
              */
             generated_at?: string;
         };
+        /** PrecallIn */
+        PrecallIn: {
+            /** Spots */
+            spots: components["schemas"]["SpotIn"][];
+            /** Size */
+            size: string;
+            /** Smell Leak */
+            smell_leak: string;
+            /** Location */
+            location: string;
+        };
         /** Property */
         Property: {
             /**
@@ -1468,6 +2135,21 @@ export interface components {
             /** Prompt Id */
             prompt_id: string;
         };
+        /** SkipIn2 */
+        SkipIn2: {
+            /**
+             * Days
+             * @default 7
+             */
+            days: number;
+        };
+        /** SpotIn */
+        SpotIn: {
+            /** Room */
+            room: string;
+            /** Surface */
+            surface: string;
+        };
         /** StoredReport */
         StoredReport: {
             draft: components["schemas"]["ReportDraft"];
@@ -1483,6 +2165,59 @@ export interface components {
              * Format: date-time
              */
             generated_at?: string;
+        };
+        /**
+         * TenantPack
+         * @description $50 tenant action pack: the legal escalation ladder, one approved step at a time.
+         */
+        TenantPack: {
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "active" | "paused" | "resolved" | "completed";
+            /**
+             * Step
+             * @default 1
+             */
+            step: number;
+            /** Tenant Name */
+            tenant_name: string;
+            /** Tenant Email */
+            tenant_email: string;
+            /** Landlord Name */
+            landlord_name: string;
+            /** Landlord Email */
+            landlord_email: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at?: string;
+            /** Next Due */
+            next_due?: string | null;
+            /**
+             * Landlord Replied
+             * @default false
+             */
+            landlord_replied: boolean;
+        };
+        /** ToolCall */
+        ToolCall: {
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "get_checklist" | "save_answer" | "capture_photo" | "finish_assessment";
+            /**
+             * Args
+             * @description Tool arguments, e.g. {'key':'room','value':'Laundry'} or {'shot':'wide','reason':'...'}
+             * @default {}
+             */
+            args: {
+                [key: string]: unknown;
+            };
         };
         /** TranscriptLine */
         TranscriptLine: {
@@ -1521,6 +2256,201 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    projects_list_projects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+        };
+    };
+    project_detail_projects__case_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_chat_projects__case_id__chat_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    muse_ask_muse_ask_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MuseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evidence_bundle_projects__case_id__evidence_zip_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_telegram_projects__case_id__import_telegram_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_import_telegram_projects__case_id__import_telegram_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_health_get: {
         parameters: {
             query?: never;
@@ -1858,7 +2788,142 @@ export interface operations {
             };
             cookie?: never;
         };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LiveStartIn"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_mock_turn_cases__case_id__live_mock_turn_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MockTurnIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BruceTurn"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_precall_options_live_precall_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    live_precall_cases__case_id__live_precall_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrecallIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_locate_cases__case_id__live_locate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_live_locate_cases__case_id__live_locate_post"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -1974,6 +3039,343 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    checkout_cases__case_id__checkout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pack_view_cases__case_id__pack_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    outbox_approve_cases__case_id__outbox__mid__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                mid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    outbox_deny_cases__case_id__outbox__mid__deny_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                mid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pack_state_cases__case_id__pack_state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackStateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    demo_skip_demo_skip_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SkipIn2"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    autopilot_inbox_autopilot_inbox_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    autopilot_approve_autopilot_approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AutopilotDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    autopilot_deny_autopilot_deny_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AutopilotDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    autopilot_approve_all_autopilot_approve_all_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveAllIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */

@@ -124,7 +124,10 @@ export function Logo({ small }: { small?: boolean }) {
 }
 
 const NAV = [
-  ["/dashboard", "Inbox"],
+  ["/autopilot", "Autopilot"],
+  ["/muse", "Muse"],
+  ["/projects", "Projects"],
+  ["/dashboard", "Cases"],
   ["/cases/job1/inspect", "Job 1 · Inspect"],
   ["/cases/job1/review", "Job 1 · Review"],
   ["/compare", "Before / After"],

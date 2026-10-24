@@ -3,7 +3,7 @@ services:
   virtual:  {price: "100.00", tax_included: true,  label_en: "Virtual assessment", label_fr: "Évaluation virtuelle"}
   onsite:   {price: "195.00", tax_included: false, label_en: "On-site visual & diagnostic inspection", label_fr: "Inspection visuelle et diagnostique sur place"}
   iaq:      {price: "520.00", tax_included: false, label_en: "Indoor Air Quality (IAQ) assessment", label_fr: "Évaluation de la qualité de l'air intérieur (QAI)"}
-  remote_report: {price: "25.00", tax_included: false, label_en: "AI pre-assessment report (remote, outside service area)", label_fr: "Rapport de pré-évaluation IA (à distance, hors zone)", proposed: true}
+  remote_report: {price: "20.00", tax_included: false, label_en: "AI pre-assessment report (remote, outside service area)", label_fr: "Rapport de pré-évaluation IA (à distance, hors zone)", proposed: true}
 taxes:
   "ON": {rate: "0.13", label: "HST 13%", label_fr: "TVH 13 %"}
   "QC": {rate: "0.14975", label: "GST 5% + QST 9.975%", label_fr: "TPS 5 % + TVQ 9,975 %"}
