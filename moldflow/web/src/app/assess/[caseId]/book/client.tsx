@@ -45,6 +45,7 @@ export default function Book() {
   const [contact, setContact] = useState<Contact>(EMPTY);
   const [tip, setTip] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
+  const [consent, setConsent] = useState(false);
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -77,7 +78,7 @@ export default function Book() {
     setBusy(true);
     try {
       const out = await api.post<CaseOut>(`/cases/${caseId}/book`, {
-        service, customer_type: who, slot_date: day, slot_time: time, tip, notes,
+        service, customer_type: who, slot_date: day, slot_time: time, tip, notes, marketing_consent: consent,
         contact: Object.fromEntries(Object.entries(contact).map(([k, v]) => [k, v.trim()])),
       });
       setC(out.case);
@@ -236,6 +237,18 @@ export default function Book() {
                 <Row label="Tip" value={tip ? `$${tip}.00` : "None"} />
               </dl>
             </Card>
+
+            <div className="space-y-3 rounded-ds-sm bg-kit-gray-faint p-4">
+              <label className="flex items-start gap-3 text-subtitle text-ink">
+                <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-brand)]" />
+                <span>Yes, send me helpful check-ins, seasonal reminders and offers from Mold Busters by text and email. I can unsubscribe anytime.
+                  <span className="block text-caption text-ink-muted">Optional. Mold Busters · 1-877-566-6653 · moldbusters.ca</span></span>
+              </label>
+              <p className="text-caption text-ink-muted">
+                To help us serve you, Mold Busters keeps notes from your calls, texts, emails and forms (including what you tell us about your home and household)
+                in a customer profile created with automated tools. You can see, correct or delete what we keep at any time. <a href="/privacy" className="font-medium text-brand underline">Privacy</a>
+              </p>
+            </div>
 
             {err && <p role="alert" className="rounded-ds-sm bg-alert-danger-bg p-3 text-subtitle text-kit-red">{err}</p>}
             <Button type="submit" size="lg" fullWidth state={busy ? "loading" : undefined} leading={<Check size={18} aria-hidden />}>Confirm booking</Button>

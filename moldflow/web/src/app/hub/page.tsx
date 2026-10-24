@@ -154,6 +154,7 @@ export default function HubPage() {
             <h2 className="text-subheading font-semibold text-ink">One place instead of seven</h2>
             <p className="mt-1 text-caption text-ink-muted">Every person&apos;s history from these tools sits on one timeline. FreshBooks and Google Calendar stay as the system of record; Close sequences, Asana cards and Brain notes are replaced.</p>
             <div className="mt-3 flex flex-wrap gap-1.5">{Object.keys(SYSTEMS).filter((s) => s !== "bruce").map((s) => <SourceChip key={s} system={s} />)}</div>
+            <Link href="/compare" className="mt-3 inline-block text-caption font-medium text-brand">See Job 1 before / after →</Link>
           </Card>
         </div>
       </div>

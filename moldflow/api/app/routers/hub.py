@@ -627,7 +627,7 @@ def hub() -> dict:
         "alerts": [{"id": v.alert.id, "type": v.alert.type, "area": v.alert.area, "source": v.alert.source, "matches": len(v.matched),
                     "opted_in": len([x for x in v.matched if x["priority"] == 1]),
                     "drafted": len([m for m in drafts if m.trigger_ref == v.alert.id])} for v in alerts_v],
-        "today_jobs": bookings,
+        "today_jobs": sorted(bookings, key=lambda b: _clock_key(b["time"])),
         "inbound": threads,
         "money": {
             "open_estimates_total": round(sum(i.amount or 0 for i in open_est), 2), "open_estimates": len(open_est),
@@ -645,3 +645,66 @@ def hub() -> dict:
         "counts": {"contacts": len(contacts), "synthetic": len([c for c in contacts.values() if c.synthetic]),
                    "tools_unified": sorted({i.system for i in db.query(Interaction)})},
     }
+
+
+# ---------------------------------------------------------------- mould research (lab results only)
+@router.get("/research/topics")
+def research_topics() -> dict:
+    from app.data import mold_kb
+    return {"topics": mold_kb.TOPICS, "common": mold_kb.COMMON}
+
+
+class BriefIn(BaseModel):
+    lab_text: str
+    language: str = "en"
+
+
+@router.post("/research/brief")
+def research_brief(body: BriefIn) -> dict:
+    """Explain a LAB RESULT that names a mould (or an ERMI score), only from the reviewed reference. Never from photos."""
+    from app.data import mold_kb
+    keys = mold_kb.find(body.lab_text)
+    if not keys:
+        return {"found": [], "brief": "No mould named in that text matches the reference library. Species are only identified by a lab, never from photos.",
+                "sources": []}
+    parts, sources = [], []
+    for k in keys:
+        t = mold_kb.TOPICS[k]
+        parts.append(f"{t['name']}: {t['summary']} Usually found on {t['where'][0].lower() + t['where'][1:]} {t['moisture']}")
+        sources += [s for s in t["sources"] if s not in sources]
+    parts += [mold_kb.COMMON["what_to_do"], mold_kb.COMMON["health"]]
+    return {"found": [mold_kb.TOPICS[k]["name"] for k in keys], "brief": "\n\n".join(parts),
+            "sources": [{"title": s[0], "url": s[1]} for s in (sources if mold_kb.HC_MOULD in sources else [mold_kb.HC_MOULD, *sources])]}
+
+
+# ---------------------------------------------------------------- inspector day sheet
+@router.get("/schedule")
+def schedule(day: date | None = None) -> dict:
+    """Everything an inspector needs per stop, phone-first: concern, access, pets, talking points, what to photograph."""
+    d = day or clock.today()
+    stops = []
+    for case in case_store.list_all():
+        b = case.booking
+        if not b or not b.slot_date or b.slot_date != d:
+            continue
+        c = db.get(Contact, case.contact_id) if case.contact_id else None
+        facts = db.query(ProfileFact, contact_id=c.id) if c else []
+        inter = sorted(db.query(Interaction, contact_id=c.id), key=lambda i: i.at, reverse=True) if c else []
+        access = [f.source.quote for f in facts if f.status == "approved" and re.search(r"dog|cat|gate|door|park|code|pets", f.text + f.source.quote, re.I)]
+        stops.append({"case_id": case.id, "time": b.slot_time, "name": b.contact.name if b.contact else case.customer.alias,
+                      "address": f"{b.contact.address}, {b.contact.city} {b.contact.postal_code}" if b.contact else case.property.region_text,
+                      "phone": b.contact.phone if b.contact else None, "service": b.service, "concern": case.concern or case.answers.get("concern", ""),
+                      "room": case.answers.get("room"), "notes": b.notes, "access": access,
+                      "talking_points": agents._rule_points(c, facts, inter) if c else [],
+                      "photos": len([p for p in case.photos if p.source == "customer"]),
+                      "photograph": [f"{a}" for a in (case.pre_assessment.cannot_tell if case.pre_assessment else [])][:3],
+                      "contact_id": c.id if c else None})
+    return {"day": d.isoformat(), "stops": sorted(stops, key=lambda s: _clock_key(s["time"]))}
+
+
+def _clock_key(t: str | None) -> str:
+    from datetime import datetime as _dt
+    try:
+        return _dt.strptime((t or "").strip(), "%I:%M %p").strftime("%H:%M")
+    except ValueError:
+        return t or "99"

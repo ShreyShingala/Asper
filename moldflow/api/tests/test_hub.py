@@ -210,3 +210,36 @@ def test_kill_switch_holds_everything(client):
     m = client.post("/people/c-job1/chase").json()
     out = client.post(f"/messages/{m['id']}/approve", json={"by": "x"}).json()
     assert out["status"] == "draft" and "paused" in out["blocked_reason"].lower()
+
+
+def _book(client, consent_box: bool, phone: str):
+    cid = client.post("/cases", json={"language": "en"}).json()["case"]["id"]
+    av = client.get("/booking/availability").json()
+    day = next(d for d in av["days"] if d["slots"])
+    r = client.post(f"/cases/{cid}/book", json={"service": "onsite", "customer_type": "homeowner", "slot_date": day["date"], "slot_time": day["slots"][0],
+                                                "marketing_consent": consent_box, "notes": "We've got a big dog, use the side door. Text me after five please.",
+                                                "contact": {"name": "Ana Lima", "phone": phone, "email": "", "address": "1 Main St", "city": "Ottawa", "postal_code": "K1S 2B3"}})
+    assert r.status_code == 200, r.text
+    return r.json()["case"]
+
+
+def test_booking_creates_contact_with_exact_consent(client):
+    case = _book(client, True, "(613) 555-4040")
+    p = client.get(f"/people/{case['contact_id']}").json()
+    assert p["contact"]["consent"]["sms"]["basis"] == "express" and p["contact"]["consent"]["profiling_notice_at"]
+    assert p["contact"]["properties"][0]["fsa"] == "K1S" and p["contact"]["properties"][0]["lat"]
+    assert any("dog" in f["text"].lower() for f in p["facts"])
+
+
+def test_booking_without_box_is_only_implied_inquiry(client):
+    case = _book(client, False, "(613) 555-5050")
+    c = client.get(f"/people/{case['contact_id']}").json()["contact"]
+    assert c["consent"]["sms"]["basis"] == "implied_inquiry" and c["consent"]["sms"]["implied_until"]
+
+
+def test_research_brief_only_from_reference():
+    from app.routers.hub import BriefIn, research_brief
+    r = research_brief(BriefIn(lab_text="Lab: Stachybotrys detected on drywall"))
+    assert r["found"] == ["Stachybotrys"] and "long-term water damage" in r["brief"] and "medical advice" in r["brief"]
+    assert len({s["url"] for s in r["sources"]}) == len(r["sources"])
+    assert research_brief(BriefIn(lab_text="black stuff in a photo"))["found"] == []

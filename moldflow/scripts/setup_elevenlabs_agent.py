@@ -90,8 +90,10 @@ Finishing
 
 {GUARDRAILS}"""
 
-FIRST_MESSAGE = ("Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, "
-                 "and tell me a little about what's going on.")
+# Recording/transcription disclosure (PIPEDA meaningful consent, Quebec Law 25 transparency). The hub only learns facts
+# from transcripts whose opening line contains this disclosure.
+FIRST_MESSAGE = ("Hi, I'm Bruce, Mold Busters' AI assistant. This call is recorded and transcribed to help us. Point your phone's back "
+                 "camera at the spot that's worrying you, and tell me a little about what's going on.")
 
 
 def client_tool(name: str, description: str, properties: dict | None = None, required: list[str] | None = None, **extra) -> dict:

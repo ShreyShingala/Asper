@@ -29,7 +29,7 @@ RULES: list[tuple[str, str, str, int | None, str | None]] = [
      "life_event", "Planning a renovation: {quote}", 3, "moisture check before the renovation closes the walls"),
     (r"(?:selling|listing|list) (?:the |our )?(?:house|home|condo|place)|vendre (?:la|notre) maison",
      "life_event", "Planning to sell the home", 4, "pre-listing inspection"),
-    (r"(?:we|i) (?:have|'ve got|got) (?:a |two |three )?(?:big |small |old )?(?:dog|dogs|cat|cats)|on a un chien",
+    (r"\b(?:we|i)(?:'ve got|'ve| have| got)\s+(?:a |two |three )?(?:big |small |old |little )?(?:dog|dogs|cat|cats)|on a un chien",
      "home", "Pets at home: {quote}", None, None),
     (r"(?:asthma|allerg\w+|cough\w*|wheez\w+|headaches?|asthme|toux)", "health", "Health concern mentioned: {quote}", None, None),
     (r"(?:text|call|email) me (?:after|before|in the) [\w ]+|textez-moi après [\w ]+", "preference", "Contact preference: {quote}", None, None),

@@ -197,3 +197,31 @@ def seed(cases: list[Case]) -> dict:
     db.put(*contacts, *facts, *inters)
     db.kv_set("seeded_at", clock.now().isoformat())
     return {"contacts": len(contacts), "facts": len(facts), "interactions": len(inters)}
+
+
+def seed_todays_visits(save_case) -> list[str]:
+    """Three synthetic inspections booked for 'today' (app clock) so the day sheet and the hub's Today box have content."""
+    from app.models.passport import Booking, BookingContact, Customer, Property
+    plan = [("c-s01", "9:00 AM", "Musty smell in the finished basement, worse after rain", "Basement", "Park in the driveway; side door is unlocked."),
+            ("c-s06", "11:30 AM", "Black spots on the bathroom ceiling above the shower", "Bathroom", "Ring twice, the doorbell is quiet."),
+            ("c-s13", "2:00 PM", "Water stain on the bedroom ceiling after an ice dam", "Bedroom", "Street parking only; attic hatch is in the hallway closet.")]
+    ids = []
+    for cid, slot, concern, room, access in plan:
+        c = db.get(Contact, cid)
+        if not c:
+            continue
+        p = c.properties[0]
+        case = Case(id=f"visit-{cid}", title=f"Inspection: {c.name}", stage="inspection_booked", language=c.language, contact_id=cid,
+                    customer=Customer(type=c.customer_type, alias=c.name), concern=concern, answers={"room": room, "concern": concern},
+                    property=Property(province=p.province, postal_prefix=p.fsa, region_text=f"{p.address}, {p.city}"),
+                    booking=Booking(service="onsite", slot_text=f"Today {slot}", status="confirmed_simulated", slot_date=clock.today(), slot_time=slot,
+                                    timezone="America/Toronto", customer_type=c.customer_type,
+                                    contact=BookingContact(name=c.name, phone=c.phones[0], email=c.emails[0] if c.emails else "", address=p.address,
+                                                           city=p.city, postal_code=p.postal), notes=access),
+                    seeded_from="synthetic demo data")
+        save_case(case)
+        c.case_ids.append(case.id)
+        db.put(c, Interaction(id=f"i-{case.id}-book", contact_id=cid, case_id=case.id, at=clock.now() - timedelta(days=3), system="google_calendar",
+                              kind="booking", summary=f"Inspection booked for today {slot}: {concern}", synthetic=True))
+        ids.append(case.id)
+    return ids

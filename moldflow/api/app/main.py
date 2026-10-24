@@ -47,6 +47,7 @@ def _seed_everything() -> list[Case]:
         c.contact_id = f"c-{c.id}"
         store.save(c)
     crm_seed.seed(cases)
+    crm_seed.seed_todays_visits(store.save)
     from app import messaging
     from app.models.crm import Contact
     for contact in crm_store.query(Contact):
@@ -354,6 +355,7 @@ class BookIn(BaseModel):
     contact: BookingContact | None = None
     tip: int | None = None
     notes: str | None = None
+    marketing_consent: bool = False  # the unchecked box on the booking form; never pre-checked
 
 
 @app.post("/cases/{case_id}/book")
@@ -387,6 +389,12 @@ async def book(case_id: str, body: BookIn) -> CaseOut:
         extra = f" · tip ${body.tip}" if body.tip else ""
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Booked" if not paid else "Remote report purchased",
                                 system="MoldFlow (simulated)", what=f"{body.service}: {slot_text}{extra}", source="simulated"))
+    from app import hub_links
+    if contact := await hub_links.link_booking(c, body.marketing_consent, body.notes):
+        if c.contact_id != contact.id:
+            async with store.editing(case_id) as c2:
+                c2.contact_id = contact.id
+            c = c2
     return CaseOut(case=c)
 
 
