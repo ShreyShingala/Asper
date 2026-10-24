@@ -153,3 +153,35 @@ class FollowUpDraft(BaseModel):
         cut = v[:320]
         end = max(cut.rfind(". "), cut.rfind("? "), cut.rfind("! "))
         return cut[:end + 1] if end > 120 else cut[:cut.rfind(" ")] + "…"
+
+
+# ---------- relationship hub agents ----------
+class FactDraft(BaseModel):
+    text: str = Field(description="Short neutral fact, e.g. 'Expecting a baby in April'")
+    category: Literal["home", "household", "life_event", "preference", "health", "work", "other"]
+    quote: str = Field(description="The customer's exact words this fact comes from (verbatim substring of the source)")
+    confidence: float = Field(default=0.8, ge=0, le=1)
+    follow_up_month: int | None = Field(default=None, ge=1, le=12, description="Month a person should follow up, if the fact implies one")
+    follow_up_reason: str | None = None
+
+
+class FactsOut(BaseModel):
+    facts: list[FactDraft] = []
+
+
+class TriageOut(BaseModel):
+    intent: Literal["question", "booking", "reschedule", "estimate_yes", "estimate_question", "complaint", "thanks", "other"]
+    reply: str = Field(description="Reply to send, <= 300 characters, in the customer's language; no prices except published service rates")
+    escalate: bool = Field(default=False, description="True if a person must handle this (complaint, legal, landlord dispute, unclear)")
+    wants_booking: bool = False
+
+
+class OutreachDraft(BaseModel):
+    subject: str | None = Field(default=None, description="Email subject (null for SMS)")
+    body: str = Field(description="Message body. SMS <= 300 characters. No footer: the system adds identity and unsubscribe.")
+    reason: str = Field(description="One line for staff: why this message, why now")
+    facts_used: list[str] = Field(default=[], description="Ids of the facts referenced")
+
+
+class TalkingPoints(BaseModel):
+    points: list[str] = Field(description="2-3 short scripts a staff member can say on a call, each with where it came from")

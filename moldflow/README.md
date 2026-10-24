@@ -3,6 +3,7 @@
 One continuous AI workflow for Mold Busters, built around an **Evidence Passport**: a single case record
 (Pydantic v2) that the customer pre-assessment, inspector, report/estimate review and follow-up all read and write.
 Plan and red-team history: [`../plan/PLAN.md`](../plan/PLAN.md), [`../plan/REDTEAM_LOG.md`](../plan/REDTEAM_LOG.md).
+**Why it's built this way** (problem, decisions, evidence, compliance, demo script, presentation outline): [`../docs/`](../docs/README.md).
 
 ## Run it
 ```bash
@@ -44,6 +45,35 @@ uv run python ../scripts/eval_photos.py             # proof page: AI vs organize
 cd ../web && npx tsc --noEmit && npx eslint src && npx next build
 ```
 Offline check: run the API with `MOLDFLOW_DEMO_MODE=fixture OPENROUTER_API_KEY=x`; `demo_api_run.py` must still pass (fixtures in `api/cache/fixtures`).
+
+## MoldFlow Hub (relationship engine)
+Staff home is `/hub`. Everything except the inspection itself: instant answers to inbound texts, estimate follow-ups that answer
+the customer's own question, facts learned from calls/texts/notes/bookings (with the customer's exact words), one timeline across
+Google Calendar, FreshBooks, Asana, Close, Brain, Dialpad and email, weather-alert check-ins, an inspector day sheet and a
+lab-result explainer. Plan + the 4 red-team reviews: `../plan/HUB_PLAN.md`.
+
+| Route | What |
+|---|---|
+| `/hub` | needs-you counts, money on the table (open / at-risk estimates, chased -> replied -> accepted, $ recovered), today, inbound, coming up, demo controls |
+| `/people`, `/people/[id]` | directory; profile with talking points, facts (approve / edit / delete, source quote), consent, moments, unified timeline, take over / hand back |
+| `/outreach` | approval queue (batch approve; anything with $ or personal facts is locked), blocked/held with reasons, sent, inbound, calls & tasks |
+| `/alerts` | live Environment Canada check + simulate a rainfall warning over a real forecast zone; offer vs safety-only drafts by consent |
+| `/schedule` | inspector day sheet (phone-first, printable) |
+| `/research` | mould library + "explain a lab result" (cited; never from photos) |
+| `/settings` | autonomy per message type, kill switch, data processors |
+| `/privacy` | customer-facing notice EN/FR |
+
+Rules enforced in code (`api/app/engine/consent.py`, `models/crm.py`): CASL consent basis + expiry (implied: 2 years after a
+purchase, 6 months after an inquiry), check-ins with an offer only with consent (safety-only otherwise), STOP/ARRÊT +
+suppression list, HUMAN hands the thread to a person, quiet hours 21:00-09:00, 1 marketing message per 7 days, identity +
+unsubscribe + AI-assistant footer on every message, health facts never in messages, household facts are human talking points
+only, booking-form consent box unchecked by default, kill switch. Sending is simulated (`sent_simulated`) until Twilio/Resend
+keys exist (`messaging._deliver` is the seam).
+
+Every hub AI agent (`api/app/agents/hub.py`) has a reviewed rule-based fallback, labelled "Template" in the UI, and the LLM
+wrapper stops calling the provider for the day once the free quota is used up, so the whole loop works offline.
+Demo data: 28 synthetic customers (labelled) + the 2 sample-pack customers; `POST /admin/reset` reseeds; `POST /admin/clock
+{"today": "2027-02-01"}` time-travels for moments.
 
 ## AI evaluation tooling (overnight work, see `../plan/OVERNIGHT_LOG.md`)
 All scores are **agreement with the organizer captions on the sample pack (n=24, illustrative)**, never "accuracy".

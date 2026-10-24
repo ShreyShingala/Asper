@@ -2,7 +2,8 @@
 
 The ElevenLabs agent drives the conversation, but what still has to be collected (questions + photo shots) and which
 answers are acceptable is decided here, from the same question/photo lists the tap-through intake uses. That keeps
-pricing, routing and reports working unchanged whichever way the customer came in."""
+pricing, routing and reports working unchanged whichever way the customer came in.
+Why Bruce's rules live in code: docs/04_decisions.md D6, D19."""
 import re
 
 from app import config

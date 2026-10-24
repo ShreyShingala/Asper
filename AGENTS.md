@@ -16,3 +16,8 @@
 - `openrouter/free` is not a usable fallback (forces reasoning, returns empty content); fallback is nemotron nano-omni. `DISABLE_REASONING=1` keeps Nemotron at ~3 s.
 - Bruce (ElevenLabs agent) is changed ONLY by editing `scripts/setup_elevenlabs_agent.py` and re-running it from `moldflow/api`. `engine/live.py` validates spoken answers ("nope", "I rent", postal codes) and returns `next_step` in every checklist.
 - E2E: `cd moldflow/web && npm run test:e2e` (Playwright 1.64.1, Chromium fake camera from the walkthrough, ElevenLabs mocked via `window.__MOLDFLOW_FAKE_CONVERSATION__`, API stubbed with `MOLDFLOW_E2E_STUB=1`).
+- Hub (relationship engine): `api/app/models/crm.py`, `crm_store.py` (own SQLite tables + global write lock), `messaging.py` (the ONLY way out; consent.check first), `engine/{consent,moments,floods,geo}.py`, `agents/hub.py` (AI + rule fallback), `routers/hub.py`. Tests: `api/tests/test_hub.py`; e2e: `web/e2e/hub.spec.ts`.
+- Use `app.clock.today()/now()` (time-travel aware), never `date.today()`/`datetime.now()`.
+- New agent output models need a rule fallback; in e2e (`MOLDFLOW_E2E_STUB=1`) models without a stub fail fast to the fallback.
+- macOS bash 3.2: apostrophes inside `$(cat <<'EOF' ...)` break; write commit/PR bodies to a file and use `git commit -F` / `gh pr create --body-file`.
+- Docs: `docs/` explains WHY (decision log `docs/04_decisions.md`, evidence labels `docs/05_evidence.md`, compliance `docs/06_trust_safety_compliance.md`). When you make a product or architecture decision, add an entry to `docs/04_decisions.md` and a line to `docs/11_build_journal.md`; when numbers change, update `docs/05_evidence.md` (keep measured / projected / simulated labels).

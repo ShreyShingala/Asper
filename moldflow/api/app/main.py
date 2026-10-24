@@ -3,6 +3,7 @@ import json
 import logging
 import re
 import shutil
+from contextlib import asynccontextmanager
 import uuid
 from datetime import date, datetime, timedelta
 
@@ -11,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, PlainTextResponse, Response
 from pydantic import BaseModel
 
-from app import config, store
+from app import clock, config, store
 from app.agents import bruce, tasks
 from app.agents.llm import AgentFailure, Result, prepare_image, structured
 from app.engine import booking, checks, photo_plan, rules
@@ -24,14 +25,43 @@ from app.models.passport import (Approval, Booking, BookingContact, Case, Event,
 from app.seed import seeds
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
-app = FastAPI(title="MoldFlow API", version="1.0")
+@asynccontextmanager
+async def lifespan(_app):
+    _startup()
+    yield
+
+
+app = FastAPI(title="MoldFlow API", version="1.0", lifespan=lifespan)
+from app.routers import hub as hub_router  # noqa: E402
+
+app.include_router(hub_router.router)
 app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 
 
-@app.on_event("startup")
+def _seed_everything() -> list[Case]:
+    from app import crm_store
+    from app.routers.hub import run_moments  # noqa: F401  (moments are recomputed below)
+    from app.seed import crm_seed
+    cases = seeds.seed_all(store.save)
+    crm_store.wipe_all()
+    for c in cases:  # link the real sample-pack cases to their contact
+        c.contact_id = f"c-{c.id}"
+        store.save(c)
+    crm_seed.seed(cases)
+    crm_seed.seed_todays_visits(store.save)
+    from app import messaging
+    from app.models.crm import Contact
+    for contact in crm_store.query(Contact):
+        messaging.recompute_moments(contact)
+    return cases
+
+
 def _startup():
-    if not store.list_all():
-        seeds.seed_all(store.save)
+    from app import crm_store
+    from app.models.crm import Contact
+    if not store.list_all() or not crm_store.query(Contact):
+        store.wipe()
+        _seed_everything()
 
 
 def _get(case_id: str) -> Case:
@@ -424,7 +454,7 @@ def booking_availability() -> dict:
     return {"timezone": booking.TIMEZONE, "timezone_label": booking.TIMEZONE_LABEL, "policy": booking.POLICY,
             "tenant_phone": booking.TENANT_PHONE, "customer_types": booking.CUSTOMER_TYPES,
             "tips": [{"amount": a, "label": label} for a, label in booking.TIPS.items()],
-            "days": booking.availability(date.today(), _booked_slots())}
+            "days": booking.availability(clock.today(), _booked_slots())}
 
 
 class BookIn(BaseModel):
@@ -436,6 +466,7 @@ class BookIn(BaseModel):
     contact: BookingContact | None = None
     tip: int | None = None
     notes: str | None = None
+    marketing_consent: bool = False  # the unchecked box on the booking form; never pre-checked
 
 
 @app.post("/cases/{case_id}/book")
@@ -447,7 +478,7 @@ async def book(case_id: str, body: BookIn) -> CaseOut:
             raise HTTPException(403, f"Tenants must call us at {booking.TENANT_PHONE} to schedule. Additional fees may apply.")
         if body.customer_type not in booking.BOOKABLE_TYPES:
             raise HTTPException(422, "Tell us who is booking: homeowner, landlord, business or property manager.")
-        if not (body.slot_date and body.slot_time) or not booking.is_available(body.slot_date, body.slot_time, date.today(),
+        if not (body.slot_date and body.slot_time) or not booking.is_available(body.slot_date, body.slot_time, clock.today(),
                                                                                 _booked_slots(exclude_case=case_id)):
             raise HTTPException(409, "That time was just taken. Please pick another slot.")
         if not body.contact:
@@ -469,6 +500,12 @@ async def book(case_id: str, body: BookIn) -> CaseOut:
         extra = f" · tip ${body.tip}" if body.tip else ""
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Booked" if not paid else "Remote report purchased",
                                 system="MoldFlow (simulated)", what=f"{body.service}: {slot_text}{extra}", source="simulated"))
+    from app import hub_links
+    if contact := await hub_links.link_booking(c, body.marketing_consent, body.notes):
+        if c.contact_id != contact.id:
+            async with store.editing(case_id) as c2:
+                c2.contact_id = contact.id
+            c = c2
     return CaseOut(case=c)
 
 
@@ -642,7 +679,7 @@ async def followup_draft(case_id: str, body: FollowIn) -> CaseOut:
     c = _get(case_id)
     if not c.estimate:
         raise HTTPException(400, "No estimate on this case.")
-    as_of = body.as_of or date.today()
+    as_of = body.as_of or clock.today()
     try:
         d, offer_issues, res = await tasks.draft_followup(c, as_of, _prior_messages(c))
     except AgentFailure as e:
@@ -776,5 +813,7 @@ def reset() -> dict:
         d = config.UPLOAD_DIR / cid
         if d.is_dir() and d.parent == config.UPLOAD_DIR:
             shutil.rmtree(d, ignore_errors=True)
-    cases = seeds.seed_all(store.save)
+    from app import clock
+    clock.set_today(None)
+    cases = _seed_everything()
     return {"ok": True, "cases": [c.id for c in cases]}

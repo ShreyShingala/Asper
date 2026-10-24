@@ -133,7 +133,8 @@ def landlord_letter(case: Case, lang: str) -> tuple[str, list[str]]:
     if case.pre_assessment:
         obs = obs or case.pre_assessment.observed
     obs = obs[:4]
-    today = date.today().isoformat()
+    from app import clock
+    today = clock.today().isoformat()
     room = case.answers.get("room", "the unit")
     if lang == "fr":
         lines = [f"Date : {today}", "", "Madame, Monsieur,", "",
