@@ -117,12 +117,12 @@ def report_pdf(case: Case) -> bytes:
         for sec in rep.sections:
             s.append(Paragraph(sec.room, H2))
             for c in sec.claims:
-                s.append(Paragraph(f"► {c.text} <font color='#646677' size='7'>[{', '.join(c.cites)}]</font>", BODY))
+                s.append(Paragraph(f"• {c.text} <font color='#646677' size='7'>[{', '.join(c.cites)}]</font>", BODY))
             ids = {x for c in sec.claims for x in c.cites}
             ids |= {pid for f in case.findings if f.id in ids for pid in f.evidence_photo_ids}
             if grid := _photo_grid([p for p in case.photos if p.id in ids][:8]):
                 s += [Spacer(1, 4), grid]
-        s += [Paragraph("Recommendations", H2)] + [Paragraph(f"► {c.text} <font color='#646677' size='7'>[{', '.join(c.cites)}]</font>", BODY)
+        s += [Paragraph("Recommendations", H2)] + [Paragraph(f"• {c.text} <font color='#646677' size='7'>[{', '.join(c.cites)}]</font>", BODY)
                                                     for c in rep.recommendations]
         s += [Paragraph("Limitations", H2)] + [Paragraph(f"• {x}", BODY) for x in rep.limitations]
     s += _live_section(case, transcript=True)
@@ -168,3 +168,98 @@ def estimate_csv(case: Case) -> str:
         w.writerow([e.id, case.customer.alias, li.code, li.description, li.unit_price, li.qty, e.tax_label, e.tax_rate * 100,
                     li.unit_price * li.qty, "yes" if li.illustrative else "no"])
     return buf.getvalue()
+
+
+# ---------------------------------------------------------------- $20 AI pre-assessment report (Mold Busters report format)
+HEALTH_CANADA = ("Health Canada considers indoor mould growth to be a significant health hazard and recommends that all mould, "
+                 "regardless of the species, be cleaned and that the underlying water or humidity problem be dealt with quickly. "
+                 "(Source: Addressing moisture and mould in your home; Canada.ca)")
+LIMITS = ("This is a remote, non-invasive pre-assessment based on the photos and answers you provided at the time of submission. "
+          "Areas that were not photographed or are hidden (behind walls, under floors, inside ducts) may contain concerns not "
+          "presented here. Photos cannot confirm mould: only physical sampling and laboratory analysis can.")
+
+
+def _big_img(p: Photo, width: float) -> RLImage:
+    buf = annotated(p, max_side=900)
+    w, h = Image.open(buf).size
+    buf.seek(0)
+    return RLImage(buf, width=width, height=min(width * h / w, 3.6 * inch))
+
+
+def ai_report_pdf(case: Case) -> bytes:
+    from app.engine import photo_plan
+    pa = case.pre_assessment
+    a = case.answers
+    titles = {s.id: s for s in (photo_plan.plan_for_case(a) or [])}
+    photos = [p for p in case.photos if p.source == "customer"]
+    spots = photo_plan.spots_from_answers(a) or [{"room": a.get("room", "Other"), "surface": "wall"}]
+    when = (pa.generated_at if pa else case.created_at).strftime("%B %d, %Y")
+    s = [Paragraph("Mold Busters", SMALL), Paragraph("AI PRE-ASSESSMENT REPORT", H1),
+         Paragraph(f"<b>Prepared for:</b> {escape(case.customer.alias)} &nbsp; <b>Property:</b> {escape(case.property.region_text or case.property.postal_prefix or case.property.province)}"
+                   f" &nbsp; <b>Date:</b> {when}", BODY),
+         Paragraph("<b>Assessment type:</b> Remote AI pre-assessment (customer photos, guided call and answers)", BODY), Spacer(1, 6),
+         Paragraph("01 · Objectives", H2)]
+    s += [Paragraph(f"{i}. {t}", BODY) for i, t in enumerate([
+        "Review the photographed areas of the property to identify any visible indoor environmental concerns;",
+        "Point to the likely source(s) of moisture and the apparent extent of the concern, where photos allow;",
+        "Recommend the most appropriate next step."], 1)]
+    s += [Paragraph("02 · Diagnostic results", H2),
+          Paragraph("<b>Location(s):</b> " + escape("; ".join(f"{x['room']} ({photo_plan.SURFACES.get(x['surface'], x['surface']).lower()})" for x in spots)), BODY),
+          Paragraph("<b>General observations:</b>", BODY)]
+    obs = []
+    if case.concern:
+        obs.append(f"The client reported: \"{case.concern}\".")
+    if a.get("odor") == "Yes":
+        obs.append("The client noted musty odours. Musty odours are often associated with moisture problems or hidden growth.")
+    if a.get("leak") == "Yes":
+        obs.append("The client reported a leak or water damage nearby, a likely moisture source to confirm on site.")
+    if a.get("symptoms") == "Yes" or case.health_flag:
+        obs.append("Health-related issues were reported by the client while living in the property.")
+    if size := photo_plan.SIZES.get(a.get("size", "")):
+        obs.append(f"Approximate size reported: {size.lower()}.")
+    for p in photos:
+        if p.analysis:
+            obs += [f"{(titles[p.prompt_id].title if p.prompt_id in titles else 'Photo')}: {o}" for o in p.analysis.observations[:2]]
+    if case.live and case.live.key_points:
+        obs += [f"From the guided call: {k}" for k in case.live.key_points[:3]]
+    s += [Paragraph(f"• {escape(o)}", BODY) for o in obs] or [Paragraph("• Photos received for review.", BODY)]
+
+    s += [Paragraph("03 · Photographic evidence", H2),
+          Paragraph("Photographs taken by the client during the guided assessment. Highlighted boxes are areas the analysis suggests "
+                    "looking at more closely; they are not confirmed mould.", SMALL), Spacer(1, 4)]
+    for n, p in enumerate(photos, 1):
+        title = titles[p.prompt_id].title if p.prompt_id in titles else (p.caption_from_pack or "Photo")
+        an = p.analysis
+        right = [Paragraph(f"<b>#{n} · {escape(title)}</b>", BODY)]
+        if an:
+            right += [Paragraph("<b>What the analysis sees</b>", SMALL)] + [Paragraph(f"• {escape(o)}", BODY) for o in an.observations]
+            if an.regions:
+                right += [Paragraph("<b>Areas worth a closer look</b>", SMALL)] + [Paragraph(f"• {escape(r.label.replace('look closer:', '').strip())}", BODY) for r in an.regions]
+            right += [Paragraph(f"<b>Photo quality:</b> {an.quality.replace('_', ' ')} &nbsp; <b>Type:</b> {an.image_type.replace('_', ' ')}", SMALL)]
+            if an.follow_up_question:
+                right += [Paragraph(f"<b>Inspector's follow-up question:</b> {escape(an.follow_up_question)}", SMALL)]
+            right += [Paragraph(f"Analysis: {escape(p.analysis_model or 'AI')}", SMALL)]
+        t = Table([[_big_img(p, 3.3 * inch), right]], colWidths=[3.45 * inch, 3.75 * inch])
+        t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("BOTTOMPADDING", (0, 0), (-1, -1), 10)]))
+        s.append(t)
+
+    s += [Paragraph("04 · Likely moisture sources worth checking", H2)]
+    seen = set()
+    for x in spots:
+        for sid, ttl, instr, *_ in photo_plan.SURFACE_SOURCES.get(x["surface"], []) + photo_plan.ROOM_SOURCES.get(x["room"], photo_plan.ROOM_SOURCES["Other"]):
+            if ttl not in seen:
+                seen.add(ttl)
+                s.append(Paragraph(f"• <b>{escape(ttl)}</b> in the {escape(x['room'].lower())}: a common source for this kind of spot, "
+                                   "worth checking on site.", BODY))
+    if pa:
+        s += [Paragraph("05 · What photos can't tell us", H2)] + [Paragraph(f"• {escape(x)}", BODY) for x in pa.cannot_tell]
+        s += [Paragraph("06 · Conclusions & recommendations", H2), Paragraph(escape(pa.summary), BODY),
+              Paragraph(f"• <b>Recommended next step: {escape(pa.service_price_text)}</b>", BODY)]
+        s += [Paragraph(f"• {escape(r)}", BODY) for r in pa.reasons]
+        if pa.health_note:
+            s.append(Paragraph(f"• {escape(pa.health_note)}", BODY))
+        s.append(Paragraph("• Limit time and traffic in the affected area until the recommended step is taken, to avoid spreading spores.", BODY))
+    s += [Spacer(1, 8), Paragraph(HEALTH_CANADA, SMALL), Spacer(1, 4), Paragraph(LIMITS, SMALL), Spacer(1, 4),
+          Paragraph("If you have any questions regarding this report, please contact Mold Busters at 1-877-566-6653.", SMALL),
+          Paragraph(DISCLAIMER, SMALL)]
+    return _doc(s)

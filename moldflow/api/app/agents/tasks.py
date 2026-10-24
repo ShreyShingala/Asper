@@ -58,6 +58,51 @@ def mean_luma(image: bytes) -> float:
     return ImageStat.Stat(Image.open(io.BytesIO(image)).convert("L").resize((64, 64))).mean[0]
 
 
+_WHERE = [["upper left", "top", "upper right"], ["left side", "centre", "right side"], ["lower left", "bottom", "lower right"]]
+_WHERE_FR = [["en haut à gauche", "en haut", "en haut à droite"], ["à gauche", "au centre", "à droite"], ["en bas à gauche", "en bas", "en bas à droite"]]
+
+
+def image_check(image: bytes, language: str = "en", prompt_text: str | None = None) -> PhotoAnalysis:
+    """Deterministic image analysis (no AI): finds patches noticeably darker or more discoloured than the rest of the surface
+    and boxes them. Describes what it measured; never says what the patch is."""
+    from PIL import Image, ImageFilter, ImageStat
+    fr = language == "fr"
+    img = Image.open(io.BytesIO(image)).convert("RGB")
+    small = img.resize((96, 96))
+    gray = small.convert("L").filter(ImageFilter.GaussianBlur(1.2))
+    px = list(gray.getdata())
+    med = sorted(px)[len(px) // 2]
+    mean = ImageStat.Stat(gray).mean[0]
+    r, g, b = (ImageStat.Stat(small).mean[i] for i in range(3))
+    thresh = med - max(28, med * 0.22)
+    dark = [(i % 96, i // 96) for i, v in enumerate(px) if v < thresh]
+    cells: dict[tuple[int, int], list[tuple[int, int]]] = {}
+    for x, y in dark:
+        cells.setdefault((y // 32, x // 32), []).append((x, y))
+    regions, obs = [], []
+    for (cy, cx), pts in sorted(cells.items(), key=lambda kv: -len(kv[1]))[:3]:
+        share = len(pts) / (96 * 96)
+        if share < 0.006:
+            continue
+        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        box = [max(0, min(ys) * 1000 // 96 - 15), max(0, min(xs) * 1000 // 96 - 15), min(1000, max(ys) * 1000 // 96 + 15), min(1000, max(xs) * 1000 // 96 + 15)]
+        where = (_WHERE_FR if fr else _WHERE)[cy][cx]
+        regions.append({"box_2d": box, "label": ("regarder de plus près : zone sombre " if fr else "look closer: darker patch ") + where})
+        obs.append((f"Zone plus sombre {where}, environ {share * 100:.0f} % de la photo." if fr
+                    else f"Darker patch {where}, about {max(1, round(share * 100))}% of the photo."))
+    tint = ("teinte jaunâtre ou brunâtre" if fr else "yellow-brown tint") if r > b + 18 and g > b + 8 else None
+    if not obs:
+        obs.append("Couleur assez uniforme, aucune tache nette repérée." if fr else "Fairly even colour; no distinct dark patch found.")
+    if tint:
+        obs.append(f"Le cliché a une {tint}, ce qui peut indiquer une décoloration." if fr else f"The photo has a {tint}, which can indicate discoloration.")
+    quality = "too_dark" if mean < 35 else "ok"
+    obs.append(("Éclairage faible : une lampe aiderait." if fr else "Low light: a lamp would help.") if mean < 70 else
+               ("Assez lumineux pour juger la surface." if fr else "Bright enough to judge the surface."))
+    return PhotoAnalysis(image_type="regular", observations=obs[:4], regions=regions, quality=quality, declined_to_confirm_mold=True,
+                         visible_moisture=None, follow_up_question=("Depuis combien de temps voyez-vous cela?" if fr
+                                                                     else "How long have you noticed this, and does it change after rain or showers?"))
+
+
 LOCATE_SYSTEM = ("You help a customer aim their phone camera during a mold pre-screening. Given ONE live video frame and a target "
                  "description, return a tight box around the target only if it is clearly visible (prefer a visible stain, dark spots, "
                  "damp mark or the named fixture). If it is not visible or the frame is unusable, return found=false. Never box the "
@@ -84,12 +129,8 @@ async def analyze_photo(case: Case, photo: Photo, image: bytes, prompt_text: str
     try:
         return await structured(PhotoAnalysis, agent="photo", system=system, user_text=json.dumps(ctx), images=[image],
                                 fixture_key=fixture_key, max_tokens=900, temperature=0.0)
-    except AgentFailure:  # AI quota/outage: keep the photo moving; an inspector reviews it
-        fr = case.language == "fr"
-        note = PhotoAnalysis(image_type="regular", quality="ok", declined_to_confirm_mold=True,
-                             observations=["Photo enregistrée pour l'inspecteur." if fr else "Photo saved for the inspector to review."],
-                             follow_up_question="Depuis combien de temps l'avez-vous remarqué?" if fr else "How long have you noticed this?")
-        return Result(note, AIUsage(agent="photo", model="rule (AI unavailable)", latency_ms=0, tier="rule"))
+    except AgentFailure:  # AI quota/outage: a real (simpler) image check instead of a placeholder
+        return Result(image_check(image, case.language, prompt_text), AIUsage(agent="photo", model="image check (on-server)", latency_ms=0, tier="rule"))
 
 
 async def assess(case: Case, fixture_key: str | None) -> Result:
@@ -141,6 +182,57 @@ async def live_summary(case: Case) -> Result:
     return await structured(LiveSummary, agent="live_summary", system=system, user_text=json.dumps(ctx), max_tokens=700)
 
 
+_READINGS = [
+    (r"swab|\btape lift", "swab", lambda t: "positive" if re.search(r"positive|growth|contaminant", t) else "negative" if "negative" in t else "not_recorded"),
+    (r"moisture|meter|\bmc\b|wet\b|damp", "moisture", lambda t: "normal" if re.search(r"normal|dry|within", t) else "elevated"),
+    (r"humidity|\brh\b|hygrometer|dew point", "temp_rh_dew", lambda t: "elevated" if re.search(r"high|elevated|above", t) else "normal"),
+    (r"thermal|infrared|\bflir\b|cold spot", "thermal", lambda t: "none" if re.search(r"\bno\b|none|not", t) else "anomaly"),
+    (r"ball.?slope|slope test", "ball_slope", lambda t: "failed" if "fail" in t else "passed"),
+]
+
+
+def rule_findings(room: str, note: str) -> FindingsOut:
+    """One finding per sentence of the inspector's own words; a reading only when the sentence names a test."""
+    from app.models.agents import FindingDraft
+    out = []
+    for sent in [x.strip() for x in re.split(r"(?<=[.!?;])\s+|\n+", note) if len(x.strip()) > 8]:
+        low = sent.lower()
+        if re.match(r"^(starting|moving|now|next|heading|going|ok(ay)?|let'?s)\b", low) and len(low.split()) <= 6:
+            continue  # "Moving to the attic." is navigation, not a finding
+        kind = result = None
+        for rx, k, res_fn in _READINGS:
+            if re.search(rx, low):
+                kind, result = k, res_fn(low)
+                break
+        if kind is None and re.search(r"stain|discolou?r|spots?|growth|black|peel|rot|leak|standing water|efflorescence", low):
+            kind, result = "visual", "anomaly"
+        out.append(FindingDraft(room=room, observation=sent.rstrip(".") + ".", reading_kind=kind, reading_result=result))
+    return FindingsOut(findings=out[:8])
+
+
+def rule_report(case: Case) -> ReportDraft:
+    """Report draft built only from the confirmed findings (every sentence cites its finding)."""
+    from app.models.agents import Claim, ReportSection
+    rooms: dict[str, list] = {}
+    for f in case.findings:
+        if f.confirmed:
+            rooms.setdefault(f.room, []).append(f)
+    sections = [ReportSection(room=r, claims=[Claim(text=f.observation, cites=[f.id]) for f in fs]) for r, fs in rooms.items()]
+    recs = []
+    for r, fs in rooms.items():
+        flagged = [f for f in fs if any(x.result in ("positive", "elevated", "anomaly", "failed") for x in f.readings)]
+        if flagged:
+            recs.append(Claim(text=f"Address the moisture source and remediate the affected materials in the {r.lower()}.", cites=[flagged[0].id]))
+    if not recs and sections:
+        recs.append(Claim(text="Monitor the areas noted and keep indoor humidity below 50%.", cites=[sections[0].claims[0].cites[0]]))
+    n = sum(len(x.claims) for x in sections)
+    summary = (f"On-site inspection of {', '.join(rooms) or 'the property'}: {n} observation(s) recorded by the inspector. "
+               + (f"The client's concern was: {case.concern}" if case.concern else ""))
+    return ReportDraft(summary=summary.strip(), sections=sections, recommendations=recs,
+                       limitations=["Visual and thermal observations do not confirm mould without sampling and laboratory analysis.",
+                                    "Areas behind walls, under floors and inside ducts were not opened."])
+
+
 async def findings_from_note(case: Case, room: str, note: str) -> tuple[list[Finding], Result]:
     system = ("You turn an inspector's quick field note into structured findings. Use ONLY facts stated in the note. One finding per distinct "
               "observation. Pick reading_kind/reading_result only if the note states a test or reading result. Allowed results per kind: "
@@ -148,8 +240,11 @@ async def findings_from_note(case: Case, room: str, note: str) -> tuple[list[Fin
               + ". The photo list is ONLY for choosing evidence_photo_ids (match by caption/room); it is NEVER a source of findings. "
               "If the note mentions one thing, return one finding. Never invent ids.")
     ctx = {"room": room, "note": note, "photos": [{"id": p.id, "room": p.room, "caption": p.caption_from_pack} for p in case.photos]}
-    res = await structured(FindingsOut, agent="findings", system=system, user_text=json.dumps(ctx), max_tokens=900,
-                           fixture_key=f"findings:{case.id}:{note.strip().lower()[:60]}")
+    try:
+        res = await structured(FindingsOut, agent="findings", system=system, user_text=json.dumps(ctx), max_tokens=900,
+                               fixture_key=f"findings:{case.id}:{note.strip().lower()[:60]}")
+    except AgentFailure:  # AI unavailable: one finding per sentence of the inspector's own words, readings by keyword
+        res = Result(rule_findings(room, note), AIUsage(agent="findings", model="rule (AI unavailable)", latency_ms=0, tier="rule"))
     photo_ids = {p.id for p in case.photos}
     out, n = [], sum(1 for f in case.findings if f.source == "ai_structured")
     note_words = _words(note)
@@ -181,8 +276,11 @@ async def draft_report(case: Case) -> tuple[ReportDraft, list[str], Result]:
            "recorded_recommendations": case.recommendations,
            "estimate_scope_areas": case.estimate.areas if case.estimate else [],
            "staff_resolution_notes": [f"{fl.message} -> {fl.resolution_note}" for fl in case.flags if fl.resolved and fl.resolution_note]}
-    res = await structured(ReportDraft, agent="report", system=system, user_text=json.dumps(ctx), max_tokens=2500,
-                           fixture_key=f"report:{case.id}")
+    try:
+        res = await structured(ReportDraft, agent="report", system=system, user_text=json.dumps(ctx), max_tokens=2500,
+                               fixture_key=f"report:{case.id}")
+    except AgentFailure:
+        res = Result(rule_report(case), AIUsage(agent="report", model="rule (AI unavailable)", latency_ms=0, tier="rule"))
     valid = {f.id for f in case.findings} | {p.id for p in case.photos}
     draft: ReportDraft = res.value
     dropped = []

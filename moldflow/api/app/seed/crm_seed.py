@@ -1,4 +1,4 @@
-"""Seed the relationship hub: the 2 real sample-pack customers + 28 SYNTHETIC customers (labelled as such everywhere).
+"""Seed the relationship hub: the 2 real sample-pack customers + 8 SYNTHETIC customers (labelled as such everywhere).
 
 Synthetic people are invented for the demo: names, phones (555 numbers), emails (example.com) and their histories in the
 company's tools (Google Calendar, FreshBooks, Asana, Close, Brain, Dialpad, email). Facts carry the quote they came from,
@@ -25,26 +25,6 @@ PEOPLE = [
     ("Emily Chen", "en", "homeowner", "K1Y", "9 Hamilton Ave N", "Ottawa"),
     ("Robert Lavoie", "fr", "homeowner", "J9A", "120 rue Principale", "Gatineau"),
     ("Aisha Mohamed", "en", "tenant", "K1G", "1840 Russell Rd", "Ottawa"),
-    ("Michel Pelletier", "fr", "homeowner", "J8T", "56 rue Notre-Dame", "Gatineau"),
-    ("Hannah Schultz", "en", "homeowner", "K2B", "33 Britannia Rd", "Ottawa"),
-    ("Luc Côté", "fr", "property_manager", "H2X", "1200 rue Saint-Urbain", "Montréal"),
-    ("Grace Liu", "en", "homeowner", "K4A", "4 Tenth Line Rd", "Ottawa"),
-    ("Isabelle Roy", "fr", "homeowner", "H2T", "4480 rue Saint-Denis", "Montréal"),
-    ("Tom Bennett", "en", "homeowner", "K2G", "18 Greenbank Rd", "Ottawa"),
-    ("Nadia Haddad", "fr", "tenant", "H4A", "5600 av. Monkland", "Montréal"),
-    ("Carlos Mendes", "en", "homeowner", "K1V", "2600 Riverside Dr", "Ottawa"),
-    ("Chantal Fortin", "fr", "homeowner", "H7N", "250 boul. Cartier", "Laval"),
-    ("Kevin O'Brien", "en", "business", "K1P", "150 Elgin St", "Ottawa"),
-    ("Mei Tanaka", "en", "homeowner", "M4C", "880 Danforth Ave", "Toronto"),
-    ("André Girard", "fr", "homeowner", "J8P", "73 rue Saint-Louis", "Gatineau"),
-    ("Fatima Benali", "fr", "homeowner", "H7T", "3030 boul. Le Carrefour", "Laval"),
-    ("James Wilson", "en", "landlord", "M6P", "2120 Dundas St W", "Toronto"),
-    ("Olivia Martin", "en", "homeowner", "K2M", "41 Castlefrank Rd", "Ottawa"),
-    ("Pierre Dubois", "fr", "homeowner", "J9H", "18 ch. d'Aylmer", "Gatineau"),
-    ("Sarah Goldberg", "en", "homeowner", "M5R", "60 Avenue Rd", "Toronto"),
-    ("Yves Bergeron", "fr", "homeowner", "H1A", "12000 rue Sherbrooke E", "Montréal"),
-    ("Linda Park", "en", "homeowner", "K1J", "1500 Ogilvie Rd", "Ottawa"),
-    ("Marc-André Leblanc", "fr", "homeowner", "J8X", "92 rue Eddy", "Gatineau"),
 ]
 
 # (category, fact text, customer quote, source kind, message_use, follow-up (month, day) or None, follow-up reason, status)
@@ -159,7 +139,7 @@ def seed(cases: list[Case]) -> dict:
                     emails=[f"{slug}@example.com"], language=lang, customer_type=ctype,
                     properties=[PropertyRef(address=street, city=city, postal=f"{fsa} {rng.randint(1, 9)}{chr(65 + i % 20)}{rng.randint(1, 9)}", fsa=fsa,
                                             lat=lat, lon=lon, province="ON" if fsa[0] in "KM" else "QC")],
-                    consent=consent, prefs=Prefs(storm_checkin_opt_in=(i % 3 == 0), channel="email" if i % 7 == 3 else "sms"),
+                    consent=consent, prefs=Prefs(storm_checkin_opt_in=False, channel="email" if i % 7 == 3 else "sms"),
                     synthetic=True, tags=["synthetic demo data"])
         contacts.append(c)
         sysrows = [
@@ -204,7 +184,7 @@ def seed_todays_visits(save_case) -> list[str]:
     from app.models.passport import Booking, BookingContact, Customer, Property
     plan = [("c-s01", "9:00 AM", "Musty smell in the finished basement, worse after rain", "Basement", "Park in the driveway; side door is unlocked."),
             ("c-s06", "11:30 AM", "Black spots on the bathroom ceiling above the shower", "Bathroom", "Ring twice, the doorbell is quiet."),
-            ("c-s13", "2:00 PM", "Water stain on the bedroom ceiling after an ice dam", "Bedroom", "Street parking only; attic hatch is in the hallway closet.")]
+            ("c-s05", "2:00 PM", "Water stain on the bedroom ceiling after an ice dam", "Bedroom", "Street parking only; attic hatch is in the hallway closet.")]
     ids = []
     for cid, slot, concern, room, access in plan:
         c = db.get(Contact, cid)

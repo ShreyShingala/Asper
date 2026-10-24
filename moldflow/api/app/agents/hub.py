@@ -124,8 +124,39 @@ COMPLAINT = re.compile(r"\b(angry|terrible|refund|lawyer|complain|scam|worst|una
 THANKS = re.compile(r"\b(thanks|thank you|merci)\b", re.I)
 
 
-def _rule_triage(contact: Contact, text: str, open_estimate: dict | None) -> TriageOut:
+WHEN = re.compile(r"\b(when|what time|arriv\w*|coming|quelle heure|quand|arriver)\b", re.I)
+CLEAN = re.compile(r"\b(bleach|clean (it|this)( myself)?|vinegar|scrub|wipe|javel|nettoyer)\b", re.I)
+REPORT = re.compile(r"\b(report|results?|rapport|résultats?)\b", re.I)
+
+
+def case_facts(case: Case | None) -> dict:
+    """What the assistant may rely on about THIS customer's case (no health facts, no invented prices)."""
+    if not case:
+        return {}
+    b = case.booking
+    return {"stage": case.stage, "concern": case.concern, "room": case.answers.get("room"),
+            "visit": b.slot_text if b and b.slot_date else None, "service": case.pre_assessment.service_price_text if case.pre_assessment else None,
+            "pre_assessment": case.pre_assessment.summary if case.pre_assessment else None,
+            "report_ready": bool(case.report and any(a.what == "report" for a in case.approvals))}
+
+
+def _rule_triage(contact: Contact, text: str, open_estimate: dict | None, case: Case | None = None) -> TriageOut:
     fr = contact.language == "fr"
+    cf = case_facts(case)
+    if WHEN.search(text) and cf.get("visit"):
+        return TriageOut(intent="question", reply=(f"Votre visite est prévue {cf['visit']}. Le technicien vous texte 30 minutes avant d'arriver." if fr else
+                                                   f"Your visit is booked for {cf['visit']}. The technician will text you 30 minutes before arriving."))
+    if CLEAN.search(text):
+        return TriageOut(intent="question", reply=(
+            "Pour une petite zone (moins d'environ 1 m²), Santé Canada conseille de l'eau et un détergent sans parfum, avec gants et masque; "
+            "évitez l'eau de Javel. Plus grand, ou si ça revient: laissez-nous vérifier la source d'humidité." if fr else
+            "For a small area (under about 1 m²), Health Canada suggests water and unscented detergent with gloves and a mask; skip bleach. "
+            "If it's bigger or keeps coming back, let us find the moisture source first."))
+    if REPORT.search(text) and case:
+        return TriageOut(intent="question", reply=(("Votre rapport est prêt, je vous le renvoie par courriel." if cf.get("report_ready") else
+                                                    "Votre rapport est en préparation; vous le recevrez par courriel dès qu'il est approuvé.") if fr else
+                                                   ("Your report is ready; I'll email it to you again." if cf.get("report_ready") else
+                                                    "Your report is being finalized; you'll get it by email as soon as it's approved.")))
     if COMPLAINT.search(text):
         return TriageOut(intent="complaint", reply=("Je suis désolé. Une personne de notre équipe vous rappelle aujourd'hui." if fr else
                                                     "I'm sorry about this. Someone from our team will call you today."), escalate=True)
@@ -153,18 +184,20 @@ def _rule_triage(contact: Contact, text: str, open_estimate: dict | None) -> Tri
                                                            "Thanks, someone from our team will get back to you shortly."))
 
 
-async def triage(contact: Contact, text: str, open_estimate: dict | None, case: Case | None) -> tuple[TriageOut, str]:
+async def triage(contact: Contact, text: str, open_estimate: dict | None, case: Case | None,
+                 thread: list[dict] | None = None) -> tuple[TriageOut, str]:
     concern, sources = concern_and_sources(case)
     system = ("You answer a customer's text for Mold Busters (mold inspection/remediation, Ontario + Quebec). Classify intent and "
               "write a short reply in the customer's language. Never diagnose mold, never give medical advice (say to check with a "
               "doctor), never state prices other than published service rates. Use '{booking_link}' where a booking link belongs. "
               "Escalate complaints, legal threats, landlord disputes or anything unclear.")
-    ctx = {"language": LANG[contact.language], "customer_text": text, "open_estimate": open_estimate, "concern": concern, "findings": sources}
+    ctx = {"language": LANG[contact.language], "customer_text": text, "open_estimate": open_estimate, "concern": concern, "findings": sources,
+           "conversation_so_far": (thread or [])[-8:], "case": case_facts(case)}
     try:
         r = await structured(TriageOut, agent="triage_inbound", system=system, user_text=json.dumps(ctx), max_tokens=400)
         return r.value, "ai"
     except AgentFailure:
-        return _rule_triage(contact, text, open_estimate), "rule"
+        return _rule_triage(contact, text, open_estimate, case), "rule"
 
 
 # ---------------------------------------------------------------- outreach drafts

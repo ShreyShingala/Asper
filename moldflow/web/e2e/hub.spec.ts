@@ -1,15 +1,17 @@
 import { expect, test } from "@playwright/test";
 
-/** The hub hero loop in the browser: instant answer -> estimate rescue -> memory -> storm check-ins. AI agents fall back to
+/** The hub hero loop in the browser: instant answer -> estimate rescue -> memory -> customer conversations. AI agents fall back to
  *  rule-based templates in e2e (MOLDFLOW_E2E_STUB=1), so this runs offline and deterministically. */
 test.describe.configure({ mode: "serial" });
 
 test.beforeEach(async ({ request }) => { await request.post("/api/admin/reset"); });
 
-test("hub: instant reply, estimate rescue, new fact, storm check-ins", async ({ page, request }, info) => {
+test("hub: instant reply, estimate rescue, new fact, conversation approval", async ({ page, request }, info) => {
   test.skip(info.project.name !== "desktop-chrome", "the hub is a staff (desktop) screen");
   await page.goto("/hub");
-  await expect(page.getByRole("heading", { name: /what needs you/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Approve or deny/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Customer conversations" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "On-site reviews" })).toBeVisible();
   await expect(page.getByText("Money on the table")).toBeVisible();
 
   // 1. 11 PM text from a new number: health question answered instantly with the fixed reply.
@@ -36,20 +38,13 @@ test("hub: instant reply, estimate rescue, new fact, storm check-ins", async ({ 
   await page.getByRole("button", { name: "Approve", exact: true }).first().click();
   await expect(page.getByText("for a person to bring up")).toBeVisible();
 
-  // 4. Storm: simulated rainfall warning over Gatineau -> offer only with consent, safety-only otherwise, French where preferred.
-  await page.goto("/alerts");
-  await page.getByRole("button", { name: "Simulate rainfall warning" }).click();
-  await expect(page.getByText("asked for storm check-ins").first()).toBeVisible();
-  await page.getByRole("button", { name: "Draft check-ins" }).first().click();
-  await expect(page.getByRole("status").filter({ hasText: "safety-only" })).toBeVisible();
-  await page.goto("/outreach");
-  await expect(page.getByText(/Storm check-in \(offer\)/)).toBeVisible();
-  await expect(page.getByLabel("Message text").filter({ hasText: /pluie/ }).first()).toBeVisible();
-  await page.getByRole("button", { name: /Approve all without money/ }).click();
-  await expect(page.getByRole("status").filter({ hasText: /sent/ })).toBeVisible();
+  // 4. Customer conversation pillar: an AI reply drafted from the customer's own case, approved from the hub.
+  await page.goto("/hub");
+  await page.getByRole("button", { name: "Approve", exact: true }).first().click();
+  await expect(page.getByRole("status").filter({ hasText: "Approved and sent" })).toBeVisible();
 
   // 5. The hub shows the money recovered.
   await page.goto("/hub");
   await expect(page.getByText("$4,181.00").first()).toBeVisible();
-  await expect(page.getByText("1 → 1 → 1")).toBeVisible();
+  await expect(page.getByText(/^1 → \d+ → 1$/)).toBeVisible();  // chased → replied (incl. seeded conversations) → accepted
 });

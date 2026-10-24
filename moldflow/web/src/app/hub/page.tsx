@@ -1,10 +1,11 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, Bot, CalendarClock, CheckCheck, CloudRain, FlaskConical, Inbox, MessageSquarePlus, PiggyBank, Sparkles, Timer } from "lucide-react";
+import { AlertTriangle, Bot, CalendarClock, CheckCheck, FlaskConical, Inbox, MessageSquarePlus, PiggyBank, Sparkles, Timer } from "lucide-react";
 import { api, money } from "@/lib/api";
 import { Button, Card, Eyebrow, KitTextarea, Spinner, StaffShell, Tag, cx } from "@/components/ui";
 import { SYSTEMS, SourceChip, day, dayTime } from "@/components/hub";
+import { Pillars } from "@/components/pillars";
 
 type Hub = {
   today: string; clock_travelling: boolean; paused: boolean;
@@ -43,19 +44,12 @@ export default function HubPage() {
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <Eyebrow color="text-brand">MoldFlow Hub · {day(h.today)}{h.clock_travelling && " (time travel on)"}</Eyebrow>
-          <h1 className="mt-1 text-h5 font-semibold text-ink">Good morning. Here&apos;s what needs you.</h1>
+          <h1 className="mt-1 text-h5 font-semibold text-ink">Everything runs itself. Approve or deny what&apos;s waiting.</h1>
         </div>
         <p className="text-caption text-ink-muted">{h.counts.contacts} people · {h.counts.synthetic} synthetic demo customers · one timeline across {h.counts.tools_unified.length} tools</p>
       </div>
 
-      {h.alerts.map((a) => (
-        <Card key={a.id} tone="warning" className="mb-4 flex flex-wrap items-center gap-3 p-4">
-          <CloudRain className="text-kit-orange" aria-hidden />
-          <p className="flex-1 text-subtitle text-ink"><b className="capitalize">{a.type}</b> · {a.area}{a.source === "simulated" && " (simulated)"}: {a.matches} past customers in the area, {a.opted_in} asked for storm check-ins
-            {a.drafted ? ` · ${a.drafted} check-ins drafted` : ""}.</p>
-          <Link href="/alerts"><Button size="sm" trailing={<ArrowRight size={14} aria-hidden />}>{a.drafted ? "Review batch" : "Draft check-ins"}</Button></Link>
-        </Card>
-      ))}
+      <Pillars />
 
       <section aria-labelledby="needs" className="mb-6">
         <h2 id="needs" className="sr-only">Needs you</h2>
@@ -202,9 +196,6 @@ function DemoPanel({ onDone }: { onDone: () => void }) {
             const r = await api.post<{ intent: string; reply: { status: string; body: string }; contact_id: string }>("/webhooks/inbound", { from_: from, channel: "sms", body });
             return `${r.intent}: reply ${r.reply.status === "sent_simulated" ? "sent instantly" : "drafted for approval"} → "${r.reply.body.slice(0, 90)}…"`;
           })}>Send text</Button>
-        <Button size="sm" variant="outline" leading={<CloudRain size={14} aria-hidden />} disabled={busy}
-          onClick={() => run(async () => { const r = await api.post<{ matched: unknown[] }>("/alerts/simulate", { zone: "Gatineau" }); return `Rainfall warning simulated over Gatineau: ${r.matched.length} matches.`; })}>
-          Rain alert: Gatineau</Button>
       </div>
       {out && <p role="status" className="mt-3 flex gap-1.5 rounded-ds-xsm bg-kit-gray-faint p-2 text-caption text-ink-body"><Sparkles size={13} className="mt-0.5 shrink-0" aria-hidden />{out}</p>}
       <p className="mt-3 flex items-center gap-1.5 text-caption text-ink-muted"><AlertTriangle size={12} aria-hidden />Nothing is actually sent: SMS/email are simulated until Twilio/Resend keys are added. <CheckCheck size={12} aria-hidden /></p>

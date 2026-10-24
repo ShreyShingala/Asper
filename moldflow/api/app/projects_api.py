@@ -173,3 +173,53 @@ async def import_telegram(case_id: str, file: UploadFile = File(...)) -> dict:
                 added += 1
         c.chat.sort(key=lambda m: m.at)
     return {"imported": added, "chat_name": data.get("name"), "total": len(_get(case_id).chat)}
+
+
+@router.get("/hub/pillars")
+def hub_pillars() -> dict:
+    """The admin dashboard's three pillars: customer conversations, virtual assessments, on-site reviews. Each item says what
+    the system did and what (if anything) is waiting for Approve / Deny."""
+    from app import crm_store as db
+    from app.models.crm import Contact, Message
+    contacts = {c.id: c for c in db.query(Contact)}
+    msgs = db.query(Message)
+    convs = []
+    for cid, c in contacts.items():
+        thread = sorted([m for m in msgs if m.contact_id == cid and m.status in ("received", "sent_simulated", "draft")], key=lambda m: m.created_at)
+        if not any(m.direction == "in" for m in thread):
+            continue
+        draft = next((m for m in reversed(thread) if m.status == "draft"), None)
+        convs.append({"contact_id": cid, "name": c.name, "language": c.language, "synthetic": c.synthetic, "owner": c.owner,
+                      "case_id": next(iter(c.case_ids), None), "last_at": thread[-1].created_at.isoformat(),
+                      "thread": [{"id": m.id, "dir": m.direction, "text": m.body, "at": m.created_at.isoformat(), "status": m.status}
+                                 for m in thread if m.status != "draft"][-6:],
+                      "draft": {"id": draft.id, "body": draft.body, "reason": draft.reason, "autonomy": draft.autonomy} if draft else None})
+    convs = sorted(convs, key=lambda x: (x["draft"] is None, -datetime.fromisoformat(x["last_at"]).timestamp()))
+    cases = store.list_all()
+    virtual = []
+    for c in cases:
+        if c.intake_mode != "live" and not any(p.source == "customer" for p in c.photos):
+            continue
+        if c.seeded_from in ("mock",) or c.id.startswith(("conv-", "visit-")):
+            continue
+        pending = [m for m in msgs if m.case_id == c.id and m.status == "draft"]
+        virtual.append({"case_id": c.id, "title": c.title, "stage": c.stage, "photos": sum(1 for p in c.photos if p.source == "customer"),
+                        "service": c.pre_assessment.service_price_text if c.pre_assessment else None,
+                        "summary": c.live.summary if c.live and c.live.summary else (c.pre_assessment.summary if c.pre_assessment else None),
+                        "paid": [p.product for p in c.payments], "tenant_pack": c.tenant_pack.status if c.tenant_pack else None,
+                        "photo_ids": [p.id for p in c.photos if p.source == "customer"][:4],
+                        "pending": [{"id": m.id, "body": m.body, "reason": m.reason} for m in pending], "created_at": c.created_at.isoformat()})
+    virtual.sort(key=lambda x: x["created_at"], reverse=True)
+    onsite = []
+    for c in cases:
+        if not (c.onsite or c.report or any(p.source == "inspector" for p in c.photos)):
+            continue
+        approved = any(a.what == "report" for a in c.approvals)
+        onsite.append({"case_id": c.id, "title": c.title, "stage": c.stage, "notes": len(c.onsite), "findings": len(c.findings),
+                       "inspector_photos": sum(1 for p in c.photos if p.source == "inspector"),
+                       "last_note": c.onsite[-1].text[:220] if c.onsite else None, "has_video": any(o.video_path for o in c.onsite),
+                       "report": "approved" if approved else "draft" if c.report else "none",
+                       "blocks": [f.message for f in c.open_blocks()], "summary": c.report.draft.summary if c.report else None})
+    return {"conversations": convs[:10], "virtual": virtual[:8], "onsite": onsite[:8],
+            "counts": {"replies_waiting": sum(1 for x in convs if x["draft"]), "virtual_waiting": sum(len(v["pending"]) for v in virtual),
+                       "reports_waiting": sum(1 for o in onsite if o["report"] == "draft")}}

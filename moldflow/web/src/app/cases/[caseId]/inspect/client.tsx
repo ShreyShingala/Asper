@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Mic, Sparkles, Check, Trash2, Camera, ArrowRight } from "lucide-react";
 import { api, type CaseOut } from "@/lib/api";
 import { useCase } from "@/lib/useCase";
+import { Walkthrough } from "./walkthrough";
 import { AnnotatedPhoto, Button, Card, Eyebrow, IconButton, KitTextarea, ProvenancePill, SidebarMenu, Spinner, StaffShell, Tag, buttonClass } from "@/components/ui";
 
 const KINDS: Record<string, { label: string; options: string[] }> = {
@@ -17,7 +18,7 @@ const KINDS: Record<string, { label: string; options: string[] }> = {
 
 export default function Inspect() {
   const { caseId } = useParams<{ caseId: string }>();
-  const { c, err, busy, run } = useCase(caseId);
+  const { c, err, busy, run, reload } = useCase(caseId);
   const rooms = useMemo(() => [...new Set([...(c?.photos ?? []).map((p) => p.room ?? "Unassigned"), ...(c?.findings ?? []).map((f) => f.room)])], [c]);
   const [room, setRoom] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -32,6 +33,7 @@ export default function Inspect() {
   return (
     <StaffShell title={`Inspect · ${c.title}`}
       actions={<Link href={`/cases/${caseId}/review`} className={buttonClass({ size: "sm" })}>Go to review <ArrowRight size={14} aria-hidden /></Link>}>
+      <Walkthrough caseId={caseId} onDone={() => void reload()} />
       <div className="grid gap-6 lg:grid-cols-[230px_1fr]">
         <SidebarMenu activeId={active} onSelect={setRoom} className="self-start lg:sticky lg:top-28"
           sections={[{

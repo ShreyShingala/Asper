@@ -2,10 +2,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Camera, ImageUp, Info, FileDown, CalendarCheck, Mail, Phone, CreditCard, MapPin, Check, HeartPulse } from "lucide-react";
+import { Camera, ImageUp, Info, FileDown, CalendarCheck, Phone, CreditCard, MapPin, Check, HeartPulse } from "lucide-react";
 import { api, resizeImage, type Case, type CaseOut, type IntakeTurn, type Photo } from "@/lib/api";
 import { STRINGS } from "@/lib/i18n";
-import { AnnotatedPhoto, Button, Card, Eyebrow, LangToggle, Logo, Modal, ProgressBar, ProvenancePill, Spinner, TextArea, TextField, buttonClass, cx } from "@/components/ui";
+import { AnnotatedPhoto, Button, Card, Eyebrow, LangToggle, Logo, ProgressBar, ProvenancePill, Spinner, TextArea, TextField, buttonClass, cx } from "@/components/ui";
 
 export default function Assess() {
   const { caseId } = useParams<{ caseId: string }>();
@@ -248,26 +248,15 @@ function PhotoCard({ c, p }: { c: Case; p: Photo }) {
   );
 }
 
-function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string | null; tick: number; reload: () => void; onRelocate: (v: string) => void }) {
+function Result({ c, busy, tick, onRelocate }: { c: Case; busy: string | null; tick: number; reload: () => void; onRelocate: (v: string) => void }) {
   const t = STRINGS[c.language];
   const pa = c.pre_assessment!;
-  const [modal, setModal] = useState<null | "letter" | "pay">(null);
-  const [letter, setLetter] = useState<string>("");
-  const [copied, setCopied] = useState(false);
   const [loc, setLoc] = useState("");
   const [showLoc, setShowLoc] = useState(false);
   const remote = pa.recommended_service === "remote_report";
   const paid = c.booking?.status === "paid_simulated";
   const booked = c.booking && !paid;
 
-  async function act(kind: "letter" | "pay") {
-    if (kind === "letter") {
-      const l = await api.post<{ body: string }>(`/cases/${c.id}/letters/landlord`, { language: c.language });
-      setLetter(l.body); setModal("letter"); return;
-    }
-    await api.post(`/cases/${c.id}/book`, { service: "remote_report", slot_text: "Remote report" });
-    setModal(null); reload();
-  }
   if (busy === "assess") return <Card className="mt-6 p-5"><Spinner label={t.preparing[Math.min(tick, 2)]} /></Card>;
 
   return (
@@ -297,7 +286,7 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
           <div className="mt-5 grid gap-2">
             {remote ? (
               paid ? <p role="status" className="rounded-ds-sm bg-alert-success-bg p-3 text-subtitle font-medium text-alert-success-title">{t.paid}</p>
-                : <Button size="lg" multiline leading={<CreditCard size={18} aria-hidden className="shrink-0" />} onClick={() => setModal("pay")}>{t.remote}</Button>
+                : <Link href={`/assess/${c.id}/checkout?product=ai_report`} className={buttonClass({ size: "lg", multiline: true })}><CreditCard size={18} aria-hidden className="shrink-0" />{t.remote}</Link>
             ) : booked ? (
               <Link href={`/assess/${c.id}/book`} className="flex items-center gap-2 rounded-ds-sm bg-alert-success-bg p-3 text-subtitle font-medium text-alert-success-title">
                 <CalendarCheck size={16} className="shrink-0" aria-hidden />{t.booked} · {c.booking?.slot_text}
@@ -307,7 +296,6 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
                 <CalendarCheck size={18} aria-hidden className="shrink-0" />{t.book}
               </Link>
             )}
-            {pa.next_actions.includes("landlord_letter") && <Button size="lg" multiline variant="outline" leading={<Mail size={18} aria-hidden className="shrink-0" />} onClick={() => act("letter")}>{t.letter}</Button>}
             <a href={`/api/cases/${c.id}/export/pre-assessment.pdf`} target="_blank" rel="noreferrer" aria-disabled={remote && !paid ? true : undefined}
               className={buttonClass({ variant: "outline", size: "lg", multiline: true, disabled: remote && !paid })}>
               <FileDown size={18} aria-hidden className="shrink-0" />{t.pdf}
@@ -343,24 +331,6 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
         )}
       </div>
 
-      <Modal open={!!modal} onClose={() => setModal(null)} className={modal === "letter" ? "max-w-[520px]" : undefined}
-        title={modal === "pay" ? t.payTitle : t.letterTitle}>
-        {modal === "pay" && (
-          <>
-            <p>{pa.summary}</p>
-            <Button size="lg" fullWidth multiline className="mt-4" leading={<CreditCard size={18} aria-hidden className="shrink-0" />} onClick={() => act("pay")}>{t.pay}</Button>
-            <p className="mt-3 text-caption text-ink-muted">Simulated checkout. Proposed product, pending Mold Busters approval.</p>
-          </>
-        )}
-        {modal === "letter" && (
-          <>
-            <pre className="max-h-[55vh] overflow-auto whitespace-pre-wrap rounded-ds-xsm bg-kit-gray-faint p-3 font-sans text-subtitle text-ink">{letter}</pre>
-            <Button fullWidth className="mt-3" onClick={() => { navigator.clipboard.writeText(letter); setCopied(true); }}>
-              {copied ? t.copied : t.copy}
-            </Button>
-          </>
-        )}
-      </Modal>
     </div>
   );
 }
@@ -383,9 +353,9 @@ function Offers({ c }: { c: Case }) {
       )}
       <div className="rounded-ds-sm border border-kit-gray-soft p-4">
         <p className="text-subtitle font-semibold text-ink">Full AI pre-assessment report · $20</p>
-        <p className="mt-1 text-caption text-ink-body">Annotated photos, findings in plain language and next steps, as a PDF.</p>
+        <p className="mt-1 text-caption text-ink-body">Every photo annotated by AI with what it shows, a room-by-room analysis, likely moisture sources and next steps, in the format our inspectors use.</p>
         {paid("ai_report") ? (
-          <a href={`/api/cases/${c.id}/export/pre-assessment.pdf`} target="_blank" rel="noreferrer" className={cx(buttonClass({ variant: "outline", size: "md", fullWidth: true }), "mt-3")}>Download my report</a>
+          <a href={`/api/cases/${c.id}/export/ai-report.pdf`} target="_blank" rel="noreferrer" className={cx(buttonClass({ variant: "outline", size: "md", fullWidth: true }), "mt-3")}>Download my full report</a>
         ) : (
           <Link href={`/assess/${c.id}/checkout?product=ai_report`} className={cx(buttonClass({ variant: "outline", size: "md", fullWidth: true }), "mt-3")}>Get the report</Link>
         )}

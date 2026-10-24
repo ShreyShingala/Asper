@@ -144,7 +144,9 @@ async def receive(contact: Contact, channel: str, body: str) -> dict:
     est_ctx = {"number": est.meta.get("number"), "total": f"${est.amount:,.2f}"} if est else None
     from app import store as case_store
     case = case_store.get(contact.case_ids[0]) if contact.case_ids else None
-    tri, by = await agents.triage(contact, body, est_ctx, case)
+    thread = [{"from": "customer" if x.direction == "in" else "mold_busters", "text": x.body}
+              for x in sorted(history(contact.id), key=lambda x: x.created_at) if x.status in ("received", "sent_simulated")]
+    tri, by = await agents.triage(contact, body, est_ctx, case, thread)
     facts, fby = await agents.extract_facts(body, channel)
     result["facts"] = [f.model_dump() for f in save_facts(contact, facts, channel, inbound.id, fby)]
     result["intent"], result["triage_by"] = tri.intent, by

@@ -274,3 +274,24 @@ def test_autopilot_sends_on_its_own(client):
     assert sent["status"] == "sent_simulated" and "Mold Busters ·" in sent["body"] and sent["cc"] == ["sam@example.com"]
     nxt = client.post("/demo/skip", json={"days": 7}).json()["drafted"]
     assert any(d["case_id"] == t and d["status"] == "sent_simulated" for d in nxt)            # step 2 sent on the authorization
+
+
+def test_three_pillars_and_onsite_walkthrough(client):
+    """Conversations come seeded with AI drafts from each customer's own case; a spoken walkthrough fills the report; the $20
+    report is locked until checkout."""
+    p = client.get("/hub/pillars").json()
+    assert p["counts"]["replies_waiting"] == 8 and all(c["draft"] for c in p["conversations"])
+    r = client.post("/webhooks/inbound", json={"contact_id": "c-s02", "channel": "sms", "body": "What time is the inspector coming tomorrow?"}).json()
+    assert "2:00 PM" in r["reply"]["body"]                                    # answered from her booking, not a generic reply
+    out = client.post("/cases/visit-c-s01/onsite/walkthrough", data={"room": "Basement", "transcript":
+                      "Starting in the basement. Moisture meter shows elevated moisture at the north wall. Moving to the laundry. Dryer vent hose is crushed."}).json()
+    rooms = {f["room"] for f in out["case"]["findings"]}
+    assert {"Basement", "Laundry"} <= rooms and out["case"]["report"] and out["case"]["stage"] == "report_draft"
+    assert not any(f["observation"].startswith(("Starting", "Moving")) for f in out["case"]["findings"])
+    cid = client.post("/cases", json={"language": "en"}).json()["case"]["id"]
+    client.post(f"/cases/{cid}/sample-photos")
+    client.post(f"/cases/{cid}/pre-assessment")
+    assert client.get(f"/cases/{cid}/export/ai-report.pdf").status_code == 402
+    client.post(f"/cases/{cid}/checkout", json={"product": "ai_report"})
+    pdf = client.get(f"/cases/{cid}/export/ai-report.pdf")
+    assert pdf.status_code == 200 and pdf.content[:4] == b"%PDF"

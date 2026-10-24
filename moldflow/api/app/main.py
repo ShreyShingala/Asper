@@ -21,7 +21,7 @@ from app.engine import live as live_rules
 from app.exports import render
 from app.integrations import elevenlabs
 from app.models.agents import IntakeTurn
-from app.models.passport import (Approval, Booking, BookingContact, Case, Event, Flag, FollowUp, Letter, LiveSession, OutboxMessage, Payment, Photo, PreAssessment, Reading,
+from app.models.passport import (Approval, Booking, BookingContact, Case, Event, Finding, Flag, FollowUp, Letter, LiveSession, OnsiteNote, OutboxMessage, Payment, Photo, PreAssessment, Reading,
                                  StoredReport, TranscriptLine, now)
 from app.seed import seeds
 
@@ -52,6 +52,8 @@ def _seed_everything() -> list[Case]:
         store.save(c)
     crm_seed.seed(cases)
     crm_seed.seed_todays_visits(store.save)
+    from app.seed import conversations
+    conversations.seed(store.save)
     from app import messaging
     from app.models.crm import Contact
     for contact in crm_store.query(Contact):
@@ -631,6 +633,16 @@ async def demo_skip(body: SkipIn2) -> dict:
     return {"today": day.isoformat(), "drafted": drafted}
 
 
+@app.get("/cases/{case_id}/export/ai-report.pdf")
+def export_ai_report(case_id: str):
+    """The $20 AI pre-assessment report: annotated photos with analysis, in the Mold Busters report format."""
+    c = _get(case_id)
+    if not any(p.product == "ai_report" for p in c.payments) and c.seeded_from is None:
+        raise HTTPException(402, "The full AI report is available after checkout ($20).")
+    return Response(render.ai_report_pdf(c), media_type="application/pdf",
+                    headers={"Content-Disposition": f'inline; filename="ai-report-{case_id}.pdf"'})
+
+
 @app.get("/cases/{case_id}/export/pre-assessment.pdf")
 def export_pre(case_id: str):
     return Response(render.pre_assessment_pdf(_get(case_id)), media_type="application/pdf",
@@ -716,6 +728,100 @@ async def book(case_id: str, body: BookIn) -> CaseOut:
 class NoteIn(BaseModel):
     room: str
     text: str
+
+
+ROOM_WORDS = [("Basement", r"basement|cellar|crawl ?space|sump|furnace"), ("Upstairs washrooms", r"en-?suite|upstairs (wash|bath)room"),
+              ("Bathroom", r"bath(room)?|washroom|shower|tub|toilet"), ("Laundry", r"laundry|washer|dryer"), ("Kitchen", r"kitchen|dishwasher"),
+              ("Attic", r"attic|roof deck|sheathing|insulation"), ("Bedroom", r"bedroom|closet"), ("Exterior", r"exterior|outside|grading|downspout|gutter")]
+
+
+def _segments(text: str, default_room: str) -> list[tuple[str, str]]:
+    """Split a spoken walkthrough into (room, sentences) as the inspector moves through the house."""
+    room, out = default_room, []
+    for sent in [x.strip() for x in re.split(r"(?<=[.!?])\s+|\n+", text) if x.strip()]:
+        for name, rx in ROOM_WORDS:
+            if re.search(rf"\b({rx})\b", sent, re.I):
+                room = name
+                break
+        if out and out[-1][0] == room:
+            out[-1] = (room, out[-1][1] + " " + sent)
+        else:
+            out.append((room, sent))
+    return out
+
+
+async def _transcript_card(case_id: str, room: str, text: str) -> None:
+    """An image of the inspector's own words for a room with no photo, filed as inspector evidence (clearly captioned)."""
+    import io
+    import textwrap
+    from PIL import Image, ImageDraw
+    img = Image.new("RGB", (900, 600), (255, 247, 240))
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, 900, 70], fill=(194, 65, 12))
+    d.text((24, 24), f"On-site walkthrough · {room} (inspector's words, no photo)", fill=(255, 255, 255))
+    y = 100
+    for line in textwrap.wrap(text, 95)[:20]:
+        d.text((24, y), line, fill=(15, 20, 42))
+        y += 24
+    buf = io.BytesIO()
+    img.save(buf, "JPEG", quality=85)
+    pid = "t" + uuid.uuid4().hex[:6]
+    rel = f"uploads/{case_id}/{pid}.jpg"
+    (config.DATA_DIR / "uploads" / case_id).mkdir(parents=True, exist_ok=True)
+    (config.DATA_DIR / rel).write_bytes(buf.getvalue())
+    async with store.editing(case_id) as c:
+        c.photos.append(Photo(id=pid, path=rel, room=room, source="inspector", caption_from_pack=f"Walkthrough transcript · {room}"))
+
+
+@app.post("/cases/{case_id}/onsite/walkthrough")
+async def onsite_walkthrough(case_id: str, transcript: str = Form(...), by: str = Form("Inspector"), room: str = Form("General"),
+                             video: UploadFile | None = File(None)) -> CaseOut:
+    """Inspector's recorded walkthrough -> findings per room (their own words, confirmed) -> report draft, ready for approval."""
+    text = transcript.strip()[:20000]
+    if len(text) < 10:
+        raise HTTPException(422, "The transcript is empty. Speak while recording, or type the notes.")
+    vid = None
+    if video is not None:
+        data = await video.read()
+        if data:
+            (config.DATA_DIR / "uploads" / case_id).mkdir(parents=True, exist_ok=True)
+            vid = f"uploads/{case_id}/walkthrough-{uuid.uuid4().hex[:6]}.webm"
+            (config.DATA_DIR / vid).write_bytes(data[:200_000_000])
+    new_ids = []
+    for seg_room, seg in _segments(text, room):
+        c = _get(case_id)
+        if not any(p.room == seg_room for p in c.photos):  # no snapshot of this room: the spoken words themselves are the evidence
+            await _transcript_card(case_id, seg_room, seg)
+            c = _get(case_id)
+        if not any(p.room == seg_room for p in c.photos) and c.photos:  # evidence: the walkthrough snapshots for that room, else any photo
+            async with store.editing(case_id) as c:
+                fallback = next((p for p in reversed(c.photos) if p.source == "inspector"), c.photos[-1])
+                if fallback.room is None:
+                    fallback.room = seg_room
+        found, res = await tasks.findings_from_note(_get(case_id), seg_room, seg)
+        if not found and _get(case_id).photos:
+            c = _get(case_id)
+            ev = [p.id for p in c.photos if p.room == seg_room][:1] or [c.photos[-1].id]
+            found = [Finding(id=f"W{len(c.findings) + i + 1}", room=seg_room, observation=d.observation, evidence_photo_ids=ev, source="ai_structured")
+                     for i, d in enumerate(tasks.rule_findings(seg_room, seg).findings)]
+        async with store.editing(case_id) as c:
+            _log(c, res)
+            taken = {f.id for f in c.findings}
+            for f in found:
+                while f.id in taken:
+                    f.id = f"W{len(taken) + 1}"
+                taken.add(f.id)
+                f.confirmed = True  # the inspector's own spoken words
+                c.findings.append(f)
+                new_ids.append(f.id)
+    async with store.editing(case_id) as c:
+        c.onsite.append(OnsiteNote(id="o" + uuid.uuid4().hex[:6], kind="walkthrough", by=by, room=room, text=text, video_path=vid, finding_ids=new_ids))
+        c.stage = "inspected"
+        c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="On-site walkthrough recorded", system="MoldFlow (inspector)",
+                                what=f"{by}: {len(new_ids)} findings from the spoken walkthrough" + (" + video" if vid else ""), source="moldflow"))
+    if new_ids:
+        return await report_draft(case_id)
+    return CaseOut(case=_get(case_id))
 
 
 @app.post("/cases/{case_id}/findings/from-note")

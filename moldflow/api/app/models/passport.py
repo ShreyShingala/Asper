@@ -279,6 +279,18 @@ class ChatMessage(BaseModel):
     source: Literal["app", "telegram", "sample_pack_mock"] = "app"
 
 
+class OnsiteNote(BaseModel):
+    """What the inspector recorded on site: a spoken walkthrough (transcript + optional video) or a typed comment."""
+    id: str
+    kind: Literal["walkthrough", "comment"] = "walkthrough"
+    by: str = "Inspector"
+    room: str | None = None
+    text: str
+    video_path: str | None = None
+    finding_ids: list[str] = []
+    at: datetime = Field(default_factory=now)
+
+
 class StoredReport(BaseModel):
     draft: ReportDraft
     dropped_claims: list[str] = []
@@ -317,6 +329,7 @@ class Case(BaseModel):
     outbox: list[OutboxMessage] = []
     tenant_pack: TenantPack | None = None
     chat: list[ChatMessage] = []
+    onsite: list[OnsiteNote] = []
     project_no: int | None = None
     seeded_from: str | None = None
     customer: Customer = Customer()

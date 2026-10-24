@@ -7,7 +7,7 @@ import { api, type CaseOut } from "@/lib/api";
 import { Button, Card, Eyebrow, Logo, TextField, buttonClass } from "@/components/ui";
 
 const PRODUCTS = {
-  ai_report: { price: 20, title: "AI pre-assessment report", points: ["Annotated photos with areas worth a closer look", "Plain-language findings and next steps", "PDF you can share with your landlord or insurer"] },
+  ai_report: { price: 20, title: "AI pre-assessment report", points: ["Every photo annotated by AI: what it shows and where to look closer", "Room-by-room analysis, likely moisture sources and what photos can't tell", "Recommendations in the Mold Busters report format, as a PDF to share"] },
   tenant_pack: { price: 50, title: "Tenant action pack", points: ["We write to your landlord for you, from a Mold Busters address, with you copied", "Automatic follow-ups if they don't reply: formal notice, city property standards complaint", "Tribunal application prep with an evidence bundle. You approve every message first"] },
 } as const;
 type Product = keyof typeof PRODUCTS;
@@ -49,7 +49,7 @@ export default function Checkout() {
           {pack ? (
             <Button size="lg" fullWidth leading={<Mail size={18} aria-hidden />} onClick={() => router.push(`/assess/${caseId}/pack`)}>Track your action pack</Button>
           ) : (
-            <a href={`/api/cases/${caseId}/export/pre-assessment.pdf`} target="_blank" rel="noreferrer" className={buttonClass({ size: "lg", fullWidth: true })}>Download your report</a>
+            <a href={`/api/cases/${caseId}/export/ai-report.pdf`} target="_blank" rel="noreferrer" className={buttonClass({ size: "lg", fullWidth: true })}>Download your full report</a>
           )}
           <Link href={`/assess/${caseId}`} className={buttonClass({ variant: "text", size: "lg" })}>Back to my pre-assessment</Link>
         </Card>
