@@ -635,8 +635,18 @@ def proof() -> dict:
         a["cost"] += u.cost_usd or 0
     for a in by_agent.values():
         a["avg_s"] = round(a["ms"] / a["calls"] / 1000, 1)
-    return {"eval": evald, "usage_by_agent": by_agent, "calls_total": len(usage), "live_calls": len(live),
-            "model": config.PRIMARY_MODEL}
+    def load(name: str) -> dict | None:
+        f = config.API_DIR / "proof" / name
+        return json.loads(f.read_text()) if f.exists() else None
+
+    frames = load("eval_frames.json")
+    calls = load("eval_calls.json")
+    if calls:  # keep the payload small: scores only, no transcripts
+        calls = {k: v for k, v in calls.items() if k != "calls"} | {"calls": [
+            {"persona": c["persona"], "backend": c.get("backend"), "prompt": c.get("prompt"), "score": {k: v for k, v in c["score"].items() if k not in ("long_turns",)}}
+            for c in calls.get("calls", [])]}
+    return {"eval": evald, "frames": {k: v for k, v in (frames or {}).items() if k != "rows"} or None, "calls": calls,
+            "usage_by_agent": by_agent, "calls_total": len(usage), "live_calls": len(live), "model": config.PRIMARY_MODEL}
 
 
 @app.get("/photos/{case_id}/{photo_id}")

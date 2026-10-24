@@ -1,0 +1,1813 @@
+{
+ "run_at": "2026-10-24 06:13",
+ "label": null,
+ "summary": {
+  "unusable frames flagged": "5/7",
+  "vent/hose frames consistent with stills": "12/15",
+  "overclaims": 0,
+  "frames analysed": "59/59",
+  "quality flags": {
+   "ok": 15,
+   "blurry": 38,
+   "too_dark": 0,
+   "not_relevant": 6
+  }
+ },
+ "rows": [
+  {
+   "frame": 1,
+   "t_s": 0,
+   "analysis": {
+    "image_type": "other",
+    "observations": [
+     "The photo shows a person's face and upper body.",
+     "No building surfaces, plumbing, vents, or moisture clues are visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "not_relevant",
+    "follow_up_question": "Could you point the camera at the area you are concerned about?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1440,
+   "score": {
+    "ok": true,
+    "kind": "unusable",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 2,
+   "t_s": 3,
+   "analysis": {
+    "image_type": "other",
+    "observations": [
+     "The photo mainly shows a person's face.",
+     "No building surfaces or moisture clues are visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "not_relevant",
+    "follow_up_question": "Can you point the camera at the area you are concerned about?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1098,
+   "score": {
+    "ok": true,
+    "kind": "unusable",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 3,
+   "t_s": 6,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry close-up of a vent or grille.",
+     "Dark smudge visible below the vent."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark smudge",
+      "box_2d": [
+       650,
+       500,
+       1000,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you hold the camera steadier and show more of the wall?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2280,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 4,
+   "t_s": 9,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Close-up of a perforated metal surface.",
+     "Blurry edge of a round appliance opening.",
+     "No clear moisture or staining visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you show a wider view of the area?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1459,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 5,
+   "t_s": 12,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Dark spot on a light surface.",
+     "Image is blurry and hard to read."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark spot",
+      "box_2d": [
+       250,
+       250,
+       750,
+       750
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the spot?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1604,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 6,
+   "t_s": 15,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "The image is too blurry to make out any surface details.",
+     "No clear moisture or mold clues are visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Could you move closer to the area you are concerned about?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1895,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 7,
+   "t_s": 18,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view of a wall corner and floor edge.",
+     "No clear surface details can be seen."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the wall corner?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1187,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 8,
+   "t_s": 21,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view of an indoor corner or wall.",
+     "No clear surface details can be made out."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you hold the camera steadier and show the wall more clearly?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1286,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 9,
+   "t_s": 24,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view inside a cabinet under a sink.",
+     "Pipes are visible against a wall surface.",
+     "No clear moisture or staining can be seen."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move the camera closer to the pipes?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1685,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 10,
+   "t_s": 27,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view under a sink cabinet.",
+     "Pipes and cabinet surfaces are visible.",
+     "No clear moisture or staining can be seen."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the pipes under the sink?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1294,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 11,
+   "t_s": 30,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view under a sink cabinet.",
+     "Pipes and cabinet surfaces are visible.",
+     "No clear moisture or stains can be seen."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the pipes under the sink?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1174,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 12,
+   "t_s": 33,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view inside a cabinet under a sink.",
+     "Pipes are visible in the back corner.",
+     "Bottom surface looks damp or discolored."
+    ],
+    "regions": [
+     {
+      "label": "look closer: cabinet bottom",
+      "box_2d": [
+       200,
+       200,
+       900,
+       900
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Do you see any water under the sink?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2173,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 13,
+   "t_s": 36,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Flexible pipe under a sink cabinet.",
+     "Dark staining inside the cabinet corner.",
+     "Possible water damage near the pipe connection."
+    ],
+    "regions": [
+     {
+      "label": "look closer: cabinet corner staining",
+      "box_2d": [
+       100,
+       100,
+       600,
+       600
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Do you see any water dripping under the sink?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1753,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 14,
+   "t_s": 39,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view of a wall corner or fixture edge.",
+     "No clear surface details or moisture signs visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the wall or surface?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1154,
+   "score": {
+    "ok": false,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": [
+     "expected ['hose'], quality blurry"
+    ]
+   }
+  },
+  {
+   "frame": 15,
+   "t_s": 42,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "White wall plate around a wall opening.",
+     "Flexible metal duct runs into the opening.",
+     "Dark area visible inside the wall cavity."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark wall cavity",
+      "box_2d": [
+       250,
+       250,
+       750,
+       750
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Is this vent near a bathroom or laundry area?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 8840,
+   "score": {
+    "ok": false,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": [
+     "expected ['hose'], quality blurry"
+    ]
+   }
+  },
+  {
+   "frame": 16,
+   "t_s": 45,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Wall plate around a pipe opening.",
+     "Flexible metal pipes pass through the wall.",
+     "Gap around the pipes inside the opening."
+    ],
+    "regions": [
+     {
+      "label": "look closer: pipe gap",
+      "box_2d": [
+       200,
+       200,
+       700,
+       700
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is this near a bathroom or kitchen?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1734,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 17,
+   "t_s": 48,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "White wall plate around pipes on a gray wall.",
+     "Three flexible pipes enter through the wall opening.",
+     "Small dark marks visible on the wall near the plate."
+    ],
+    "regions": [
+     {
+      "label": "look closer: wall marks",
+      "box_2d": [
+       0,
+       250,
+       300,
+       350
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is this area near a bathroom or kitchen?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2137,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 18,
+   "t_s": 51,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "A plain wall with a dark vertical edge.",
+     "A small light-colored trim piece at the bottom left.",
+     "The image is soft and lacks clear surface detail."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Could you move closer to the wall so I can see the surface better?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1108,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 19,
+   "t_s": 54,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Ceiling vent with horizontal slats at the top.",
+     "Small dark spot on the ceiling below the vent.",
+     "Curved metal fixture visible at the bottom edge."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark spot",
+      "box_2d": [
+       480,
+       180,
+       540,
+       240
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Is there any water stain or dampness near that spot?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1525,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 20,
+   "t_s": 57,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Horizontal vent slats on a wall.",
+     "White surface below the vent.",
+     "Small dark spot near the vent edge."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark spot",
+      "box_2d": [
+       700,
+       0,
+       780,
+       50
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is this vent in a bathroom or kitchen?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1954,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 21,
+   "t_s": 60,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Dark horizontal vent or grille near the ceiling.",
+     "Light-colored wall or surface below the vent.",
+     "Small dark spot visible on the lower surface."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark spot",
+      "box_2d": [
+       700,
+       700,
+       800,
+       800
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Is there any dampness or smell near that vent?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 3446,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 22,
+   "t_s": 63,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Ceiling vent with horizontal slats visible.",
+     "Small dark spot on the ceiling below the vent.",
+     "Bright light fixture in the lower corner."
+    ],
+    "regions": [
+     {
+      "label": "look closer: ceiling spot",
+      "box_2d": [
+       580,
+       240,
+       640,
+       320
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Have you noticed any water stains near that ceiling spot?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1366,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 23,
+   "t_s": 66,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Dark horizontal band along the top edge of the wall.",
+     "Small dark spot on the ceiling below the band.",
+     "Bright light fixture visible at the bottom of the frame."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark wall band",
+      "box_2d": [
+       0,
+       0,
+       560,
+       1000
+      ]
+     },
+     {
+      "label": "look closer: ceiling spot",
+      "box_2d": [
+       560,
+       400,
+       620,
+       450
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the dark band on the wall?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 8746,
+   "score": {
+    "ok": false,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": [
+     "expected ['vent'], quality blurry"
+    ]
+   }
+  },
+  {
+   "frame": 24,
+   "t_s": 69,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Ceiling vent with horizontal slats at the top.",
+     "Bright circular light behind a metal railing below.",
+     "Ceiling surface appears plain with no visible stains."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is there a bathroom or kitchen near this ceiling area?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2433,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 25,
+   "t_s": 72,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry beige surface with no clear details.",
+     "No visible stains, water, or mold clues."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the wall or surface?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 14376,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 26,
+   "t_s": 75,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Dark staining along the bottom edge of the wall.",
+     "Possible moisture near the baseboard.",
+     "Surface appears soft and slightly out of focus."
+    ],
+    "regions": [
+     {
+      "label": "look closer: wall staining",
+      "box_2d": [
+       0,
+       0,
+       1000,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Has there been any water leak or flooding in this room?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1553,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 27,
+   "t_s": 78,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Close-up of a kitchen appliance control panel.",
+     "The image is blurry and shows no building surfaces."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "not_relevant",
+    "follow_up_question": "Can you show me the area where you suspect mold?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2282,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 28,
+   "t_s": 81,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view of a wall and baseboard area.",
+     "No clear surface details are visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the wall so I can see it better?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 18246,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 29,
+   "t_s": 84,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Close-up of a washing machine control panel.",
+     "No visible moisture or surface damage in view."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is this appliance near a wall or floor with dampness?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1550,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 30,
+   "t_s": 87,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Front-loading washing machine in a laundry area.",
+     "Door seal around the drum looks damp.",
+     "Control panel and door frame are visible."
+    ],
+    "regions": [
+     {
+      "label": "look closer: door seal",
+      "box_2d": [
+       500,
+       650,
+       1000,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Do you notice any musty smell near the washer?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2979,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 31,
+   "t_s": 90,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Close-up of a front-loading washing machine.",
+     "Control panel and door seal are visible.",
+     "No clear moisture or mold clues shown."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is there a leak or musty smell near the washer?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2058,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 32,
+   "t_s": 93,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Close-up of a kitchen appliance surface.",
+     "Blurry image makes surface details hard to see."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you show a clearer view of the area you are concerned about?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1428,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 33,
+   "t_s": 96,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "A plain wall surface fills the frame.",
+     "No stains, water marks, or mold spots are visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is there a specific area you are concerned about?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 3465,
+   "score": {
+    "ok": false,
+    "kind": "unusable",
+    "overclaim": false,
+    "notes": [
+     "should flag (blank wall, out of focus), got ok"
+    ]
+   }
+  },
+  {
+   "frame": 34,
+   "t_s": 99,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "The photo shows a plain wall surface.",
+     "No clear stains or moisture marks are visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Can you show me the area where you suspect mold?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 7058,
+   "score": {
+    "ok": false,
+    "kind": "unusable",
+    "overclaim": false,
+    "notes": [
+     "should flag (blank wall, out of focus), got ok"
+    ]
+   }
+  },
+  {
+   "frame": 35,
+   "t_s": 102,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "White vent slats on a wall or ceiling.",
+     "Small dark spot visible below the vent.",
+     "Image is soft and lacks clear surface detail."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark spot",
+      "box_2d": [
+       780,
+       150,
+       850,
+       220
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the vent and hold the phone steady?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 3055,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 36,
+   "t_s": 105,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "White horizontal slats on a surface.",
+     "Dark gaps between the slats.",
+     "Image is blurry and soft."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the surface?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 12746,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 37,
+   "t_s": 108,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "White vent with dark spots between the slats.",
+     "Possible buildup inside the vent opening.",
+     "Image is soft and close up."
+    ],
+    "regions": [
+     {
+      "label": "look closer: vent slats",
+      "box_2d": [
+       0,
+       0,
+       1000,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Is this vent in a bathroom or another damp room?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1394,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 38,
+   "t_s": 111,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry horizontal slats on a surface.",
+     "Dark lines between light slats.",
+     "Bottom area is plain and light."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the surface?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1494,
+   "score": {
+    "ok": true,
+    "kind": "consistent",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 39,
+   "t_s": 114,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Dark spots on a light wall surface.",
+     "A vertical line runs down the center of the wall.",
+     "The wall appears to be painted drywall or plaster."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark wall spots",
+      "box_2d": [
+       200,
+       100,
+       900,
+       450
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Have you noticed any water leaks near this wall?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 2114,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 40,
+   "t_s": 117,
+   "analysis": {
+    "image_type": "other",
+    "observations": [
+     "Cardboard boxes stacked inside a room.",
+     "No building surfaces or moisture clues are visible."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "not_relevant",
+    "follow_up_question": "Can you show me the wall or ceiling you are concerned about?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1064,
+   "score": {
+    "ok": true,
+    "kind": "unusable",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 41,
+   "t_s": 120,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Cardboard boxes stacked against a plain wall.",
+     "No wall surface is visible behind the boxes.",
+     "No moisture or staining can be seen."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "not_relevant",
+    "follow_up_question": "Can you show me the wall behind the boxes?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1819,
+   "score": {
+    "ok": true,
+    "kind": "unusable",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 42,
+   "t_s": 123,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Cardboard box sitting on a surface.",
+     "Box appears to be in front of a wall or cabinet.",
+     "No visible stains or water marks on the box."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "not_relevant",
+    "follow_up_question": "Can you show me the area where you suspect mold?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1672,
+   "score": {
+    "ok": true,
+    "kind": "unusable",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 43,
+   "t_s": 126,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Light-colored wall surface with soft texture.",
+     "Faint darker patches visible on the wall.",
+     "Image is blurry and lacks clear detail."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the wall for a clearer view?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 3201,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 44,
+   "t_s": 129,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Blurry view of a window with blinds.",
+     "Dark area below the window frame.",
+     "White surface in the foreground."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the dark area below the window?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1452,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 45,
+   "t_s": 132,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "White wall surface with a horizontal seam.",
+     "Image is soft and lacks clear surface detail."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the wall and hold the phone steady?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1040,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 46,
+   "t_s": 135,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Light-colored wall with horizontal seams.",
+     "Small gap visible near the top right edge.",
+     "No clear moisture stains or discoloration seen."
+    ],
+    "regions": [
+     {
+      "label": "look closer: top right gap",
+      "box_2d": [
+       150,
+       700,
+       280,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is this wall near a bathroom or kitchen?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1497,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 47,
+   "t_s": 138,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Light-colored wall with horizontal seams.",
+     "Small gap visible along the upper seam.",
+     "No obvious stains or water marks seen."
+    ],
+    "regions": [
+     {
+      "label": "look closer: upper seam gap",
+      "box_2d": [
+       200,
+       0,
+       320,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is this wall near a bathroom or kitchen?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 3332,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 48,
+   "t_s": 141,
+   "analysis": {
+    "image_type": "instrument",
+    "observations": [
+     "A gauge or meter is shown in the photo.",
+     "The image is too blurry to read any numbers."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you hold the meter still so I can read the display?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1222,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 49,
+   "t_s": 144,
+   "analysis": {
+    "image_type": "instrument",
+    "observations": [
+     "Digital temperature display on an appliance.",
+     "Display numbers are not legible.",
+     "Appliance surface appears clean and dry."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "What appliance is this, and where is it located?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1015,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 50,
+   "t_s": 147,
+   "analysis": {
+    "image_type": "instrument",
+    "observations": [
+     "A temperature control panel is visible.",
+     "The display is too blurry to read.",
+     "No moisture or mold clues are shown."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you show me the area where you suspect moisture?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 24593,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 51,
+   "t_s": 150,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Close-up of a vent with dark spots.",
+     "Image is blurry and hard to read clearly."
+    ],
+    "regions": [
+     {
+      "label": "look closer: vent spots",
+      "box_2d": [
+       450,
+       450,
+       650,
+       650
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you hold the camera steadier on the vent?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1511,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 52,
+   "t_s": 153,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Dark area under the kitchen sink cabinet.",
+     "White pipe fitting visible beneath the sink.",
+     "Cabinet interior appears shadowed and hard to see."
+    ],
+    "regions": [
+     {
+      "label": "look closer: under sink area",
+      "box_2d": [
+       450,
+       500,
+       1000,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Do you see any water stains or dampness under the sink?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 3448,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 53,
+   "t_s": 156,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Bottom edge of a kitchen appliance.",
+     "Dark area visible beneath the appliance.",
+     "No clear moisture or staining seen."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move the appliance so I can see the floor behind it?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1398,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 54,
+   "t_s": 159,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Bottom edge of a kitchen cabinet above an oven.",
+     "Dark gap visible between the cabinet and oven.",
+     "Oven interior shows racks and a white tube."
+    ],
+    "regions": [
+     {
+      "label": "look closer: cabinet gap",
+      "box_2d": [
+       0,
+       0,
+       1000,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Do you see any dampness or stains near the oven?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1492,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 55,
+   "t_s": 162,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "A plain light-colored wall fills the frame.",
+     "A few faint dark smudges appear on the surface.",
+     "No clear moisture stains or damage are visible."
+    ],
+    "regions": [
+     {
+      "label": "look closer: faint smudges",
+      "box_2d": [
+       450,
+       200,
+       900,
+       850
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the wall for a clearer view?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1537,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 56,
+   "t_s": 165,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Light wood flooring with visible grain.",
+     "No stains or water marks seen on the floor.",
+     "Surface appears dry and intact."
+    ],
+    "regions": [],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Is there any dampness or musty smell in this room?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1478,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 57,
+   "t_s": 168,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Light-colored wall surface with soft focus.",
+     "Small dark spots visible on the wall.",
+     "Image is blurry and lacks clear surface detail."
+    ],
+    "regions": [
+     {
+      "label": "look closer: dark spots",
+      "box_2d": [
+       550,
+       700,
+       750,
+       900
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the wall for a clearer view?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1370,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 58,
+   "t_s": 171,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "Light blue wall meets a beige ceiling.",
+     "Dark line runs along the corner where they join.",
+     "Image is soft and lacks clear surface detail."
+    ],
+    "regions": [
+     {
+      "label": "look closer: corner line",
+      "box_2d": [
+       0,
+       0,
+       1000,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "blurry",
+    "follow_up_question": "Can you move closer to the corner line?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1366,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  },
+  {
+   "frame": 59,
+   "t_s": 174,
+   "analysis": {
+    "image_type": "regular",
+    "observations": [
+     "White baseboard along a wood floor.",
+     "Small gap between baseboard and floor.",
+     "No visible stains or water marks."
+    ],
+    "regions": [
+     {
+      "label": "look closer: baseboard gap",
+      "box_2d": [
+       500,
+       500,
+       750,
+       1000
+      ]
+     }
+    ],
+    "visible_moisture": null,
+    "scale_reference_visible": false,
+    "quality": "ok",
+    "follow_up_question": "Have you noticed any dampness near this baseboard?",
+    "declined_to_confirm_mold": true
+   },
+   "tier": "live",
+   "latency_ms": 1764,
+   "score": {
+    "ok": true,
+    "kind": "other",
+    "overclaim": false,
+    "notes": []
+   }
+  }
+ ],
+ "note": "Walkthrough frames every 3 s; labels set by a human. Illustrative."
+}

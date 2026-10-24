@@ -178,3 +178,84 @@ def test_booking_rules():
     assert not booking.is_available(date(2026, 10, 31), "10:00 AM", today, set())  # Saturday
     assert "tenant" not in booking.BOOKABLE_TYPES and set(booking.TIPS) == {10, 15, 25}
     assert booking.TIPS[25] == "Tip Jar - Support Us ($25)"
+
+
+@pytest.mark.parametrize("key,said,expected", [
+    ("leak", "Nope", "No"), ("leak", "not that I know of", "No"), ("leak", "Maybe, I'm not sure.", "Not sure"),
+    ("odor", "Kinda? I don't know.", "Not sure"), ("odor", "Yes, there's a strong musty smell", "Yes"), ("odor", "A little.", "Yes"),
+    ("symptoms", "Yes, my kid has a cough.", "Yes"), ("symptoms", "No, nobody's sick.", "No"),
+    ("occupant", "I'm a tenant, I rent this apartment.", "Tenant"), ("occupant", "We own the house.", "Owner"),
+    ("room", "It's in the laundry room, around the washer and dryer.", "Laundry"), ("room", "The upstairs washroom, by the shower.", "Bathroom"),
+    ("location", "My postal code is h2x1y4.", "H2X 1Y4"), ("location", "K one A zero B one", "K1A 0B1"), ("location", "It's K1A 0B1.", "K1A 0B1"),
+    ("location", "I'm in Australia, actually, in Sydney.", "Australia, actually, in Sydney"),
+])
+def test_live_spoken_answers(key, said, expected):
+    from app.engine.live import validate_answer
+    assert validate_answer(key, said) == expected
+
+
+def test_live_canadian_city_needs_postal():
+    from app.engine.live import validate_answer
+    with pytest.raises(ValueError, match="postal code"):
+        validate_answer("location", "I'm in Ottawa")
+
+
+def test_live_next_step_interleaves():
+    from app.engine.live import checklist
+    from app.models.passport import Case, Photo
+    from app.models.agents import PhotoAnalysis
+    c = Case(id="t", title="t")
+    assert checklist(c)["next_step"]["do"] == "capture"
+    c.photos.append(Photo(id="u1", path="x", source="customer", prompt_id="wide", analysis=PhotoAnalysis(observations=["x"])))
+    assert checklist(c)["next_step"] == {"do": "ask", "key": "concern", "hint": checklist(c)["next_step"]["hint"]}
+    c.answers.update({"concern": "spots", "room": "Laundry", "occupant": "Owner"})
+    assert checklist(c)["next_step"]["do"] == "capture"
+
+
+def test_black_frame_is_too_dark_without_model_call():
+    import asyncio, io
+    from PIL import Image
+    from app.agents import tasks
+    from app.models.passport import Case, Photo
+    buf = io.BytesIO()
+    Image.new("RGB", (64, 64), (5, 5, 5)).save(buf, "JPEG")
+    res = asyncio.run(tasks.analyze_photo(Case(id="t", title="t"), Photo(id="p", path="x", source="customer"), buf.getvalue(), None, None))
+    assert res.value.quality == "too_dark" and res.usage.tier == "rule"
+
+
+def _personas():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+    from sim.personas import PERSONAS
+    return PERSONAS
+
+
+@pytest.mark.parametrize("name", ["job2-virtual", "job1-washroom", "tenant", "outside-canada", "health", "messy", "dark-room", "quitter"])
+def test_persona_spoken_answers_validate_to_facts(name):
+    from app.engine.live import validate_answer
+    p = _personas()[name]
+    for key, expected in p.facts.items():
+        got = validate_answer(key, p.say[key][0])
+        assert got.split(",")[0] == expected, (key, p.say[key][0], got)
+
+
+@pytest.mark.parametrize("name", ["job2-virtual", "job1-washroom", "tenant", "health", "messy", "dark-room"])
+def test_persona_checklist_reaches_ready(name):
+    from app.engine.live import checklist, required_shots, validate_answer
+    from app.models.agents import PhotoAnalysis
+    from app.models.passport import Case, Photo
+    p = _personas()[name]
+    c = Case(id="t", title="t")
+    for key in ("room", "occupant", "symptoms", "odor", "leak", "location"):
+        c.answers[key] = validate_answer(key, p.say[key][0])
+    for shot in required_shots(c):
+        c.photos.append(Photo(id=shot, path="x", source="customer", prompt_id=shot, analysis=PhotoAnalysis(observations=["x"])))
+    cl = checklist(c)
+    assert cl["ready_to_finish"] and cl["next_step"]["do"] in ("finish", "ask")
+    assert cl["missing_shots"] == [] and [q["key"] for q in cl["missing_questions"]] in ([], ["concern"])
+
+
+def test_whole_image_region_is_dropped():
+    a = PhotoAnalysis.model_validate({"observations": ["x"], "regions": [{"label": "all", "box_2d": [0, 0, 1000, 1000]}, {"label": "spot", "box_2d": [100, 100, 300, 300]}]})
+    assert [r.label for r in a.regions] == ["spot"]

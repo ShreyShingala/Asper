@@ -45,6 +45,27 @@ cd ../web && npx tsc --noEmit && npx eslint src && npx next build
 ```
 Offline check: run the API with `MOLDFLOW_DEMO_MODE=fixture OPENROUTER_API_KEY=x`; `demo_api_run.py` must still pass (fixtures in `api/cache/fixtures`).
 
+## AI evaluation tooling (overnight work, see `../plan/OVERNIGHT_LOG.md`)
+All scores are **agreement with the organizer captions on the sample pack (n=24, illustrative)**, never "accuracy".
+Reference report PDFs are never sent to a model. OpenRouter free tier: scripts throttle to 15 req/min (`LLM_RPM`).
+```bash
+cd api
+MOLDFLOW_DEMO_MODE=live uv run python ../scripts/eval_photos.py --label x   # 24 photos vs proof/golden_photos.json (7 checks each)
+uv run python ../scripts/eval_photos.py --rescore                           # re-score the last run, no model calls
+uv run python ../scripts/eval_frames.py --extract                           # walkthrough video -> 1 frame / 3 s
+MOLDFLOW_DEMO_MODE=live uv run python ../scripts/eval_frames.py             # unusable frames flagged? vents consistent with stills?
+uv run --with numpy python ../scripts/camera_thresholds.py                  # tune DARK_LUMA / MOVING_DIFF on the walkthrough
+LLM_RPM=11 uv run python ../scripts/simulate_call.py --persona all          # Bruce: 8 sample-pack personas, auto-scored
+uv run python ../scripts/simulate_call.py --backend elevenlabs --persona job2-virtual [--audio]   # real agent (needs ElevenLabs key, costs credits)
+cd ../web && npm run test:e2e                                               # Playwright: walkthrough as fake camera, ElevenLabs mocked, 3 device sizes
+```
+- `simulate_call.py --backend local` runs the same prompt/first message/tool contracts as `setup_elevenlabs_agent.py` on the
+  free OpenRouter model (text, different LLM): useful for regression, but **not verified with a live call**.
+- Results land in `api/proof/eval_photos.json`, `eval_frames.json`, `eval_calls.json` and show on `/proof`.
+- `scripts/make_fake_camera.sh` regenerates `web/e2e/.media/walkthrough.y4m` (git-ignored, ~480 MB). E2E runs its own API
+  (`MOLDFLOW_E2E_STUB=1`, canned AI outputs, zero model calls) on :8010 and Next on :3100 with `NEXT_DIST_DIR=.next-e2e`.
+- `/try` shows a big QR for visitors: set `NEXT_PUBLIC_PUBLIC_URL` to the HTTPS tunnel URL from `scripts/tunnel.sh`.
+
 ## What's where
 - `api/app/models/passport.py`: the Evidence Passport. `models/agents.py`: Pydantic output model for every AI call.
 - `api/app/agents/llm.py`: the only AI entry point (schema prompt, validate, up to 2 repairs, model fallback, exact + fixture cache, usage/provenance).

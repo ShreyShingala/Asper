@@ -1,0 +1,1375 @@
+{
+ "run_at": "2026-10-24 06:15",
+ "label": "latest per persona: 5 from the v3 full batch, 3 re-run with v5 (committed prompt)",
+ "summary": {
+  "total": "85.14 / 88",
+  "violations": 0,
+  "finished": "8/8",
+  "by_persona": {
+   "job2-virtual": 11.0,
+   "job1-washroom": 10.0,
+   "tenant": 10.71,
+   "outside-canada": 10.81,
+   "health": 10.73,
+   "messy": 9.95,
+   "dark-room": 10.94,
+   "quitter": 11.0
+  },
+  "backend": "local",
+  "customer": "rules",
+  "verified_with_live_call": false
+ },
+ "calls": [
+  {
+   "persona": "job2-virtual",
+   "case_id": "cc9d4c875",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 11.0,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 1.0,
+     "no_repeats": 1.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {},
+    "long_turns": [],
+    "checks": {},
+    "summary_unsupported": [],
+    "service": "onsite",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 137,
+    "turns": 15,
+    "llm_calls": 14,
+    "tools": [
+     "save_answer",
+     "capture_photo",
+     "get_checklist",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete",
+    "summary": "The customer reported black and white spots inside their washing machine and around the dryer vent in their laundry room, along with a strong musty smell that does not go away after cleaning. They own the home and said no one is having health symptoms. Photo observations show peeling paint around a wall opening, white slats over dark spots inside a vent, dark residue between slats, a dark band along the ceiling edge, and dampness near plumbing connections. The customer provided postal code H2X 1Y4.",
+    "answers": {
+     "concern": "black and white spots inside washing machine and around dryer vent, with a persistent smell",
+     "room": "Laundry",
+     "occupant": "Owner",
+     "symptoms": "No",
+     "odor": "Yes",
+     "leak": "No",
+     "location": "H2X 1Y4"
+    }
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "I keep finding black and white spots inside my washing machine and around the dryer vent, and there's a smell that won't go away.",
+     "at_ms": 20230
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture that spot.",
+     "at_ms": 23723
+    },
+    {
+     "role": "ai",
+     "text": "Thanks \u2014 I can see peeling paint and dark spots around the wall opening. Where is this area in your home?",
+     "at_ms": 35588
+    },
+    {
+     "role": "ai",
+     "text": "Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 40149
+    },
+    {
+     "role": "customer",
+     "text": "It's in the laundry room, around the washer and dryer. I own the place.",
+     "at_ms": 46534
+    },
+    {
+     "role": "ai",
+     "text": "Got it \u2014 laundry room, and you own the place. Are you the owner?",
+     "at_ms": 52718
+    },
+    {
+     "role": "ai",
+     "text": "Come closer, about an arm's length from the wall opening.",
+     "at_ms": 57964
+    },
+    {
+     "role": "ai",
+     "text": "I can see white slats over dark spots inside the vent. Is anyone in the home having health symptoms?",
+     "at_ms": 68011
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell near the washer and dryer?",
+     "at_ms": 72957
+    },
+    {
+     "role": "customer",
+     "text": "I own the place. No, nobody's sick.",
+     "at_ms": 76650
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell near the washer and dryer?",
+     "at_ms": 81296
+    },
+    {
+     "role": "ai",
+     "text": "Tilt up to show the ceiling above the wall opening.",
+     "at_ms": 86242
+    },
+    {
+     "role": "ai",
+     "text": "I see a dark band along the ceiling edge. Any known leak or water damage nearby?",
+     "at_ms": 95663
+    },
+    {
+     "role": "customer",
+     "text": "Yes, there's a strong musty smell that doesn't go away even after cleaning. Not that I know of.",
+     "at_ms": 103586
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture the nearby plumbing and vent area.",
+     "at_ms": 108617
+    },
+    {
+     "role": "ai",
+     "text": "I can see dampness near the plumbing connection. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 125234
+    },
+    {
+     "role": "customer",
+     "text": "My postal code is H2X 1Y4.",
+     "at_ms": 128542
+    },
+    {
+     "role": "ai",
+     "text": "H, 2, X, 1, Y, 4 \u2014 is that right?",
+     "at_ms": 133188
+    },
+    {
+     "role": "ai",
+     "text": "I'll put your pre-assessment together now.",
+     "at_ms": 136596
+    }
+   ],
+   "prompt": "v3 (final full batch, 05:28)"
+  },
+  {
+   "persona": "job1-washroom",
+   "case_id": "cb3688aea",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 10.0,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 1.0,
+     "no_repeats": 0.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {
+     "odor": 3
+    },
+    "long_turns": [],
+    "checks": {
+     "mentions_moisture": true
+    },
+    "summary_unsupported": [],
+    "service": "onsite",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 169,
+    "turns": 13,
+    "llm_calls": 12,
+    "tools": [
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete",
+    "summary": "The customer reported staining on the ceiling and grout in their upstairs washroom and a leaking tub faucet. Photo observations show a faint shadow near the shower corner, dark grout lines, a yellow-brown ceiling stain near the corner, white wall tiles below the ceiling, a thermal image of the bathroom ceiling, a cool blue band across the center, and a moisture meter pressed against the bathroom floor tile near a black shower fixture. The customer owns the home, reported no health symptoms, and said they do not smell anything musty. They confirmed the tub faucet drips and the shower pools water, and provided postal code K1A 0B1.",
+    "answers": {
+     "concern": "staining on the ceiling and grout in our upstairs washroom, and the tub faucet has been leaking",
+     "room": "Bathroom",
+     "leak": "Yes",
+     "occupant": "Owner",
+     "symptoms": "No",
+     "odor": "No",
+     "location": "K1A 0B1"
+    }
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "There's staining on the ceiling and grout in our upstairs washroom, and the tub faucet has been leaking.",
+     "at_ms": 17923
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture that.",
+     "at_ms": 21030
+    },
+    {
+     "role": "ai",
+     "text": "The wide shot shows a faint shadow near the shower corner and dark grout lines. Can you step back so I can see the whole washroom area?",
+     "at_ms": 45616
+    },
+    {
+     "role": "ai",
+     "text": "Hold still while I capture the close-up.",
+     "at_ms": 49708
+    },
+    {
+     "role": "ai",
+     "text": "The close-up shows a yellow-brown ceiling stain near the corner. Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 57834
+    },
+    {
+     "role": "ai",
+     "text": "Is anyone in the home having health symptoms?",
+     "at_ms": 62011
+    },
+    {
+     "role": "customer",
+     "text": "We own the house. No, we're all fine.",
+     "at_ms": 66088
+    },
+    {
+     "role": "ai",
+     "text": "Thanks. Is there a musty smell in the washroom?",
+     "at_ms": 70349
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell in the washroom?",
+     "at_ms": 74826
+    },
+    {
+     "role": "ai",
+     "text": "The view above shows a cool blue band on the ceiling. Is there a musty smell in the washroom?",
+     "at_ms": 142153
+    },
+    {
+     "role": "customer",
+     "text": "No, I don't really smell anything.",
+     "at_ms": 145461
+    },
+    {
+     "role": "ai",
+     "text": "Thanks. Any known leak or water damage nearby?",
+     "at_ms": 149338
+    },
+    {
+     "role": "ai",
+     "text": "Thanks. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 155053
+    },
+    {
+     "role": "customer",
+     "text": "Yes, the tub faucet drips and the shower pools water. It's K1A 0B1.",
+     "at_ms": 161053
+    },
+    {
+     "role": "ai",
+     "text": "K, 1, A, 0, B, 1 \u2014 is that right?",
+     "at_ms": 165699
+    },
+    {
+     "role": "ai",
+     "text": "I'll put your pre-assessment together now.",
+     "at_ms": 169126
+    }
+   ],
+   "prompt": "v5 (cycle 4, 06:02)"
+  },
+  {
+   "persona": "tenant",
+   "case_id": "cf62430d5",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 10.71,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 0.71,
+     "no_repeats": 1.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {},
+    "long_turns": [
+     "Thanks for telling me. I've saved that you rent and about the black and white stuff near your washer, dryer and vents. Which room is that in?",
+     "Got it \u2014 laundry room. Step back so I can see the whole area around the washer and dryer. Hold still.",
+     "I can see peeling paint and dark specks around the wall opening near your washer and dryer. Come closer, about an arm's length. Hold still."
+    ],
+    "checks": {
+     "tenant_letter": true,
+     "tenant_phone": true
+    },
+    "summary_unsupported": [],
+    "service": "onsite",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 141,
+    "turns": 14,
+    "llm_calls": 13,
+    "tools": [
+     "save_answer",
+     "save_answer",
+     "get_checklist",
+     "save_answer",
+     "capture_photo",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "capture_photo",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete",
+    "summary": "The customer rents an apartment and reported black and white material around the washer, dryer, and vents in the laundry room. They described a strong musty smell that persists after cleaning and said no one in the home has health symptoms. They are not aware of any leaks or water damage. Photo observations include peeling paint around wall openings, dark specks near the washer and dryer, dark material behind vent slats, and dark smudges along the ceiling edge.",
+    "answers": {
+     "occupant": "Tenant",
+     "concern": "black and white stuff around the washer, the dryer and the vents",
+     "room": "Laundry",
+     "symptoms": "No",
+     "odor": "Yes",
+     "leak": "No",
+     "location": "H2X 1Y4"
+    }
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "I rent an apartment and there's black and white stuff around the washer, the dryer and the vents.",
+     "at_ms": 17923
+    },
+    {
+     "role": "ai",
+     "text": "Thanks for telling me. I've saved that you rent and about the black and white stuff near your washer, dryer and vents. Which room is that in?",
+     "at_ms": 29107
+    },
+    {
+     "role": "ai",
+     "text": "Which room is that in?",
+     "at_ms": 32730
+    },
+    {
+     "role": "customer",
+     "text": "It's in the laundry room, around the washer and dryer.",
+     "at_ms": 37576
+    },
+    {
+     "role": "ai",
+     "text": "Got it \u2014 laundry room. Step back so I can see the whole area around the washer and dryer. Hold still.",
+     "at_ms": 46453
+    },
+    {
+     "role": "ai",
+     "text": "I can see peeling paint and dark specks around the wall opening near your washer and dryer. Come closer, about an arm's length. Hold still.",
+     "at_ms": 59834
+    },
+    {
+     "role": "ai",
+     "text": "I can see dark material behind the vent slats. Anyone in the home having health symptoms?",
+     "at_ms": 70986
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell in the laundry room?",
+     "at_ms": 75547
+    },
+    {
+     "role": "customer",
+     "text": "No, nobody's sick. Yes, there's a strong musty smell that doesn't go away even after cleaning.",
+     "at_ms": 82701
+    },
+    {
+     "role": "ai",
+     "text": "Thank you \u2014 I've saved that there's no health symptoms and a strong musty smell. Any known leak or water damage nearby?",
+     "at_ms": 91963
+    },
+    {
+     "role": "ai",
+     "text": "Any known leak or water damage nearby?",
+     "at_ms": 96055
+    },
+    {
+     "role": "customer",
+     "text": "Not that I know of.",
+     "at_ms": 98978
+    },
+    {
+     "role": "ai",
+     "text": "I've saved that there's no known leak or water damage. Could you give me your postal code, or the country if you're outside Canada?",
+     "at_ms": 109009
+    },
+    {
+     "role": "ai",
+     "text": "I can see dark smudges along the top edge near the ceiling. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 120851
+    },
+    {
+     "role": "customer",
+     "text": "My postal code is H2X 1Y4.",
+     "at_ms": 124159
+    },
+    {
+     "role": "ai",
+     "text": "K, 1, A, 0, B, 1, right?",
+     "at_ms": 127651
+    },
+    {
+     "role": "ai",
+     "text": "Thanks \u2014 H2X 1Y4 saved. Show me any plumbing, vent, window or appliance nearby. Hold still.",
+     "at_ms": 134905
+    },
+    {
+     "role": "ai",
+     "text": "I'll put your pre-assessment together now.",
+     "at_ms": 141013
+    }
+   ],
+   "prompt": "v3 (final full batch, 05:28)"
+  },
+  {
+   "persona": "outside-canada",
+   "case_id": "ca7f63976",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 10.81,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 0.81,
+     "no_repeats": 1.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {},
+    "long_turns": [
+     "Thank you. Let me save that. Dark spots on the vents in your laundry room and a musty smell \u2014 got it.",
+     "The wide shot shows dark spots near the wall opening and some peeling. Come closer, about an arm's length away. Hold still.",
+     "Thank you. Tilt up to show me what's directly above the vents. Hold still."
+    ],
+    "checks": {},
+    "summary_unsupported": [],
+    "service": "remote_report",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 141,
+    "turns": 16,
+    "llm_calls": 15,
+    "tools": [
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete",
+    "summary": "The customer, who owns the home in Sydney, Australia, reported dark spots on the laundry room vents and a musty smell. Photo observations show dark spots around the wall opening, behind the vent slats, and peeling paint around the opening, with two metal hoses running through the wall. The customer said no one in the home has health symptoms and they are not aware of any leaks or water damage. The ceiling above the vents appears clean and dry.",
+    "answers": {
+     "concern": "Dark spots on the vents in my laundry room and it smells musty",
+     "odor": "Yes",
+     "room": "Laundry",
+     "occupant": "Owner",
+     "symptoms": "No",
+     "leak": "No",
+     "location": "Australia, Sydney"
+    }
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "There are dark spots on the vents in my laundry room and it smells musty.",
+     "at_ms": 16769
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Let me save that. Dark spots on the vents in your laundry room and a musty smell \u2014 got it.",
+     "at_ms": 26030
+    },
+    {
+     "role": "ai",
+     "text": "Dark spots on the vents in your laundry room and a musty smell \u2014 saved. Are you the owner, a tenant, or a landlord or manager?",
+     "at_ms": 37430
+    },
+    {
+     "role": "ai",
+     "text": "Step back so I can see the whole area and the room around it. Hold still.",
+     "at_ms": 44684
+    },
+    {
+     "role": "ai",
+     "text": "The wide shot shows dark spots near the wall opening and some peeling. Come closer, about an arm's length away. Hold still.",
+     "at_ms": 60400
+    },
+    {
+     "role": "ai",
+     "text": "The close-up shows dark spots behind the vent slats. Are you the owner, a tenant, or a landlord or manager?",
+     "at_ms": 71826
+    },
+    {
+     "role": "customer",
+     "text": "I own the place.",
+     "at_ms": 74364
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Anyone in the home having health symptoms?",
+     "at_ms": 78626
+    },
+    {
+     "role": "ai",
+     "text": "Anyone in the home having health symptoms?",
+     "at_ms": 82418
+    },
+    {
+     "role": "customer",
+     "text": "No, nobody's sick.",
+     "at_ms": 84572
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Any known leak or water damage nearby?",
+     "at_ms": 88834
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. Tilt up to show me what's directly above the vents. Hold still.",
+     "at_ms": 95318
+    },
+    {
+     "role": "ai",
+     "text": "The ceiling above looks clean and dry. Any known leak or water damage nearby?",
+     "at_ms": 103735
+    },
+    {
+     "role": "customer",
+     "text": "Not that I know of.",
+     "at_ms": 106658
+    },
+    {
+     "role": "ai",
+     "text": "Thank you. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 112458
+    },
+    {
+     "role": "ai",
+     "text": "What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 117789
+    },
+    {
+     "role": "customer",
+     "text": "I'm in Australia, actually, in Sydney.",
+     "at_ms": 121096
+    },
+    {
+     "role": "ai",
+     "text": "Got it \u2014 Australia. Let me confirm: A, U, S, T, R, A, L, I, A, right?",
+     "at_ms": 128435
+    },
+    {
+     "role": "ai",
+     "text": "Show me any plumbing, vent, window or appliance nearby. Hold still.",
+     "at_ms": 133766
+    },
+    {
+     "role": "ai",
+     "text": "All done. I'll put your pre-assessment together now.",
+     "at_ms": 140540
+    }
+   ],
+   "prompt": "v3 (final full batch, 05:28)"
+  },
+  {
+   "persona": "health",
+   "case_id": "cb52fa240",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 10.73,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 0.73,
+     "no_repeats": 1.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {},
+    "long_turns": [
+     "I'm sorry to hear that. I can't give medical advice, so please check with a doctor about the cough. What room is the staining in?",
+     "I'll save that there's a known leak from the tub faucet. Come closer, about an arm's length from the staining. Hold still.",
+     "That's right under the faucet you said drips. Tilt up to show the ceiling directly above the stain. Hold still."
+    ],
+    "checks": {
+     "medical_disclaimer": true
+    },
+    "summary_unsupported": [],
+    "service": "iaq",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 149,
+    "turns": 15,
+    "llm_calls": 14,
+    "tools": [
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "capture_photo",
+     "capture_photo",
+     "save_answer",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete",
+    "summary": "The customer reported staining in the upstairs washroom and that their child has had a cough for a few weeks. They described a musty smell in the room and said the tub faucet leaks. Photo observations show a faint shadow and yellow-brown stain on the ceiling near the shower corner, with a cool blue band visible on the thermal image.",
+    "answers": {
+     "concern": "staining in upstairs washroom, kid coughing for a few weeks",
+     "room": "Bathroom",
+     "odor": "Yes",
+     "symptoms": "Yes",
+     "occupant": "Owner",
+     "leak": "Yes",
+     "location": "K1A 0B1"
+    }
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "There's staining in our upstairs washroom and my kid has had a cough for a few weeks.",
+     "at_ms": 17538
+    },
+    {
+     "role": "ai",
+     "text": "I'm sorry to hear that. I can't give medical advice, so please check with a doctor about the cough. What room is the staining in?",
+     "at_ms": 27953
+    },
+    {
+     "role": "ai",
+     "text": "Step back so I can see the whole washroom and the area around the staining. Hold still.",
+     "at_ms": 35892
+    },
+    {
+     "role": "ai",
+     "text": "The wide shot shows a faint shadow near the shower corner on the ceiling. Is there a musty smell in the washroom?",
+     "at_ms": 48707
+    },
+    {
+     "role": "customer",
+     "text": "The upstairs washroom. Yes, it smells kind of musty in there.",
+     "at_ms": 53938
+    },
+    {
+     "role": "ai",
+     "text": "I'll save that the room is the upstairs washroom and there's a musty smell. Is anyone in the home having health symptoms?",
+     "at_ms": 63200
+    },
+    {
+     "role": "ai",
+     "text": "Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 68361
+    },
+    {
+     "role": "customer",
+     "text": "Is it dangerous for my kid to breathe this?",
+     "at_ms": 72823
+    },
+    {
+     "role": "ai",
+     "text": "I can't give medical advice, so please check with a doctor about that. Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 82084
+    },
+    {
+     "role": "customer",
+     "text": "We own it.",
+     "at_ms": 84238
+    },
+    {
+     "role": "ai",
+     "text": "Got it \u2014 you own it. Any known leak or water damage nearby?",
+     "at_ms": 90038
+    },
+    {
+     "role": "ai",
+     "text": "Any known leak or water damage nearby?",
+     "at_ms": 93830
+    },
+    {
+     "role": "customer",
+     "text": "Yes, the tub faucet leaks.",
+     "at_ms": 96754
+    },
+    {
+     "role": "ai",
+     "text": "I'll save that there's a known leak from the tub faucet. Come closer, about an arm's length from the staining. Hold still.",
+     "at_ms": 106015
+    },
+    {
+     "role": "ai",
+     "text": "That's right under the faucet you said drips. Tilt up to show the ceiling directly above the stain. Hold still.",
+     "at_ms": 119282
+    },
+    {
+     "role": "ai",
+     "text": "The ceiling above shows a cool band on the thermal image. Any plumbing, vent, window or appliance nearby? Show it. Hold still.",
+     "at_ms": 130474
+    },
+    {
+     "role": "ai",
+     "text": "What's your postal code, or the country if you're outside Canada?",
+     "at_ms": 138485
+    },
+    {
+     "role": "customer",
+     "text": "K1A 0B1.",
+     "at_ms": 140254
+    },
+    {
+     "role": "ai",
+     "text": "K, 1, A, 0, B, 1 \u2014 is that right?",
+     "at_ms": 144900
+    },
+    {
+     "role": "ai",
+     "text": "I'll put your pre-assessment together now.",
+     "at_ms": 148308
+    }
+   ],
+   "prompt": "v5 (cycle 4, 06:02)"
+  },
+  {
+   "persona": "messy",
+   "case_id": "c3975864d",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 9.95,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 0.95,
+     "no_repeats": 0.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {
+     "symptoms": 3,
+     "location": 3
+    },
+    "long_turns": [
+     "Thanks. I'll save that as your concern. Can you tell me your postal code so I know your area?"
+    ],
+    "checks": {},
+    "summary_unsupported": [],
+    "service": "onsite",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 203,
+    "turns": 21,
+    "llm_calls": 20,
+    "tools": [
+     "save_answer",
+     "get_checklist",
+     "capture_photo",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete",
+    "summary": "The customer reported stuff on the bathroom ceiling that has been there for a while. Photo observations show discoloration above the shower, a yellowish stain with small dark specks near the corner, and a cool blue band on the ceiling from the thermal camera. The customer owns the home, is not sure about a musty smell or any known leak or water damage, and reported no health symptoms in the home. The postal code provided is K1A 0B1.",
+    "answers": {
+     "concern": "stuff on the ceiling in the bathroom",
+     "room": "Bathroom",
+     "occupant": "Owner",
+     "odor": "Not sure",
+     "symptoms": "No",
+     "leak": "Not sure",
+     "location": "K1A 0B1"
+    }
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "Uh, so, there's like, stuff on the ceiling? In the bathroom I think. It's been a while.",
+     "at_ms": 17538
+    },
+    {
+     "role": "ai",
+     "text": "Thanks. I'll save that as your concern. Can you tell me your postal code so I know your area?",
+     "at_ms": 25646
+    },
+    {
+     "role": "ai",
+     "text": "Got it \u2014 bathroom ceiling. Could you step back so I can see the whole wall and ceiling around it?",
+     "at_ms": 34738
+    },
+    {
+     "role": "ai",
+     "text": "The wide shot shows discoloration above the shower. Now come closer, about an arm's length from the ceiling spot.",
+     "at_ms": 47024
+    },
+    {
+     "role": "ai",
+     "text": "Hold still, I'm capturing the close-up now.",
+     "at_ms": 50816
+    },
+    {
+     "role": "ai",
+     "text": "The close-up shows a yellowish stain with small dark specks on the ceiling. Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 91823
+    },
+    {
+     "role": "customer",
+     "text": "Sorry, wait, how much is this going to cost me?",
+     "at_ms": 96669
+    },
+    {
+     "role": "ai",
+     "text": "The team will include pricing with your pre-assessment. Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 104007
+    },
+    {
+     "role": "customer",
+     "text": "We own it.",
+     "at_ms": 106161
+    },
+    {
+     "role": "ai",
+     "text": "Thanks \u2014 I'll save that you own it. Is there a musty smell in the bathroom?",
+     "at_ms": 113115
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell in the bathroom?",
+     "at_ms": 117292
+    },
+    {
+     "role": "customer",
+     "text": "I don't know, maybe?",
+     "at_ms": 119830
+    },
+    {
+     "role": "ai",
+     "text": "I'll save that as not sure. Anyone in the home having health symptoms?",
+     "at_ms": 125630
+    },
+    {
+     "role": "ai",
+     "text": "Anyone in the home having health symptoms?",
+     "at_ms": 129423
+    },
+    {
+     "role": "customer",
+     "text": "Hang on, my dog is barking. Okay, go ahead.",
+     "at_ms": 133884
+    },
+    {
+     "role": "ai",
+     "text": "Hold still, I'm capturing the above shot now.",
+     "at_ms": 137761
+    },
+    {
+     "role": "ai",
+     "text": "The above shot shows a cool blue band on the ceiling from the thermal camera. Anyone in the home having health symptoms?",
+     "at_ms": 148704
+    },
+    {
+     "role": "customer",
+     "text": "Nope.",
+     "at_ms": 150089
+    },
+    {
+     "role": "ai",
+     "text": "I'll save that as no symptoms. Any known leak or water damage nearby?",
+     "at_ms": 155889
+    },
+    {
+     "role": "ai",
+     "text": "Any known leak or water damage nearby?",
+     "at_ms": 159681
+    },
+    {
+     "role": "customer",
+     "text": "I don't know, maybe?",
+     "at_ms": 162220
+    },
+    {
+     "role": "ai",
+     "text": "I'll save that as not sure. Could you give me your postal code, or the country if you're outside Canada?",
+     "at_ms": 170712
+    },
+    {
+     "role": "ai",
+     "text": "Could you give me your postal code, or the country if you're outside Canada?",
+     "at_ms": 177197
+    },
+    {
+     "role": "customer",
+     "text": "K1A 0B1.",
+     "at_ms": 178966
+    },
+    {
+     "role": "ai",
+     "text": "K, 1, A, 0, B, 1 \u2014 is that right?",
+     "at_ms": 183612
+    },
+    {
+     "role": "ai",
+     "text": "K, 1, A, 0, B, 1 \u2014 is that right?",
+     "at_ms": 188558
+    },
+    {
+     "role": "customer",
+     "text": "Yes, that's right.",
+     "at_ms": 190712
+    },
+    {
+     "role": "ai",
+     "text": "Great, confirmed. Now show me any plumbing, vent, window or appliance nearby.",
+     "at_ms": 196128
+    },
+    {
+     "role": "ai",
+     "text": "All done \u2014 I'll put your pre-assessment together now.",
+     "at_ms": 202291
+    }
+   ],
+   "prompt": "v3 (final full batch, 05:28)"
+  },
+  {
+   "persona": "dark-room",
+   "case_id": "cc77ff7ea",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 10.94,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 0.94,
+     "no_repeats": 1.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {},
+    "long_turns": [
+     "Got it, no known leak. Show me what's directly above the vent \u2014 tilt up to the ceiling. Hold still."
+    ],
+    "checks": {
+     "light_coaching": true
+    },
+    "summary_unsupported": [],
+    "service": "onsite",
+    "shots_taken": [
+     "wide",
+     "close",
+     "above",
+     "nearby"
+    ],
+    "seconds": 148,
+    "turns": 17,
+    "llm_calls": 16,
+    "tools": [
+     "save_answer",
+     "save_answer",
+     "get_checklist",
+     "capture_photo",
+     "capture_photo",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "capture_photo",
+     "save_answer",
+     "finish_assessment"
+    ],
+    "finish_reason": "complete",
+    "summary": "The customer reported dark spots on the laundry room vent grille and a strong musty smell that persists after cleaning. They own the home and reported no health symptoms or known leaks or water damage. Photo observations show dark spots on the vent grille and around the wall opening with two metal hoses; the ceiling above appears clean.",
+    "answers": {
+     "concern": "Dark spots on the vent grille in the laundry room",
+     "room": "Laundry",
+     "occupant": "Owner",
+     "symptoms": "No",
+     "odor": "Yes",
+     "leak": "No",
+     "location": "H2X 1Y4"
+    }
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "There are dark spots on the vent grille in my laundry room.",
+     "at_ms": 15615
+    },
+    {
+     "role": "ai",
+     "text": "Dark spots on the vent grille in the laundry room \u2014 got it. Is your laundry room upstairs or downstairs?",
+     "at_ms": 24107
+    },
+    {
+     "role": "ai",
+     "text": "Step back so I can see the whole vent and the area around it. Hold still.",
+     "at_ms": 31961
+    },
+    {
+     "role": "ai",
+     "text": "Can you turn on a light or use your phone flashlight? Hold still.",
+     "at_ms": 37765
+    },
+    {
+     "role": "ai",
+     "text": "I can see dark spots around the wall opening with the hoses. Are you the owner, tenant, or landlord or manager?",
+     "at_ms": 48971
+    },
+    {
+     "role": "customer",
+     "text": "I own the place.",
+     "at_ms": 51509
+    },
+    {
+     "role": "ai",
+     "text": "Got it, you own the place. Is anyone in the home having health symptoms?",
+     "at_ms": 57694
+    },
+    {
+     "role": "ai",
+     "text": "Come closer, about an arm's length from the vent. Hold still.",
+     "at_ms": 63025
+    },
+    {
+     "role": "ai",
+     "text": "I can see dark spots behind the vent grille. Is anyone in the home having health symptoms?",
+     "at_ms": 72609
+    },
+    {
+     "role": "customer",
+     "text": "No, nobody's sick.",
+     "at_ms": 74763
+    },
+    {
+     "role": "ai",
+     "text": "Got it, no symptoms. Is there a musty smell near the laundry vent?",
+     "at_ms": 80563
+    },
+    {
+     "role": "ai",
+     "text": "Is there a musty smell near the laundry vent?",
+     "at_ms": 85125
+    },
+    {
+     "role": "customer",
+     "text": "Yes, there's a strong musty smell that doesn't go away even after cleaning.",
+     "at_ms": 91125
+    },
+    {
+     "role": "ai",
+     "text": "Got it, a strong musty smell. Any known leak or water damage nearby?",
+     "at_ms": 96925
+    },
+    {
+     "role": "ai",
+     "text": "Any known leak or water damage nearby?",
+     "at_ms": 100717
+    },
+    {
+     "role": "customer",
+     "text": "Not that I know of.",
+     "at_ms": 103640
+    },
+    {
+     "role": "ai",
+     "text": "Got it, no known leak. Show me what's directly above the vent \u2014 tilt up to the ceiling. Hold still.",
+     "at_ms": 112132
+    },
+    {
+     "role": "ai",
+     "text": "I can see dark spots on the vent grille with a clean ceiling above. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 125135
+    },
+    {
+     "role": "ai",
+     "text": "I can see dark spots around the wall opening with the hoses. What's your postal code, or your country if you're outside Canada?",
+     "at_ms": 137239
+    },
+    {
+     "role": "customer",
+     "text": "My postal code is H2X 1Y4.",
+     "at_ms": 140547
+    },
+    {
+     "role": "ai",
+     "text": "H, 2, X, 1, Y, 4 \u2014 right?",
+     "at_ms": 144424
+    },
+    {
+     "role": "ai",
+     "text": "I'll put your pre-assessment together now.",
+     "at_ms": 147831
+    }
+   ],
+   "prompt": "v5 (cycle 4, 06:02)"
+  },
+  {
+   "persona": "quitter",
+   "case_id": "c1aa569c3",
+   "backend": "local",
+   "audio": false,
+   "score": {
+    "total": 11.0,
+    "max": 11,
+    "parts": {
+     "answers": 1.0,
+     "concern": 1.0,
+     "shots": 1.0,
+     "finished": 1.0,
+     "service": 1.0,
+     "rules": 1.0,
+     "short_turns": 1.0,
+     "no_repeats": 1.0,
+     "summary_grounded": 1.0,
+     "persona_checks": 1.0,
+     "in_time": 1.0
+    },
+    "wrong_answers": {},
+    "violations": {},
+    "repeated": {},
+    "long_turns": [],
+    "checks": {},
+    "summary_unsupported": [],
+    "service": "onsite",
+    "shots_taken": [
+     "wide"
+    ],
+    "seconds": 45,
+    "turns": 5,
+    "llm_calls": 4,
+    "tools": [
+     "save_answer",
+     "save_answer",
+     "capture_photo",
+     "save_answer",
+     "finish_assessment"
+    ],
+    "finish_reason": "customer_requested",
+    "summary": "The customer reported dark spots on the vent in their laundry room. Photo observations show dark spots inside a wall opening beside peeling paint, with two metal hoses running through the opening. The customer ended the call before providing their occupancy status.",
+    "answers": {
+     "concern": "Dark spots on the vent in my laundry room.",
+     "room": "Laundry"
+    }
+   },
+   "transcript": [
+    {
+     "role": "ai",
+     "text": "Hi, I'm Bruce from Mold Busters. Point your phone's back camera at the spot that's worrying you, and tell me a little about what's going on.",
+     "at_ms": 0
+    },
+    {
+     "role": "customer",
+     "text": "There are dark spots on the vent in my laundry room.",
+     "at_ms": 15230
+    },
+    {
+     "role": "ai",
+     "text": "Hold still, I'll capture that spot now.",
+     "at_ms": 18723
+    },
+    {
+     "role": "ai",
+     "text": "The wide shot shows dark spots inside the wall opening beside peeling paint. Are you the owner, a tenant, or a landlord or manager?",
+     "at_ms": 31837
+    },
+    {
+     "role": "ai",
+     "text": "Are you the owner, a tenant, or a landlord or manager?",
+     "at_ms": 37168
+    },
+    {
+     "role": "customer",
+     "text": "Sorry, I really have to go now.",
+     "at_ms": 40860
+    },
+    {
+     "role": "ai",
+     "text": "I understand. Let me put your pre-assessment together now.",
+     "at_ms": 45122
+    }
+   ],
+   "prompt": "v3 (final full batch, 05:28)"
+  }
+ ],
+ "note": "Simulated calls on the sample-pack personas. Local stand-in (same prompt/tools, free OpenRouter model, text only): NOT verified with a live call. job2-virtual, tenant, outside-canada, messy and quitter were last run on prompt v3; the committed prompt is v5 (adds three rules) and was re-run only on job1-washroom, health and dark-room (free-tier request limit)."
+}

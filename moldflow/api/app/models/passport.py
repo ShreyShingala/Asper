@@ -172,7 +172,7 @@ class AIUsage(BaseModel):
     tokens_in: int | None = None
     tokens_out: int | None = None
     cost_usd: float | None = None
-    tier: Literal["live", "fallback", "exact_cache", "fixture"]
+    tier: Literal["live", "fallback", "exact_cache", "fixture", "rule"]
     at: datetime = Field(default_factory=now)
 
 

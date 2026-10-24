@@ -8,3 +8,8 @@ __pycache__/
 moldflow/api/data/
 moldflow/api/cache/exact/
 moldflow/api/.venv/
+moldflow/api/proof/frames/
+moldflow/web/e2e/.media/
+moldflow/web/test-results/
+moldflow/web/playwright-report/
+moldflow/web/.next-e2e/

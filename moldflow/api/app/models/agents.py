@@ -30,7 +30,7 @@ class Region(BaseModel):
 
 class PhotoAnalysis(BaseModel):
     image_type: Literal["regular", "thermal", "test_kit", "instrument", "other"] = "regular"
-    observations: list[str] = Field(description="Plain-language visible observations, 1-4 items")
+    observations: list[str] = Field(description="2-4 spoken-style sentences, each at most 12 words")
     regions: list[Region] = Field(default=[], description="Areas worth a closer look (may be empty)")
     visible_moisture: bool | None = None
     scale_reference_visible: bool = False
@@ -44,9 +44,13 @@ class PhotoAnalysis(BaseModel):
         good = []
         for r in v or []:
             try:
-                good.append(Region.model_validate(r))
+                reg = Region.model_validate(r)
             except Exception:
                 continue
+            y0, x0, y1, x1 = reg.box_2d
+            if (y1 - y0) * (x1 - x0) > 850_000:  # a box over (almost) the whole photo is not "a closer look"
+                continue
+            good.append(reg)
         return good[:4]
 
     @field_validator("image_type", mode="before")

@@ -29,10 +29,27 @@ GUARDRAILS = """Rules you must always follow:
 
 _client: AsyncOpenAI | None = None
 _sem = asyncio.Semaphore(config.LLM_CONCURRENCY)
+_rate_lock = asyncio.Lock()
+_next_slot = 0.0
+
+
+async def _throttle() -> None:
+    """Space live requests evenly at LLM_RPM (process-wide), so bursts never trip the provider's per-minute limit."""
+    global _next_slot
+    async with _rate_lock:
+        now_ = time.monotonic()
+        wait = max(0.0, _next_slot - now_)
+        _next_slot = max(now_, _next_slot) + 60.0 / config.LLM_RPM
+    if wait:
+        await asyncio.sleep(wait)
 
 
 class AgentFailure(Exception):
     pass
+
+
+class TransientError(Exception):
+    """Provider returned an empty/malformed response (seen on free tiers): retry like a 5xx."""
 
 
 @dataclass
@@ -96,7 +113,7 @@ def _write(path, value: BaseModel, model: str):
     path.write_text(json.dumps({"model": model, "value": value.model_dump_json()}, indent=1))
 
 
-async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_tokens: int) -> tuple[T, dict]:
+async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_tokens: int, temperature: float = 0.2) -> tuple[T, dict]:
     """One model, with up to 2 repair turns on invalid JSON / schema errors."""
     msgs = list(messages)
     tokens_in = tokens_out = 0
@@ -106,14 +123,17 @@ async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_
         extra: dict = {"usage": {"include": True}}
         if model == config.PRIMARY_MODEL and config.DISABLE_REASONING:
             extra["reasoning"] = {"enabled": False}  # ~3x faster on Nemotron; some routers (openrouter/free) reject this
+        await _throttle()
         async with _sem:
             resp = await client().chat.completions.create(model=model, messages=msgs, max_tokens=max_tokens,
-                                                          temperature=0.2, extra_body=extra)
+                                                          temperature=temperature, extra_body=extra)
         u = resp.usage
         if u:
             tokens_in += u.prompt_tokens or 0
             tokens_out += u.completion_tokens or 0
             cost += float((u.model_extra or {}).get("cost") or 0)
+        if not getattr(resp, "choices", None):
+            raise TransientError(f"{model} returned no choices")
         raw = resp.choices[0].message.content or ""
         try:
             return model_cls.model_validate_json(_extract_json(raw)), {"tokens_in": tokens_in, "tokens_out": tokens_out, "cost_usd": cost}
@@ -127,7 +147,7 @@ async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_
 
 async def structured(model_cls: type[T], *, agent: str, system: str, user_text: str,
                      images: list[bytes] | None = None, fixture_key: str | None = None,
-                     max_tokens: int = 1500, mode: str | None = None) -> Result:
+                     max_tokens: int = 1500, mode: str | None = None, temperature: float = 0.2) -> Result:
     images = images or []
     mode = mode or config.DEMO_MODE
     full_system = f"{system}\n\n{GUARDRAILS}\n\n{_schema_prompt(model_cls)}"
@@ -138,6 +158,10 @@ async def structured(model_cls: type[T], *, agent: str, system: str, user_text: 
     def done(value, model, tier, meta=None) -> Result:
         return Result(value, AIUsage(agent=agent, model=model, latency_ms=int((time.monotonic() - t0) * 1000), tier=tier, **(meta or {})))
 
+    if config.E2E_STUB:
+        from app.agents.stubs import STUBS
+        if model_cls.__name__ in STUBS:
+            return done(model_cls.model_validate(STUBS[model_cls.__name__]), "e2e-stub", "fixture")
     if mode == "fixture" and fixture and (v := _read(fixture, model_cls)):
         return done(v, "fixture", "fixture")
     if mode in ("fixture", "hybrid") and (v := _read(exact, model_cls)):
@@ -149,18 +173,28 @@ async def structured(model_cls: type[T], *, agent: str, system: str, user_text: 
     messages = [{"role": "system", "content": full_system}, {"role": "user", "content": content}]
 
     errors = []
-    for tier, model in (("live", config.PRIMARY_MODEL), ("fallback", config.FALLBACK_MODEL)):
+    attempts = [("live", config.PRIMARY_MODEL)] * (1 + config.PRIMARY_RETRIES) + [("fallback", config.FALLBACK_MODEL)]
+    for n, (tier, model) in enumerate(attempts):
+        if n and tier == "live":
+            await asyncio.sleep(1.5 * n)  # backoff before retrying a transient provider error
         try:
-            value, meta = await _call_model(model, model_cls, messages, max_tokens)
+            budget = max_tokens * 4 if "reasoning" in model else max_tokens  # reasoning tokens count against max_tokens
+            value, meta = await _call_model(model, model_cls, messages, budget, temperature)
             _write(exact, value, model)
             if fixture and not fixture.exists():
                 _write(fixture, value, model)
             return done(value, model, tier, meta)
-        except (APIStatusError, APITimeoutError, AgentFailure, asyncio.TimeoutError) as e:
+        except AgentFailure as e:  # invalid JSON after repairs: retrying the same model rarely helps, go to fallback
             errors.append(f"{model}: {type(e).__name__} {str(e)[:160]}")
             log.warning("agent %s failed on %s: %s", agent, model, errors[-1])
-            if mode == "live":
-                continue
+            if tier == "live":
+                attempts[n + 1:] = [a for a in attempts[n + 1:] if a[0] != "live"]
+        except (APIStatusError, APITimeoutError, asyncio.TimeoutError, TransientError) as e:
+            errors.append(f"{model}: {type(e).__name__} {str(e)[:160]}")
+            log.warning("agent %s failed on %s: %s", agent, model, errors[-1])
+            status = getattr(e, "status_code", None)
+            if tier == "live" and status is not None and status not in (429, 500, 502, 503, 504):
+                attempts[n + 1:] = [a for a in attempts[n + 1:] if a[0] != "live"]  # 4xx won't fix itself
     if fixture and (v := _read(fixture, model_cls)):
         return done(v, "fixture", "fixture")
     raise AgentFailure("; ".join(errors) or "no model available")

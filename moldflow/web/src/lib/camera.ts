@@ -2,10 +2,22 @@
 
 const PROBE_W = 64;
 const PROBE_H = 48;
+/**
+ * Thresholds tuned on the sample-pack walkthrough (288x640, 10 fps), emulating this probe (64x48 gray) every 600 ms
+ * (script: moldflow/scripts/camera_thresholds.py):
+ * - DARK_LUMA 42: the vent/hose close-ups never drop below luma 96, so 0 false "too dark" warnings there; only the four
+ *   genuinely black transitions (t = 71, 97, 141, 165 s) fall under 42. Kept.
+ * - MOVING_DIFF 22 -> 30: on steady close-ups the 600 ms probe diff has a median of 26-28 (low-res video + hand-held), so 22
+ *   raised 5 false "hold still" episodes there; 30 raises 3 while still catching the fast pans (19 episodes overall).
+ * - CAPTURE_MARGIN 6 -> 4 (capture rejects when the steadiest of 6 samples, 140 ms apart, differs by > MOVING_DIFF + margin):
+ *   rejects 7% of close-up seconds instead of 11%.
+ */
 /** Mean luminance (0-255) below this reads as "too dark to see anything useful". */
 export const DARK_LUMA = 42;
-/** Mean absolute pixel change between two probes ~150-700 ms apart; above this the phone is moving. */
-export const MOVING_DIFF = 22;
+/** Mean absolute pixel change between two probes ~600 ms apart; above this the phone is moving. */
+export const MOVING_DIFF = 30;
+/** Extra tolerance for the steadiest frame of a capture burst. */
+export const CAPTURE_MARGIN = 4;
 
 export type FrameStats = { luma: number; diff: number | null };
 
@@ -62,7 +74,7 @@ export async function captureSteady(video: HTMLVideoElement, maxSide = 1280): Pr
   }
   if (!best.data) return { ok: false, problem: "no_video" };
   if (best.luma < DARK_LUMA) return { ok: false, problem: "too_dark" };
-  if (best.diff > MOVING_DIFF + 6) return { ok: false, problem: "moving" };
+  if (best.diff > MOVING_DIFF + CAPTURE_MARGIN) return { ok: false, problem: "moving" };
   fctx.putImageData(best.data, 0, 0);
   const blob = await new Promise<Blob | null>((r) => full.toBlob(r, "image/jpeg", 0.88));
   return blob ? { ok: true, blob, luma: best.luma } : { ok: false, problem: "no_video" };
