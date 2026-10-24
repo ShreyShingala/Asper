@@ -38,7 +38,8 @@ export function AnnotatedPhoto({ caseId, photo, showBoxes = true, analyzing, cla
         return (
           <div key={i} className="box-draw absolute rounded-md border-2 border-amber shadow-[0_0_0_1px_rgba(255,255,255,0.6)]"
             style={{ top: `${y0 / 10}%`, left: `${x0 / 10}%`, height: `${(y1 - y0) / 10}%`, width: `${(x1 - x0) / 10}%`, animationDelay: `${i * 0.15}s` }}>
-            <span className="stamp absolute -top-5 left-0 whitespace-nowrap rounded bg-amber px-1.5 py-0.5 text-[10px] text-white">
+            <span className={cx("stamp absolute left-0 max-w-[220px] truncate whitespace-nowrap rounded bg-amber px-1.5 py-0.5 text-[10px] text-white",
+              y0 < 70 ? "top-0" : "-top-5")}>
               {r.label.replace(/^look closer:\s*/i, "look closer · ").slice(0, 38)}
             </span>
           </div>

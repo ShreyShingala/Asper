@@ -22,7 +22,7 @@ def service_price_text(service: str, province: str, lang: str = "en") -> str:
     if s["tax_included"]:
         return f"{label}: ${s['price']} " + ("taxes incluses" if lang == "fr" else "incl. tax")
     tax = table()["taxes"].get(province)
-    suffix = (f" + {tax['label']}" if tax else (" + taxes" if lang == "fr" else " + applicable tax"))
+    suffix = (f" + {tax['label_fr' if lang == 'fr' else 'label']}" if tax else (" + taxes" if lang == "fr" else " + applicable tax"))
     return f"{label}: ${s['price']}{suffix}"
 
 

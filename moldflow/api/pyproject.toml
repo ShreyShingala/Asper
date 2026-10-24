@@ -1,7 +1,7 @@
 [project]
 name = "moldflow-api"
 version = "0.1.0"
-description = "Add your description here"
+description = "MoldFlow API: Evidence Passport + Pydantic AI agents for Mold Busters"
 authors = [
     { name = "Shrey", email = "shreyshingala1@gmail.com" }
 ]
@@ -19,14 +19,8 @@ dependencies = [
     "uvicorn[standard]>=0.54.0",
 ]
 
-[project.scripts]
-moldflow-api = "moldflow_api:main"
-
-[build-system]
-requires = ["uv_build>=0.13.0,<0.14.0"]
-build-backend = "uv_build"
-
 [tool.uv]
+package = false
 exclude-newer = "2026-10-16T00:00:00Z"
 
 [tool.pytest.ini_options]
