@@ -1,6 +1,6 @@
 {
  "model": "nvidia/nemotron-3.5-super-vl:free",
- "run_at": "2026-10-24 05:24",
+ "run_at": "2026-10-24 06:13",
  "label": "c3-prompt-v3 (quality rules for live frames)",
  "rows": [
   {

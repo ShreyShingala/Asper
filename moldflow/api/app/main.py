@@ -643,7 +643,7 @@ def proof() -> dict:
     calls = load("eval_calls.json")
     if calls:  # keep the payload small: scores only, no transcripts
         calls = {k: v for k, v in calls.items() if k != "calls"} | {"calls": [
-            {"persona": c["persona"], "backend": c.get("backend"), "score": {k: v for k, v in c["score"].items() if k not in ("long_turns",)}}
+            {"persona": c["persona"], "backend": c.get("backend"), "prompt": c.get("prompt"), "score": {k: v for k, v in c["score"].items() if k not in ("long_turns",)}}
             for c in calls.get("calls", [])]}
     return {"eval": evald, "frames": {k: v for k, v in (frames or {}).items() if k != "rows"} or None, "calls": calls,
             "usage_by_agent": by_agent, "calls_total": len(usage), "live_calls": len(live), "model": config.PRIMARY_MODEL}

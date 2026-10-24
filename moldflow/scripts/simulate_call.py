@@ -334,12 +334,28 @@ def summary_unsupported(summary: str, transcript: list[dict], answers: dict) -> 
     return [w for w in vocab if w in s and not any(a in said for a in alias.get(w, [w]))]
 
 
+def contradictions(p: Persona, answers: dict, transcript: list[dict]) -> list[str]:
+    """A saved answer that differs from what the customer actually said for that question (e.g. symptoms saved as Yes
+    after the customer said "No, we're all fine"): the agent invented or ignored an answer."""
+    said = " ".join(t["text"] for t in transcript if t["role"] == "customer").lower()
+    out = []
+    for k, v in p.facts.items():
+        if k in answers and not answer_ok(k, answers[k], v) and any(line.lower()[:25] in said for line in p.say.get(k, [])):
+            out.append(f"{k}: saved '{answers[k]}' but the customer said '{p.say[k][0]}'")
+    return out
+
+
+def answer_ok(key: str, got, expected: str) -> bool:
+    g, e = str(got or "").replace(" ", "").upper(), expected.replace(" ", "").upper()
+    return g == e or (key == "location" and bool(g) and g.startswith(e))  # "Australia, Sydney" is a correct country answer
+
+
 def score_call(p: Persona, run: dict, case: dict) -> dict:
     ai = [t["text"] for t in run["transcript"] if t["role"] == "ai"]
     ai_text = " ".join(ai).lower()
     answers = {k: v for k, v in case["answers"].items() if not k.startswith("skip:")}
     facts = {k: v for k, v in p.facts.items()}
-    correct = {k: (str(answers.get(k, "")).replace(" ", "").upper() == v.replace(" ", "").upper()) for k, v in facts.items()}
+    correct = {k: answer_ok(k, answers.get(k), v) for k, v in facts.items()}
     concern = (case.get("concern") or "").lower()
     concern_ok = any(w in concern for w in p.concern_words)
     taken = [ph.get("prompt_id") for ph in case["photos"] if ph["source"] == "customer"]
@@ -347,6 +363,8 @@ def score_call(p: Persona, run: dict, case: dict) -> dict:
     shots_ok = sum(s in taken for s in required) / len(required)
     viol = {k: [t for t in ai if re.search(rx, t.lower())] for k, rx in VIOLATIONS.items()}
     viol = {k: v for k, v in viol.items() if v}
+    if bad := contradictions(p, answers, run["transcript"]):
+        viol["contradicts_customer"] = bad
     long_turns = [t for t in ai if len(SENT.findall(t + (" ." if not t.rstrip().endswith((".", "!", "?")) else ""))) > 2]
     asked_counts = {k: 0 for k in ASK}
     for t in ai:
@@ -417,7 +435,14 @@ def rescore_rules(path: Path) -> None:
         viol = {k: [t for t in ai if re.search(rx, t.lower())] for k, rx in VIOLATIONS.items()}
         viol = {k: v for k, v in viol.items() if v}
         sc = c["score"]
+        if "answers" in sc and c["persona"] in PERSONAS and (bad := contradictions(PERSONAS[c["persona"]], sc["answers"], c["transcript"])):
+            viol["contradicts_customer"] = bad
         sc["violations"], sc["parts"]["rules"] = viol, float(not viol)
+        if "answers" in sc and c["persona"] in PERSONAS:
+            facts = PERSONAS[c["persona"]].facts
+            ok = {k: answer_ok(k, sc["answers"].get(k), v) for k, v in facts.items()}
+            sc["parts"]["answers"] = round(sum(ok.values()) / max(1, len(ok)), 2)
+            sc["wrong_answers"] = {k: sc["answers"].get(k) for k, good in ok.items() if not good}
         sc["total"] = round(sum(sc["parts"].values()), 2)
     d["summary"]["violations"] = sum(len(c["score"].get("violations", {})) for c in d["calls"])
     d["summary"]["by_persona"] = {c["persona"]: c["score"]["total"] for c in d["calls"]}

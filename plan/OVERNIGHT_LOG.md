@@ -54,3 +54,46 @@ rule-based customer could not answer (simulator gap, fixed in c2) and the one-to
 re-run persona improved over c1; job1 remains 0.45 under the (differently simulated) baseline, losing only "no repeats".
 Baseline failure modes seen in transcripts: says "I've noted..." without calling save_answer (job2: 0 of 6 answers saved);
 asks questions that were already answered; never calls finish_assessment when the customer goes quiet; 3-sentence turns.
+
+### Full batch, all 8 personas, prompt v3 (05:28-05:50)
+| Persona | Score /11 | Finished | Service (expected) | Notes |
+|---|---|---|---|---|
+| job2-virtual | **11.00** | yes | onsite (virtual/onsite/iaq) | all answers, concern, 4 shots |
+| job1-washroom | 10.00 | yes | onsite (onsite) | never linked the photos to moisture/the faucet in its own words |
+| tenant | 10.71 | yes | onsite; landlord letter offered; booking page shows tenant phone | 3 long turns |
+| outside-canada | 10.81 | yes | remote_report (remote_report) | location saved "Australia, Sydney" (scorer now accepts country + city) |
+| health | 9.80 | yes | iaq (iaq) | "I can't give medical advice, so please check with a doctor" said; 3-sentence turns; odour asked 3x |
+| messy | 9.95 | yes | onsite (onsite) | vague answers saved as Not sure; symptoms/location asked 3x |
+| dark-room | 9.83 | yes | iaq (any paid) | coached light after the too_dark capture; odour asked 3x |
+| quitter | **11.00** | yes (customer_requested, after 1 photo) | onsite | pre-assessment still built |
+| **Total** | **83.10 / 88** | **8/8** | 8/8 match | **0 rule violations**, all inside 5 min (simulated 115-203 s) |
+
+### Cycle 3 (prompt v4: sentence budget incl. deflections; link photo comments to the customer's words), 3 personas
+health 9.80 -> 10.80, dark-room 9.83 -> 9.92, job1 10.00 -> 10.75 on the original scorer. **But** job1's transcript shows the
+stand-in saving symptoms = "Yes" before the customer answered (customer then said "No, we're all fine"). Added a scorer check
+`contradicts_customer` (saved answer differs from what the customer said) and re-applied it to the saved batches (no calls):
+final v3 batch unchanged (83.10, 0 violations); c3 job1 -> 9.75 with 1 violation -> **v4 rejected** (a persona got worse).
+
+### Cycle 4 (prompt v5 = v4 + "only save what the customer said; ask one question, then wait"), same 3 personas
+job1-washroom 10.00 -> **10.00** (no invented answer), health 9.80 -> **10.73**, dark-room 9.83 -> **10.94**; 0 violations
+(contradiction check on). **Kept** -> committed prompt is v5. Previous prompts saved during the night: /tmp/setup_agent_v1..v4.py
+(v1 = original, also recoverable from git history).
+
+### Latest per persona (shown on /proof): 85.14 / 88, 8/8 finished, 0 violations
+job2-virtual 11.00, tenant 10.71, outside-canada 10.81, messy 9.95, quitter 11.00 (last run on v3); job1-washroom 10.00,
+health 10.73, dark-room 10.94 (v5). The five v3 personas were NOT re-run on v5 (free-tier request cap reached).
+
+| When (EDT) | What | OpenRouter req | ElevenLabs calls / min |
+|---|---|---|---|
+| 05:35-06:15 | final 8-persona batch, Bruce c3 + c4 (3 personas each) | ~270 | 0 / 0 |
+| **Night total** | | **959 of 1,000 free/day** (93 were used before the night) | **0 / 0 min, $0** |
+
+## Final state (06:20)
+- Photo: 140.0 -> **162.0 / 168**, 0 overclaims, image type 20 -> 23/24 (thermal 6/6, swab 3/4, meters 2/2), spoken-length
+  observations 5 -> 24/24, median latency 11.8 -> 2.3 s.
+- Frames: unusable flagged 3/7 -> 5/7; vent/hose frames consistent with stills 11/14 -> 12/15; 0 overclaims.
+- Bruce (stand-in): 4-persona baseline 32.98/44 (2/4 finished) -> latest 85.14/88 on 8 personas, 8/8 finished, 0 violations.
+- Checks: pytest 59 passed; demo_api_run passes live and offline (fixture mode, no key, empty cache); tsc, eslint, next build
+  clean; Playwright 18/18 (desktop Chrome, iPhone 13, Pixel 7 viewports in Chromium) with the walkthrough as the camera.
+- setup_elevenlabs_agent.py NOT re-run: it exits with "ELEVENLABS_API_KEY is not set". The live agent still runs the old
+  prompt until someone with the key runs it.

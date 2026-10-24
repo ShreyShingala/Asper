@@ -11,7 +11,7 @@ type Proof = {
   eval: { model: string; run_at: string; label?: string; rows: Row[]; summary: Record<string, unknown> } | null;
   frames: { run_at: string; summary: Record<string, unknown> } | null;
   calls: { run_at: string; label?: string; note: string; summary: { total: string; violations: number; finished: string; verified_with_live_call: boolean };
-    calls: { persona: string; backend?: string; score: CallScore }[] } | null;
+    calls: { persona: string; backend?: string; prompt?: string; score: CallScore }[] } | null;
   usage_by_agent: Record<string, { calls: number; avg_s: number; tokens_in: number; tokens_out: number; cost: number }>;
   calls_total: number; live_calls: number; model: string;
 };
@@ -74,7 +74,7 @@ export default function ProofPage() {
                 <tr className="border-b border-kit-gray-soft">
                   <th scope="col" className={TH}>Persona</th><th scope="col" className={TH}>Score</th><th scope="col" className={TH}>Answers</th>
                   <th scope="col" className={TH}>Shots</th><th scope="col" className={TH}>Finished</th><th scope="col" className={TH}>Service</th>
-                  <th scope="col" className={TH}>Rule violations</th><th scope="col" className={cx(TH, "text-right")}>Sim. length</th>
+                  <th scope="col" className={TH}>Rule violations</th><th scope="col" className={TH}>Prompt</th><th scope="col" className={cx(TH, "text-right")}>Sim. length</th>
                 </tr>
               </thead>
               <tbody>
@@ -88,6 +88,7 @@ export default function ProofPage() {
                     <td className="px-4 py-3">{c.score.service ?? "—"}</td>
                     <td className={cx("px-4 py-3", Object.keys(c.score.violations ?? {}).length ? "text-kit-red" : "text-kit-green")}>
                       {Object.keys(c.score.violations ?? {}).join(", ") || "none"}</td>
+                    <td className="px-4 py-3 text-caption text-ink-muted">{c.prompt ?? "—"}</td>
                     <td className="px-4 py-3 text-right tabular-nums">{c.score.seconds ?? "—"}s</td>
                   </tr>
                 ))}
