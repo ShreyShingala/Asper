@@ -46,9 +46,9 @@ export default function Compare() {
             ))}
           </ol>
         </Card>
-        <Card className="border-t-4 border-t-kit-blue p-5">
+        <Card className="border-t-4 border-t-brand p-5">
           <div className="flex flex-wrap items-center gap-2">
-            <Tag tone="blue" soft>With MoldFlow</Tag>
+            <Tag tone="brand" soft>With MoldFlow</Tag>
             <span className="text-caption font-light text-ink-muted">simulated workflow on the same seeded evidence</span>
           </div>
           <div className="mt-4 space-y-5">
@@ -66,7 +66,7 @@ export default function Compare() {
               )}
               {d.followups.map((f) => (
                 <li key={f.id} className="list-none">
-                  <div className="rounded-ds-sm rounded-bl-ds-xsm bg-kit-blue px-4 py-3 text-subtitle text-white">{f.body}</div>
+                  <div className="rounded-ds-sm rounded-bl-ds-xsm bg-brand px-4 py-3 text-subtitle text-white">{f.body}</div>
                   <p className="mt-1 text-caption font-light text-ink-muted">{f.as_of} · {f.status.replace("_", " ")} · cites {f.cites.join(", ") || "findings"} · why: {f.reason}</p>
                 </li>
               ))}
@@ -86,7 +86,7 @@ export default function Compare() {
 function Counter({ icon: Icon, label, before, after, note }: { icon: typeof Clock; label: string; before: string; after: string; note?: string }) {
   return (
     <Card className="rise p-5">
-      <p className="flex items-center gap-2 text-subtitle font-medium text-ink"><Icon size={16} className="shrink-0 text-kit-blue" aria-hidden />{label}</p>
+      <p className="flex items-center gap-2 text-subtitle font-medium text-ink"><Icon size={16} className="shrink-0 text-brand" aria-hidden />{label}</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-ds-xsm bg-alert-danger-bg p-3"><Eyebrow color="text-kit-red">Before</Eyebrow><p className="mt-0.5 text-subheading font-semibold text-ink">{before}</p></div>
         <div className="rounded-ds-xsm bg-alert-success-bg p-3"><Eyebrow color="text-kit-green">After</Eyebrow><p className="mt-0.5 text-subheading font-semibold text-ink">{after}</p></div>

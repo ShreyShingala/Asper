@@ -51,9 +51,9 @@ export function AnnotatedPhoto({ caseId, photo, showBoxes = true, analyzing, cla
       {showBoxes && regions.map((r, i) => {
         const [y0, x0, y1, x1] = r.box_2d;
         return (
-          <div key={i} className="box-draw absolute rounded-ds-xsm border-2 border-kit-orange shadow-[0_0_0_1px_rgba(255,255,255,0.6)]"
+          <div key={i} className="box-draw absolute rounded-ds-xsm border-2 border-warning shadow-[0_0_0_1px_rgba(15,20,42,0.55)]"
             style={{ top: `${y0 / 10}%`, left: `${x0 / 10}%`, height: `${(y1 - y0) / 10}%`, width: `${(x1 - x0) / 10}%`, animationDelay: `${i * 0.15}s` }}>
-            <span className={cn("absolute left-0 max-w-[220px] truncate whitespace-nowrap rounded-ds-xsm bg-kit-orange px-1.5 py-0.5 text-[10px] font-medium text-white",
+            <span className={cn("absolute left-0 max-w-[220px] truncate whitespace-nowrap rounded-ds-xsm bg-warning px-1.5 py-0.5 text-[10px] font-semibold text-ink",
               y0 < 70 ? "top-0" : "-top-5")}>
               {r.label.replace(/^look closer:\s*/i, "look closer · ").slice(0, 38)}
             </span>
@@ -68,7 +68,7 @@ export function AnnotatedPhoto({ caseId, photo, showBoxes = true, analyzing, cla
 const SEV = {
   block: { icon: AlertOctagon, box: "bg-alert-danger-bg", accent: "text-alert-danger-accent", dot: "bg-alert-danger-accent", label: "Must resolve" },
   warn: { icon: AlertTriangle, box: "bg-alert-warning-bg", accent: "text-kit-orange", dot: "bg-alert-warning-accent", label: "Check" },
-  info: { icon: Info, box: "bg-alert-info-bg", accent: "text-alert-info-accent", dot: "bg-alert-info-accent", label: "Info" },
+  info: { icon: Info, box: "bg-kit-gray-faint", accent: "text-ink-body", dot: "bg-ink-muted", label: "Info" },
 } as const;
 const RESOLVED = { icon: CheckCircle2, box: "bg-alert-success-bg", accent: "text-alert-success-title", dot: "bg-alert-success-accent", label: "Resolved" };
 
@@ -103,7 +103,7 @@ const CARD_TONE = {
   danger: "border-alert-danger-accent/30 bg-alert-danger-bg",
   warning: "border-alert-warning-accent/40 bg-alert-warning-bg",
   success: "border-kit-green/30 bg-alert-success-bg",
-  info: "border-alert-info-accent/30 bg-alert-info-bg",
+  info: "border-brand/25 bg-brand-tint",
 } as const;
 export type CardTone = keyof typeof CARD_TONE;
 
@@ -114,7 +114,7 @@ export function Card({ className, tone, ...p }: React.HTMLAttributes<HTMLDivElem
 export function Logo({ small }: { small?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2.5">
-      <LogoMark size={small ? 32 : 40} color="#517CFF" label="MoldFlow" />
+      <LogoMark size={small ? 32 : 40} color="#C2410C" label="MoldFlow" />
       <span className="flex flex-col leading-none">
         <span className={cn("font-semibold tracking-tight text-ink", small ? "text-subheading" : "text-h6")}>MoldFlow</span>
         <span className="mt-0.5 text-[11px] font-light text-ink-muted">by Mold Busters</span>
@@ -144,7 +144,7 @@ export function StaffShell({ children, title, actions }: { children: React.React
               return (
                 <Link key={href} href={href} aria-current={on ? "page" : undefined}
                   className={cn("-mb-px inline-flex items-center whitespace-nowrap border-b-2 text-subtitle font-medium transition-colors",
-                    on ? "border-kit-blue text-kit-blue" : "border-transparent text-ink-muted hover:text-ink")}>
+                    on ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-ink")}>
                   {label}
                 </Link>
               );

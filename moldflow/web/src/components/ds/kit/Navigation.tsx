@@ -68,10 +68,10 @@ export function Tabs({
               }
             }}
             className={cn(
-              "shrink-0 text-[14px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kit-blue",
+              "shrink-0 text-[14px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
               variant === "underline"
-                ? cn("-mb-px border-b-2 pb-2.5", on ? "border-kit-blue text-kit-blue" : "border-transparent text-ink-muted hover:text-ink")
-                : cn("rounded-ds-xsm px-3.5 py-1.5", on ? "bg-white text-kit-blue shadow-ds-sm" : "text-ink-muted hover:text-ink"),
+                ? cn("-mb-px border-b-2 pb-2.5", on ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-ink")
+                : cn("rounded-ds-xsm px-3.5 py-1.5", on ? "bg-white text-brand shadow-ds-sm" : "text-ink-muted hover:text-ink"),
             )}
           >
             {t.label}
@@ -120,12 +120,12 @@ export function SidebarMenu({
                 onClick={() => setActive(it.id)}
                 className={cn(
                   "flex items-center gap-2.5 rounded-ds-xsm px-2 py-2 text-left text-[13px] transition-colors",
-                  on ? "bg-kit-blue/10 font-medium text-kit-blue" : "text-ink-body hover:bg-kit-gray-faint",
+                  on ? "bg-brand-tint font-medium text-brand-strong" : "text-ink-body hover:bg-kit-gray-faint",
                 )}
               >
                 {it.icon}
                 <span className="flex-1">{it.label}</span>
-                {it.badge && <span className="rounded-full bg-kit-blue px-1.5 text-[10px] font-semibold text-white">{it.badge}</span>}
+                {it.badge && <span className="rounded-full bg-brand px-1.5 text-[10px] font-semibold text-white">{it.badge}</span>}
               </button>
             );
           })}
@@ -168,7 +168,7 @@ export function SearchRow({ placeholder = "Search", ...rest }: React.InputHTMLAt
         type="search"
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-9 w-full rounded-ds-xsm border border-kit-gray-soft bg-white pl-9 pr-3 text-[13px] outline-none placeholder:text-placeholder focus:border-kit-blue"
+        className="h-9 w-full rounded-ds-xsm border border-kit-gray-soft bg-white pl-9 pr-3 text-[13px] outline-none placeholder:text-placeholder focus:border-brand"
         {...rest}
       />
     </div>
@@ -190,7 +190,7 @@ export function Breadcrumb({ items }: { items: { label: string; href?: string }[
                   {it.label}
                 </span>
               ) : (
-                <a href={it.href ?? "#"} className="hover:text-kit-blue hover:underline">
+                <a href={it.href ?? "#"} className="hover:text-brand hover:underline">
                   {it.label}
                 </a>
               )}
@@ -205,7 +205,7 @@ export function Breadcrumb({ items }: { items: { label: string; href?: string }[
 
 export function BackLink({ label = "Back", href = "#" }: { label?: string; href?: string }) {
   return (
-    <a href={href} className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink hover:text-kit-blue">
+    <a href={href} className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink hover:text-brand">
       <ChevronLeft size={16} aria-hidden />
       {label}
     </a>

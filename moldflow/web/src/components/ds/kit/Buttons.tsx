@@ -20,7 +20,7 @@ const SIZE_MULTILINE: Record<ButtonSize, string> = {
 };
 
 const BASE =
-  "inline-flex select-none items-center justify-center rounded-ds-xsm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kit-blue";
+  "inline-flex select-none items-center justify-center rounded-ds-xsm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 function sizeClass(size: ButtonSize, multiline?: boolean) {
   return multiline ? cn(SIZE_MULTILINE[size], "text-center leading-snug") : cn(SIZE[size], "whitespace-nowrap");
@@ -31,9 +31,9 @@ const ICON_SIZE: Record<ButtonSize, string> = { sm: "h-8 w-8", md: "h-10 w-10", 
 /** [natural, hover, pressed] per variant */
 const VARIANT: Record<ButtonVariant, { base: string; hover: string; pressed: string }> = {
   primary: {
-    base: "bg-kit-blue text-white",
-    hover: "bg-[#1b5cd0]",
-    pressed: "bg-[#174fb4]",
+    base: "bg-brand text-white",
+    hover: "bg-brand-strong",
+    pressed: "bg-brand-deep",
   },
   neutral: {
     base: "bg-kit-gray text-ink",
@@ -41,9 +41,9 @@ const VARIANT: Record<ButtonVariant, { base: string; hover: string; pressed: str
     pressed: "bg-[#a6adb2]",
   },
   text: {
-    base: "bg-transparent text-kit-blue",
-    hover: "bg-kit-blue/10",
-    pressed: "bg-kit-blue/20",
+    base: "bg-transparent text-brand",
+    hover: "bg-brand-tint",
+    pressed: "bg-brand-tint-strong",
   },
   danger: {
     base: "bg-kit-red text-white",
@@ -51,9 +51,9 @@ const VARIANT: Record<ButtonVariant, { base: string; hover: string; pressed: str
     pressed: "bg-[#9d3434]",
   },
   outline: {
-    base: "border border-kit-blue bg-white text-kit-blue",
-    hover: "bg-kit-blue/10",
-    pressed: "bg-kit-blue/20",
+    base: "border border-brand bg-white text-brand",
+    hover: "bg-brand-tint",
+    pressed: "bg-brand-tint-strong",
   },
 };
 
@@ -65,11 +65,11 @@ function resolve(variant: ButtonVariant, state: ButtonForcedState | undefined) {
 }
 
 const NATURAL_HOVER: Record<ButtonVariant, string> = {
-  primary: "hover:bg-[#1b5cd0] active:bg-[#174fb4]",
+  primary: "hover:bg-brand-strong active:bg-brand-deep",
   neutral: "hover:bg-[#b6bcc0] active:bg-[#a6adb2]",
-  text: "hover:bg-kit-blue/10 active:bg-kit-blue/20",
+  text: "hover:bg-brand-tint active:bg-brand-tint-strong active:text-brand-strong",
   danger: "hover:bg-[#b53e3e] active:bg-[#9d3434]",
-  outline: "hover:bg-kit-blue/10 active:bg-kit-blue/20",
+  outline: "hover:bg-brand-tint active:bg-brand-tint-strong active:text-brand-strong",
 };
 
 /** Button styling for non-button elements (e.g. `<Link>` / `<a>` that should look like a button). */
@@ -161,7 +161,7 @@ export function IconButton({
       title={label}
       disabled={isDisabled}
       className={cn(
-        "inline-flex items-center justify-center rounded-ds-xsm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kit-blue",
+        "inline-flex items-center justify-center rounded-ds-xsm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
         ICON_SIZE[size],
         isDisabled
           ? "cursor-not-allowed bg-kit-gray-soft text-[#9aa0a6]"
@@ -179,7 +179,7 @@ export function TextLink({ className, children, ...rest }: React.AnchorHTMLAttri
   return (
     <a
       className={cn(
-        "text-[14px] font-medium text-kit-blue underline decoration-kit-blue/40 underline-offset-4 transition-colors hover:decoration-kit-blue",
+        "text-[14px] font-medium text-brand underline decoration-brand/40 underline-offset-4 transition-colors hover:decoration-brand",
         className,
       )}
       {...rest}

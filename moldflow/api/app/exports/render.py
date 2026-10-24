@@ -15,12 +15,15 @@ from reportlab.platypus import Image as RLImage, Paragraph, SimpleDocTemplate, S
 from app import config
 from app.models.passport import Case, Photo
 
-ACCENT = colors.HexColor("#0f766e")
+# Same orange theme as the web app (WCAG AA: #C2410C is 5.18:1 on white; muted text #646677 is 5.66:1).
+ACCENT = colors.HexColor("#C2410C")
+INK = colors.HexColor("#0F142A")
+MUTED = colors.HexColor("#646677")
 SS = getSampleStyleSheet()
 H1 = ParagraphStyle("h1", parent=SS["Heading1"], textColor=ACCENT, fontSize=18)
 H2 = ParagraphStyle("h2", parent=SS["Heading2"], textColor=ACCENT, fontSize=13, spaceBefore=10)
-BODY = ParagraphStyle("b", parent=SS["BodyText"], fontSize=9.5, leading=13)
-SMALL = ParagraphStyle("s", parent=BODY, fontSize=7.5, textColor=colors.grey, leading=10)
+BODY = ParagraphStyle("b", parent=SS["BodyText"], fontSize=9.5, leading=13, textColor=INK)
+SMALL = ParagraphStyle("s", parent=BODY, fontSize=7.5, textColor=MUTED, leading=10)
 DISCLAIMER = ("Prototype output. MoldFlow assists qualified inspectors; it does not identify, diagnose or confirm mold. "
               "Visual and thermal observations cannot confirm mold without physical sampling and laboratory analysis.")
 
@@ -37,7 +40,7 @@ def annotated(p: Photo, max_side: int = 520) -> io.BytesIO:
         w, h = img.size
         for r in p.analysis.regions:
             y0, x0, y1, x1 = r.box_2d
-            d.rectangle([x0 * w / 1000, y0 * h / 1000, x1 * w / 1000, y1 * h / 1000], outline=(245, 158, 11), width=3)
+            d.rectangle([x0 * w / 1000, y0 * h / 1000, x1 * w / 1000, y1 * h / 1000], outline=(255, 176, 32), width=3)
     buf = io.BytesIO()
     img.save(buf, "JPEG", quality=80)
     buf.seek(0)
@@ -67,10 +70,23 @@ def _photo_grid(photos: list[Photo], cols: int = 4) -> Table | None:
     return t
 
 
+def _page(canvas, doc) -> None:
+    """Orange brand band at the top of every page and a muted footer with the page number."""
+    w, h = letter
+    canvas.saveState()
+    canvas.setFillColor(ACCENT)
+    canvas.rect(0, h - 0.22 * inch, w, 0.22 * inch, stroke=0, fill=1)
+    canvas.setFillColor(MUTED)
+    canvas.setFont("Helvetica", 7.5)
+    canvas.drawString(0.6 * inch, 0.3 * inch, "Mold Busters · MoldFlow")
+    canvas.drawRightString(w - 0.6 * inch, 0.3 * inch, f"Page {doc.page}")
+    canvas.restoreState()
+
+
 def _doc(story: list) -> bytes:
     buf = io.BytesIO()
-    SimpleDocTemplate(buf, pagesize=letter, leftMargin=0.6 * inch, rightMargin=0.6 * inch, topMargin=0.5 * inch,
-                      bottomMargin=0.5 * inch, title="MoldFlow").build(story)
+    SimpleDocTemplate(buf, pagesize=letter, leftMargin=0.6 * inch, rightMargin=0.6 * inch, topMargin=0.6 * inch,
+                      bottomMargin=0.6 * inch, title="MoldFlow").build(story, onFirstPage=_page, onLaterPages=_page)
     return buf.getvalue()
 
 
@@ -101,12 +117,12 @@ def report_pdf(case: Case) -> bytes:
         for sec in rep.sections:
             s.append(Paragraph(sec.room, H2))
             for c in sec.claims:
-                s.append(Paragraph(f"► {c.text} <font color='#6b7280' size='7'>[{', '.join(c.cites)}]</font>", BODY))
+                s.append(Paragraph(f"► {c.text} <font color='#646677' size='7'>[{', '.join(c.cites)}]</font>", BODY))
             ids = {x for c in sec.claims for x in c.cites}
             ids |= {pid for f in case.findings if f.id in ids for pid in f.evidence_photo_ids}
             if grid := _photo_grid([p for p in case.photos if p.id in ids][:8]):
                 s += [Spacer(1, 4), grid]
-        s += [Paragraph("Recommendations", H2)] + [Paragraph(f"► {c.text} <font color='#6b7280' size='7'>[{', '.join(c.cites)}]</font>", BODY)
+        s += [Paragraph("Recommendations", H2)] + [Paragraph(f"► {c.text} <font color='#646677' size='7'>[{', '.join(c.cites)}]</font>", BODY)
                                                     for c in rep.recommendations]
         s += [Paragraph("Limitations", H2)] + [Paragraph(f"• {x}", BODY) for x in rep.limitations]
     s += _live_section(case, transcript=True)

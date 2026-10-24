@@ -1,22 +1,22 @@
 import { cn } from "@/lib/cn";
 
-export type ProgressTone = "blue" | "green" | "orange" | "red";
+export type ProgressTone = "brand" | "green" | "orange" | "red";
 
 const TONE_BG: Record<ProgressTone, string> = {
-  blue: "bg-kit-blue",
+  brand: "bg-brand",
   green: "bg-kit-green",
   orange: "bg-kit-orange",
   red: "bg-kit-red",
 };
 
 const TONE_STROKE: Record<ProgressTone, string> = {
-  blue: "stroke-kit-blue",
+  brand: "stroke-brand",
   green: "stroke-kit-green",
   orange: "stroke-kit-orange",
   red: "stroke-kit-red",
 };
 
-export function ProgressBar({ value, tone = "blue", label, showValue }: { value: number; tone?: ProgressTone; label?: string; showValue?: boolean }) {
+export function ProgressBar({ value, tone = "brand", label, showValue }: { value: number; tone?: ProgressTone; label?: string; showValue?: boolean }) {
   const v = Math.max(0, Math.min(100, value));
   return (
     <div className="w-full">

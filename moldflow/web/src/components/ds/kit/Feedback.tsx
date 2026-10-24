@@ -101,13 +101,13 @@ export function Loader({ variant = "ring", size = 28, label = "Loading" }: { var
 
 /* ------------------------------------------------------------------ Tag */
 
-export type TagTone = "gray" | "blue" | "green" | "orange" | "red";
+export type TagTone = "gray" | "brand" | "green" | "orange" | "red";
 
 const TAG: Record<TagTone, { solid: string; soft: string }> = {
   gray: { solid: "bg-kit-gray text-ink", soft: "bg-kit-gray-faint text-ink-body" },
-  blue: { solid: "bg-kit-blue text-white", soft: "bg-kit-blue/10 text-kit-blue" },
+  brand: { solid: "bg-brand text-white", soft: "bg-brand-tint text-brand-strong" },
   green: { solid: "bg-kit-green text-white", soft: "bg-kit-green/10 text-kit-green" },
-  orange: { solid: "bg-kit-orange text-white", soft: "bg-kit-orange/10 text-kit-orange" },
+  orange: { solid: "bg-kit-orange text-white", soft: "bg-alert-warning-bg text-warning-text" },
   red: { solid: "bg-kit-red text-white", soft: "bg-kit-red/10 text-kit-red" },
 };
 

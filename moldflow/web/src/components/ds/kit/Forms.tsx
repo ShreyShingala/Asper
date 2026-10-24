@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 
 const FIELD_BASE =
   "w-full rounded-ds-xsm border bg-white text-[14px] text-ink outline-none transition-[border-color,box-shadow] placeholder:text-placeholder disabled:cursor-not-allowed disabled:bg-kit-gray-faint disabled:text-[#9aa0a6]";
-const FIELD_STATE = "border-kit-gray-soft hover:border-kit-gray focus:border-kit-blue focus:shadow-[0_0_0_3px_rgb(33_105_232/0.15)]";
+const FIELD_STATE = "border-kit-gray-soft hover:border-kit-gray focus:border-brand focus:shadow-[0_0_0_3px_rgb(194_65_12/0.18)]";
 
 function Field({ label, hint, id, children }: { label?: string; hint?: string; id: string; children: ReactNode }) {
   return (
@@ -73,7 +73,7 @@ export function KitSelect({
   return (
     <Field label={label} hint={hint} id={sid}>
       <div className="relative">
-        {prefixDot && <span className="pointer-events-none absolute left-3 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-sm bg-kit-blue" aria-hidden />}
+        {prefixDot && <span className="pointer-events-none absolute left-3 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-sm bg-brand" aria-hidden />}
         <select id={sid} className={cn(FIELD_BASE, FIELD_STATE, "h-10 appearance-none pr-9", prefixDot ? "pl-8" : "pl-3", className)} {...rest}>
           {children}
         </select>
@@ -93,7 +93,7 @@ export function Checkbox({
   return (
     <label className={cn("group inline-flex cursor-pointer items-center gap-2.5 text-[14px] text-ink-body has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50", className)}>
       <span className="relative inline-flex h-[18px] w-[18px] shrink-0">
-        <input type="checkbox" className="peer absolute inset-0 h-full w-full cursor-[inherit] appearance-none rounded-[4px] border border-kit-gray bg-white transition-colors checked:border-kit-blue checked:bg-kit-blue indeterminate:border-kit-blue indeterminate:bg-kit-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kit-blue" {...rest} />
+        <input type="checkbox" className="peer absolute inset-0 h-full w-full cursor-[inherit] appearance-none rounded-[4px] border border-kit-gray bg-white transition-colors checked:border-brand checked:bg-brand indeterminate:border-brand indeterminate:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand" {...rest} />
         <Check size={12} strokeWidth={3.5} className="pointer-events-none absolute left-[3px] top-[3px] text-white opacity-0 peer-checked:opacity-100" aria-hidden />
       </span>
       {label}
@@ -107,10 +107,10 @@ export function Radio({ label, className, ...rest }: { label?: ReactNode } & Omi
       <span className="relative inline-flex h-[18px] w-[18px] shrink-0">
         <input
           type="radio"
-          className="peer absolute inset-0 h-full w-full cursor-[inherit] appearance-none rounded-full border border-kit-gray bg-white transition-colors checked:border-kit-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kit-blue"
+          className="peer absolute inset-0 h-full w-full cursor-[inherit] appearance-none rounded-full border border-kit-gray bg-white transition-colors checked:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           {...rest}
         />
-        <span className="pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 scale-0 rounded-full bg-kit-blue transition-transform peer-checked:scale-100" aria-hidden />
+        <span className="pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 scale-0 rounded-full bg-brand transition-transform peer-checked:scale-100" aria-hidden />
       </span>
       {label}
     </label>
@@ -144,8 +144,8 @@ export function Toggle({
           onChange?.(!on);
         }}
         className={cn(
-          "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kit-blue",
-          on ? "bg-kit-blue" : "bg-kit-gray",
+          "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+          on ? "bg-brand" : "bg-kit-gray",
         )}
       >
         <span className={cn("block h-4 w-4 rounded-full bg-white shadow-ds-xsm transition-transform", on ? "translate-x-[18px]" : "translate-x-0.5")} />
@@ -232,7 +232,7 @@ export function SearchCombobox({ options, label = "Search", placeholder = "Searc
                 choose(o);
               }}
               onMouseEnter={() => setIdx(i)}
-              className={cn("flex cursor-pointer items-center justify-between px-3 py-2 text-[13px] text-ink-body", i === idx && "bg-kit-blue/10 text-kit-blue")}
+              className={cn("flex cursor-pointer items-center justify-between px-3 py-2 text-[13px] text-ink-body", i === idx && "bg-brand-tint text-brand-strong")}
             >
               {o}
               {picked === o && <Check size={14} aria-hidden />}

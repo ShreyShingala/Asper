@@ -154,3 +154,27 @@ def test_live_checklist_follows_intake_rules():
                       analysis=PhotoAnalysis(observations=["wall"]))]
     cl = live.checklist(c)
     assert cl["can_finish_early"] and cl["photos_left"] == 5 and cl["shots_taken"] == ["wide"]
+
+
+def test_booking_schedule_matches_published_slots():
+    from app.engine import booking
+    days = booking.availability(date(2026, 10, 24), set())
+    first4 = [(d["relative"], d["weekday"], d["label"], d["slots"]) for d in days[:4]]
+    assert first4 == [
+        ("next week", "Friday", "Oct 30", ["10:00 AM", "11:15 AM", "12:30 PM", "3:00 PM", "4:15 PM"]),
+        ("in 2 weeks", "Monday", "Nov 2", ["10:00 AM", "11:15 AM", "12:30 PM", "3:00 PM", "4:15 PM"]),
+        ("in 2 weeks", "Tuesday", "Nov 3", ["10:00 AM", "11:15 AM", "12:30 PM", "1:45 PM", "3:00 PM"]),
+        ("in 2 weeks", "Wednesday", "Nov 4", ["10:00 AM", "12:30 PM", "1:45 PM", "3:00 PM", "4:15 PM"]),
+    ]
+    assert all(date.fromisoformat(d["date"]).weekday() < 5 for d in days)
+
+
+def test_booking_rules():
+    from app.engine import booking
+    today, d = date(2026, 10, 24), date(2026, 10, 30)
+    assert booking.is_available(d, "10:00 AM", today, set())
+    assert not booking.is_available(d, "10:00 AM", today, {(d, "10:00 AM")})
+    assert not booking.is_available(d, "1:45 PM", today, set())          # held in the seeded calendar
+    assert not booking.is_available(date(2026, 10, 31), "10:00 AM", today, set())  # Saturday
+    assert "tenant" not in booking.BOOKABLE_TYPES and set(booking.TIPS) == {10, 15, 25}
+    assert booking.TIPS[25] == "Tip Jar - Support Us ($25)"

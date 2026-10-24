@@ -33,7 +33,7 @@ def now() -> datetime:
 
 
 class Customer(BaseModel):
-    type: Literal["homeowner", "tenant", "landlord", "unknown"] = "unknown"
+    type: Literal["homeowner", "tenant", "landlord", "business", "property_manager", "unknown"] = "unknown"
     alias: str = "New customer"
     contact_simulated: str | None = None
 
@@ -198,11 +198,27 @@ class Letter(BaseModel):
     generated_at: datetime = Field(default_factory=now)
 
 
+class BookingContact(BaseModel):
+    name: Annotated[str, Len(min_length=2, max_length=120)]
+    phone: Annotated[str, Len(min_length=7, max_length=30)]
+    email: Annotated[str, Len(max_length=200)] = ""
+    address: Annotated[str, Len(min_length=3, max_length=200)]
+    city: Annotated[str, Len(min_length=2, max_length=80)]
+    postal_code: Annotated[str, Len(min_length=3, max_length=10)]
+
+
 class Booking(BaseModel):
     service: Service
     slot_text: str
     status: Literal["requested_simulated", "confirmed_simulated", "paid_simulated"] = "requested_simulated"
     at: datetime = Field(default_factory=now)
+    customer_type: str | None = None
+    slot_date: date | None = None
+    slot_time: str | None = None
+    timezone: str | None = None
+    contact: BookingContact | None = None
+    tip: int | None = Field(default=None, description="Optional tip-jar amount in CAD (10, 15 or 25)")
+    notes: str | None = None
 
 
 class StoredReport(BaseModel):

@@ -290,7 +290,7 @@ export default function Live() {
         <main className="mx-auto flex min-h-dvh max-w-md flex-col px-5 pb-10 pt-5">
           <Logo small />
           <section className="rise mt-10">
-            <Eyebrow color="text-kit-blue" className="mb-3">Live with AI · about 4 minutes</Eyebrow>
+            <Eyebrow color="text-brand" className="mb-3">Live with AI · about 4 minutes</Eyebrow>
             <h1 className="text-h5 font-bold tracking-tight text-ink">Show us, and talk it through.</h1>
             <p className="mt-3 text-body font-light text-ink-body">Bruce, our AI assistant, guides you over a live camera call and takes the photos for you.</p>
           </section>
@@ -304,7 +304,7 @@ export default function Live() {
               return (
                 <li key={i}>
                   <Card className="flex items-start gap-3 px-4 py-3">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-kit-blue/10 text-kit-blue"><I size={18} aria-hidden /></span>
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-tint text-brand"><I size={18} aria-hidden /></span>
                     <span className="text-subtitle text-ink">{text as string}</span>
                   </Card>
                 </li>
@@ -325,7 +325,7 @@ export default function Live() {
         <div className="fixed inset-0 flex h-dvh flex-col text-white">
           <header className="flex items-center gap-2 bg-gradient-to-b from-kit-navy/90 to-transparent px-4 pb-6 pt-4">
             <span className={cx("inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-caption font-medium",
-              phase === "connecting" ? "bg-white/15" : mode === "speaking" ? "bg-kit-blue" : "bg-kit-green")}>
+              phase === "connecting" ? "bg-white/15" : mode === "speaking" ? "bg-brand" : "bg-kit-green")}>
               <span className={cx("h-2 w-2 rounded-full bg-white", phase === "live" && "animate-pulse")} />
               {phase === "connecting" ? "Connecting…" : mode === "speaking" ? "Bruce is talking" : "Listening"}
             </span>

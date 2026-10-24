@@ -283,6 +283,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/booking/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Booking Availability */
+        get: operations["booking_availability_booking_availability_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cases/{case_id}/book": {
         parameters: {
             query?: never;
@@ -671,6 +688,17 @@ export interface components {
              * @default Next available slot
              */
             slot_text: string;
+            /** Customer Type */
+            customer_type?: string | null;
+            /** Slot Date */
+            slot_date?: string | null;
+            /** Slot Time */
+            slot_time?: string | null;
+            contact?: components["schemas"]["BookingContact"] | null;
+            /** Tip */
+            tip?: number | null;
+            /** Notes */
+            notes?: string | null;
         };
         /** Booking */
         Booking: {
@@ -692,6 +720,40 @@ export interface components {
              * Format: date-time
              */
             at?: string;
+            /** Customer Type */
+            customer_type?: string | null;
+            /** Slot Date */
+            slot_date?: string | null;
+            /** Slot Time */
+            slot_time?: string | null;
+            /** Timezone */
+            timezone?: string | null;
+            contact?: components["schemas"]["BookingContact"] | null;
+            /**
+             * Tip
+             * @description Optional tip-jar amount in CAD (10, 15 or 25)
+             */
+            tip?: number | null;
+            /** Notes */
+            notes?: string | null;
+        };
+        /** BookingContact */
+        BookingContact: {
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /**
+             * Email
+             * @default
+             */
+            email: string;
+            /** Address */
+            address: string;
+            /** City */
+            city: string;
+            /** Postal Code */
+            postal_code: string;
         };
         /** Case */
         Case: {
@@ -855,7 +917,7 @@ export interface components {
              * @default unknown
              * @enum {string}
              */
-            type: "homeowner" | "tenant" | "landlord" | "unknown";
+            type: "homeowner" | "tenant" | "landlord" | "business" | "property_manager" | "unknown";
             /**
              * Alias
              * @default New customer
@@ -1987,6 +2049,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    booking_availability_booking_availability_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };

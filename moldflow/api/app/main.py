@@ -13,12 +13,12 @@ from pydantic import BaseModel
 from app import config, store
 from app.agents import tasks
 from app.agents.llm import AgentFailure, Result, prepare_image
-from app.engine import checks, rules
+from app.engine import booking, checks, rules
 from app.engine import live as live_rules
 from app.exports import render
 from app.integrations import elevenlabs
 from app.models.agents import IntakeTurn
-from app.models.passport import (Approval, Booking, Case, Event, Flag, FollowUp, Letter, LiveSession, Photo, PreAssessment, Reading,
+from app.models.passport import (Approval, Booking, BookingContact, Case, Event, Flag, FollowUp, Letter, LiveSession, Photo, PreAssessment, Reading,
                                  StoredReport, TranscriptLine, now)
 from app.seed import seeds
 
@@ -212,7 +212,7 @@ async def pre_assessment(case_id: str) -> CaseOut:
             next_actions=rules.next_actions(c, routing.service), health_note=rules.HEALTH_TEXT[c.language] if c.health_flag else None,
             tier=res.usage.tier)
         c.stage = "pre_assessed"
-        c.title = f"{c.customer.type.title()} · {c.answers.get('room', 'Unknown room')} · {c.property.postal_prefix or c.property.country}"
+        c.title = f"{c.customer.type.replace('_', ' ').title()} · {c.answers.get('room', 'Unknown room')} · {c.property.postal_prefix or c.property.country}"
         if routing.escalate:
             c.flags.append(Flag(id="esc_" + c.id, check="guardrail", severity="warn", message="AI asked for human review of this pre-assessment."))
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Pre-assessment ready", system="MoldFlow",
@@ -303,19 +303,61 @@ async def landlord_letter(case_id: str, body: LangIn) -> Letter:
     return letter
 
 
+def _booked_slots(exclude_case: str | None = None) -> set[tuple[date, str]]:
+    return {(c.booking.slot_date, c.booking.slot_time) for c in store.list_all()
+            if c.booking and c.booking.slot_date and c.booking.slot_time and c.id != exclude_case}
+
+
+@app.get("/booking/availability")
+def booking_availability() -> dict:
+    return {"timezone": booking.TIMEZONE, "timezone_label": booking.TIMEZONE_LABEL, "policy": booking.POLICY,
+            "tenant_phone": booking.TENANT_PHONE, "customer_types": booking.CUSTOMER_TYPES,
+            "tips": [{"amount": a, "label": label} for a, label in booking.TIPS.items()],
+            "days": booking.availability(date.today(), _booked_slots())}
+
+
 class BookIn(BaseModel):
     service: str
     slot_text: str = "Next available slot"
+    customer_type: str | None = None
+    slot_date: date | None = None
+    slot_time: str | None = None
+    contact: BookingContact | None = None
+    tip: int | None = None
+    notes: str | None = None
 
 
 @app.post("/cases/{case_id}/book")
 async def book(case_id: str, body: BookIn) -> CaseOut:
+    paid = body.service == "remote_report"
+    slot_text = body.slot_text
+    if body.slot_date or body.slot_time:  # on-site visit booked through the form
+        if body.customer_type == "tenant":
+            raise HTTPException(403, f"Tenants must call us at {booking.TENANT_PHONE} to schedule. Additional fees may apply.")
+        if body.customer_type not in booking.BOOKABLE_TYPES:
+            raise HTTPException(422, "Tell us who is booking: homeowner, landlord, business or property manager.")
+        if not (body.slot_date and body.slot_time) or not booking.is_available(body.slot_date, body.slot_time, date.today(),
+                                                                                _booked_slots(exclude_case=case_id)):
+            raise HTTPException(409, "That time was just taken. Please pick another slot.")
+        if not body.contact:
+            raise HTTPException(422, "Contact details and the property address are required.")
+        if body.tip is not None and body.tip not in booking.TIPS:
+            raise HTTPException(422, "Tip must be $10, $15 or $25.")
+        slot_text = booking.slot_text(body.slot_date, body.slot_time)
     async with store.editing(case_id) as c:
-        paid = body.service == "remote_report"
-        c.booking = Booking(service=body.service, slot_text=body.slot_text, status="paid_simulated" if paid else "requested_simulated")
+        c.booking = Booking(service=body.service, slot_text=slot_text, status="paid_simulated" if paid else "requested_simulated",
+                            customer_type=body.customer_type, slot_date=body.slot_date, slot_time=body.slot_time,
+                            timezone=booking.TIMEZONE if body.slot_date else None, contact=body.contact, tip=body.tip,
+                            notes=(body.notes or "").strip()[:1000] or None)
+        if body.customer_type in booking.CUSTOMER_TYPES:
+            c.customer.type = body.customer_type
+        if body.contact:
+            c.customer.alias = body.contact.name
+            c.property.region_text = f"{body.contact.address}, {body.contact.city} {body.contact.postal_code}"
         c.stage = "inspection_booked" if not paid else "report_approved"
+        extra = f" · tip ${body.tip}" if body.tip else ""
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Booked" if not paid else "Remote report purchased",
-                                system="MoldFlow (simulated)", what=f"{body.service}: {body.slot_text}", source="simulated"))
+                                system="MoldFlow (simulated)", what=f"{body.service}: {slot_text}{extra}", source="simulated"))
     return CaseOut(case=c)
 
 

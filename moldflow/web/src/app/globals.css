@@ -41,6 +41,32 @@
   --shadow-ds-xl: 0 24px 48px -8px rgb(16 20 45 / 0.22);
   --shadow-focus: 0 0 0 4px rgb(81 124 255 / 0.18);
 
+  /*
+   * MoldFlow theme: orange primary, tuned for WCAG 2.1 AA (verified ratios in comments).
+   * brand on white 5.18:1 · white on brand 5.18:1 · brand on brand-tint 4.76:1 · brand-strong on brand-tint-strong 5.95:1
+   */
+  --color-brand: #C2410C;
+  --color-brand-strong: #9A3412;
+  --color-brand-deep: #7C2D12;
+  --color-brand-tint: #FFF3EC;
+  --color-brand-tint-strong: #FDE3D3;
+  --color-field-focus: #C2410C;
+  --shadow-focus: 0 0 0 4px rgb(194 65 12 / 0.22);
+
+  /* Design-system colours darkened where they were used as text below 4.5:1. */
+  --color-ink-muted: #646677;       /* 5.66:1 on white (was 3.86) */
+  --color-placeholder: #6E7180;     /* 4.84:1 (was 2.10) */
+  --color-kit-green: #276E3B;       /* 6.21:1 (was 3.25) */
+  --color-kit-red: #B83B3B;         /* 5.63:1 */
+  --color-kit-orange: #B45309;      /* 5.02:1, used for warnings so it reads apart from the brand orange */
+  --color-danger: #C0262D;
+  --color-alert-danger-accent: #C0262D;   /* 4.96:1 on its bg (was 3.35) */
+  --color-alert-success-accent: #3F8F3A;
+  --color-alert-success-title: #2D6A29;   /* 5.57:1 on its bg (was 3.65) */
+  --color-alert-info-accent: #2E57D6;
+  --color-alert-warning-accent: #B45309;  /* 4.72:1 on its bg */
+  --color-warning-text: #8A5A0A;          /* 5.57:1 on the warning bg */
+
   --animate-ds-spin: ds-spin 0.9s linear infinite;
   @keyframes ds-spin {
     to {
@@ -80,7 +106,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 0%, rgb(33 105 232 / 0.28) 50%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgb(194 65 12 / 0.28) 50%, transparent 100%);
   animation: scan 1.6s ease-in-out infinite;
 }
 

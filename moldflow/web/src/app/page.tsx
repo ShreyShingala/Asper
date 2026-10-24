@@ -40,7 +40,7 @@ export default function Landing() {
         <LangToggle lang={lang} onChange={(l) => { setLang(l); localStorage.setItem("moldflow_lang", l); }} />
       </div>
       <section className="rise mt-12">
-        <Eyebrow color="text-kit-blue" className="mb-3">11:02 PM · NO APP NEEDED</Eyebrow>
+        <Eyebrow color="text-brand" className="mb-3">11:02 PM · NO APP NEEDED</Eyebrow>
         <h1 className="text-h5 font-bold tracking-tight text-ink">{t.heroTitle}</h1>
         <p className="mt-4 text-subheading font-light text-ink-body">{t.heroSub}</p>
       </section>
@@ -50,7 +50,7 @@ export default function Landing() {
           return (
             <li key={i} className="rise" style={{ animationDelay: `${0.1 + i * 0.08}s` }}>
               <Card className="flex items-center gap-3 px-4 py-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-kit-blue/10 text-kit-blue"><I size={18} aria-hidden /></span>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-tint text-brand"><I size={18} aria-hidden /></span>
                 <span className="text-body font-medium text-ink">{label as string}</span>
               </Card>
             </li>

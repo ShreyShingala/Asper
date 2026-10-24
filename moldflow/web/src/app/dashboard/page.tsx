@@ -79,10 +79,10 @@ export default function Dashboard() {
               <Card key={i.id} className="rise p-4">
                 <div className="flex items-center gap-2">
                   <Eyebrow>{i.title}</Eyebrow>
-                  <Tag tone="blue" soft>SMS draft</Tag>
+                  <Tag tone="brand" soft>SMS draft</Tag>
                 </div>
                 <p className="mt-2 text-body text-ink">{i.text}</p>
-                {i.reason && <p className="mt-2 text-caption text-kit-blue">why: {i.reason}</p>}
+                {i.reason && <p className="mt-2 text-caption text-brand">why: {i.reason}</p>}
               </Card>
             ))}
           </div>

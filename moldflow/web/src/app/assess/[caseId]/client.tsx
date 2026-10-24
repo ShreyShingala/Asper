@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Camera, ImageUp, Info, FileDown, CalendarCheck, Mail, Phone, CreditCard, MapPin, Check, HeartPulse } from "lucide-react";
 import { api, resizeImage, type Case, type CaseOut, type IntakeTurn, type Photo } from "@/lib/api";
 import { STRINGS } from "@/lib/i18n";
@@ -79,8 +80,8 @@ export default function Assess() {
         <Logo small />
         <LangToggle lang={lang} onChange={setLang} />
       </div>
-      <p className="mt-4 flex gap-2 rounded-ds-sm bg-alert-info-bg px-3 py-2.5 text-caption text-ink-body">
-        <Info size={14} className="mt-0.5 shrink-0 text-alert-info-accent" aria-hidden /> {t.banner}
+      <p className="mt-4 flex gap-2 rounded-ds-sm bg-brand-tint px-3 py-2.5 text-caption text-ink-body">
+        <Info size={14} className="mt-0.5 shrink-0 text-brand" aria-hidden /> {t.banner}
       </p>
 
       {c.stage === "intake" ? (
@@ -151,7 +152,7 @@ function Intake({ c, turn, photos, pending, busy, tick, onUpload, onAnswer, onSk
       <div ref={actionRef} />
       {!busy && prompt && (
         <Card key={prompt.prompt_id} className="rise p-5">
-          <Eyebrow color="text-kit-blue" className="mb-1">{t.photos} {photos.length + 1} / 4</Eyebrow>
+          <Eyebrow color="text-brand" className="mb-1">{t.photos} {photos.length + 1} / 4</Eyebrow>
           <h2 className="text-h6 font-semibold text-ink">{prompt.text}</h2>
           <p className="mt-1 text-subtitle font-light text-ink-body">{prompt.why}</p>
           <input ref={cam} type="file" accept="image/*" capture="environment" hidden
@@ -250,7 +251,7 @@ function PhotoCard({ c, p }: { c: Case; p: Photo }) {
 function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string | null; tick: number; reload: () => void; onRelocate: (v: string) => void }) {
   const t = STRINGS[c.language];
   const pa = c.pre_assessment!;
-  const [modal, setModal] = useState<null | "book" | "letter" | "pay">(null);
+  const [modal, setModal] = useState<null | "letter" | "pay">(null);
   const [letter, setLetter] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [loc, setLoc] = useState("");
@@ -259,12 +260,12 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
   const paid = c.booking?.status === "paid_simulated";
   const booked = c.booking && !paid;
 
-  async function act(kind: "book" | "letter" | "pay", payload?: string) {
+  async function act(kind: "letter" | "pay") {
     if (kind === "letter") {
       const l = await api.post<{ body: string }>(`/cases/${c.id}/letters/landlord`, { language: c.language });
       setLetter(l.body); setModal("letter"); return;
     }
-    await api.post(`/cases/${c.id}/book`, { service: kind === "pay" ? "remote_report" : pa.recommended_service, slot_text: payload ?? "Remote report" });
+    await api.post(`/cases/${c.id}/book`, { service: "remote_report", slot_text: "Remote report" });
     setModal(null); reload();
   }
   if (busy === "assess") return <Card className="mt-6 p-5"><Spinner label={t.preparing[Math.min(tick, 2)]} /></Card>;
@@ -273,7 +274,7 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
     <div className="mt-5 space-y-4">
       <section className="rise">
         <div className="flex items-center justify-between gap-2">
-          <Eyebrow color="text-kit-blue">{t.yourPA}</Eyebrow>
+          <Eyebrow color="text-brand">{t.yourPA}</Eyebrow>
           <ProvenancePill tier={pa.tier} />
         </div>
         <h1 className="mt-1 text-h6 font-semibold text-ink">{pa.summary.split(". ")[0]}.</h1>
@@ -281,7 +282,7 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
       </section>
 
       <Card className="rise overflow-hidden" style={{ animationDelay: "0.05s" }}>
-        <div className="bg-kit-blue px-5 py-4 text-white">
+        <div className="bg-brand px-5 py-4 text-white">
           <Eyebrow color="text-white/80">{t.nextStep}</Eyebrow>
           <p className="mt-1 text-h6 font-semibold">{pa.service_price_text.split(":")[0]}</p>
           <p className="mt-1 text-subheading font-semibold">{pa.service_price_text.split(":").slice(1).join(":").trim()}
@@ -292,15 +293,19 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
         <div className="p-5">
           <Eyebrow className="mb-2">{t.why}</Eyebrow>
           <ul className="space-y-1.5 text-subtitle text-ink">{pa.reasons.map((r, i) => <li key={i} className="flex gap-2"><Check size={16} className="mt-0.5 shrink-0 text-kit-green" aria-hidden />{r}</li>)}</ul>
-          {pa.health_note && <p className="mt-4 flex gap-2 rounded-ds-sm bg-alert-warning-bg p-3 text-subtitle text-[#8a5a0a]"><HeartPulse size={16} className="mt-0.5 shrink-0 text-alert-warning-accent" aria-hidden />{pa.health_note}</p>}
+          {pa.health_note && <p className="mt-4 flex gap-2 rounded-ds-sm bg-alert-warning-bg p-3 text-subtitle text-warning-text"><HeartPulse size={16} className="mt-0.5 shrink-0 text-alert-warning-accent" aria-hidden />{pa.health_note}</p>}
           <div className="mt-5 grid gap-2">
             {remote ? (
               paid ? <p role="status" className="rounded-ds-sm bg-alert-success-bg p-3 text-subtitle font-medium text-alert-success-title">{t.paid}</p>
                 : <Button size="lg" multiline leading={<CreditCard size={18} aria-hidden className="shrink-0" />} onClick={() => setModal("pay")}>{t.remote}</Button>
             ) : booked ? (
-              <p role="status" className="flex items-center gap-2 rounded-ds-sm bg-alert-success-bg p-3 text-subtitle font-medium text-alert-success-title"><CalendarCheck size={16} className="shrink-0" aria-hidden />{t.booked} · {c.booking?.slot_text}</p>
+              <Link href={`/assess/${c.id}/book`} className="flex items-center gap-2 rounded-ds-sm bg-alert-success-bg p-3 text-subtitle font-medium text-alert-success-title">
+                <CalendarCheck size={16} className="shrink-0" aria-hidden />{t.booked} · {c.booking?.slot_text}
+              </Link>
             ) : (
-              <Button size="lg" multiline leading={<CalendarCheck size={18} aria-hidden className="shrink-0" />} onClick={() => setModal("book")}>{t.book}</Button>
+              <Link href={`/assess/${c.id}/book`} className={buttonClass({ size: "lg", multiline: true })}>
+                <CalendarCheck size={18} aria-hidden className="shrink-0" />{t.book}
+              </Link>
             )}
             {pa.next_actions.includes("landlord_letter") && <Button size="lg" multiline variant="outline" leading={<Mail size={18} aria-hidden className="shrink-0" />} onClick={() => act("letter")}>{t.letter}</Button>}
             <a href={`/api/cases/${c.id}/export/pre-assessment.pdf`} target="_blank" rel="noreferrer" aria-disabled={remote && !paid ? true : undefined}
@@ -336,17 +341,7 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
       </div>
 
       <Modal open={!!modal} onClose={() => setModal(null)} className={modal === "letter" ? "max-w-[520px]" : undefined}
-        title={modal === "book" ? t.bookTitle : modal === "pay" ? t.payTitle : t.letterTitle}>
-        {modal === "book" && (
-          <>
-            <div className="grid gap-2">
-              {["Tomorrow · 9:00", "Tomorrow · 13:30", "Friday · 10:00"].map((s) => (
-                <Button key={s} size="lg" variant="outline" onClick={() => act("book", s)}>{s}</Button>
-              ))}
-            </div>
-            <p className="mt-3 text-caption text-ink-muted">Simulated: in production this writes to the MB calendar + Close.</p>
-          </>
-        )}
+        title={modal === "pay" ? t.payTitle : t.letterTitle}>
         {modal === "pay" && (
           <>
             <p>{pa.summary}</p>

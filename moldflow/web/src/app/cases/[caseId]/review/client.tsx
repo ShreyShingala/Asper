@@ -90,6 +90,7 @@ export default function Review() {
             <div className="space-y-2">{c.flags.map((f) => <FlagRow key={f.id} flag={f} onResolve={(fl) => { setResolving(fl); setNote(""); }} />)}</div>
           </Card>
           {c.estimate && <EstimateCard c={c} />}
+          {c.booking?.slot_date && <BookingCard c={c} />}
           {c.live && <LiveCallCard c={c} />}
           {c.pre_assessment && (
             <Card className="p-5">
@@ -121,7 +122,7 @@ function Cite({ c, id }: { c: Case; id: string }) {
   const p = c.photos.find((x) => x.id === pid);
   return (
     <span className="group relative inline-block align-middle" tabIndex={p ? 0 : undefined}>
-      <Tag tone="blue" soft className="cursor-help">{id}</Tag>
+      <Tag tone="brand" soft className="cursor-help">{id}</Tag>
       {p && (
         <span className="pointer-events-none absolute bottom-7 left-0 z-20 hidden w-48 rounded-ds-xsm border border-kit-gray-soft bg-white p-1.5 shadow-ds-lg group-hover:block group-focus:block">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -140,7 +141,7 @@ function ReportView({ c }: { c: Case }) {
       <p>{r.summary}</p>
       {r.sections.map((s) => (
         <div key={s.room}>
-          <h3 className="mb-1.5 text-subheading font-semibold text-kit-blue">{s.room}</h3>
+          <h3 className="mb-1.5 text-subheading font-semibold text-brand">{s.room}</h3>
           <ul className="space-y-1.5">
             {s.claims.map((cl, i) => (
               <li key={i}>► {cl.text} <span className="inline-flex gap-1">{cl.cites.map((x) => <Cite key={x} c={c} id={x} />)}</span></li>
@@ -149,13 +150,13 @@ function ReportView({ c }: { c: Case }) {
         </div>
       ))}
       <div>
-        <h3 className="mb-1.5 text-subheading font-semibold text-kit-blue">Recommendations</h3>
+        <h3 className="mb-1.5 text-subheading font-semibold text-brand">Recommendations</h3>
         <ul className="space-y-1.5">{r.recommendations.map((cl, i) => (
           <li key={i}>► {cl.text} <span className="inline-flex gap-1">{cl.cites.map((x) => <Cite key={x} c={c} id={x} />)}</span></li>))}
         </ul>
       </div>
       <div>
-        <h3 className="mb-1.5 text-subheading font-semibold text-kit-blue">Limitations</h3>
+        <h3 className="mb-1.5 text-subheading font-semibold text-brand">Limitations</h3>
         <ul className="list-disc pl-5 text-subtitle font-light text-ink-body">{r.limitations.map((l, i) => <li key={i}>{l}</li>)}</ul>
       </div>
       {c.report!.dropped_claims.length > 0 && (
@@ -193,7 +194,29 @@ function EstimateCard({ c }: { c: Case }) {
         {e.deposit && <Row k={`Deposit (${e.deposit_pct}%)`} v={money(e.deposit)} />}
         {e.expires_on && <Row k="Valid until" v={e.expires_on} />}
       </dl>
-      {e.real_world_status && <p className="mt-3 rounded-ds-xsm bg-alert-warning-bg p-2 text-caption font-medium text-[#8a5a0a]">Recorded outcome: {e.real_world_status}</p>}
+      {e.real_world_status && <p className="mt-3 rounded-ds-xsm bg-alert-warning-bg p-2 text-caption font-medium text-warning-text">Recorded outcome: {e.real_world_status}</p>}
+    </Card>
+  );
+}
+
+const WHO: Record<string, string> = { homeowner: "Homeowner", landlord: "Landlord", business: "Business", property_manager: "Property manager" };
+
+function BookingCard({ c }: { c: Case }) {
+  const b = c.booking!;
+  return (
+    <Card className="border-l-4 border-l-brand p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-subheading font-semibold text-ink">On-site visit booked</h2>
+        <Tag tone="brand" soft>{b.status.replace("_simulated", "").replace("_", " ")} (simulated)</Tag>
+      </div>
+      <p className="mt-2 text-body font-medium text-ink">{b.slot_text}</p>
+      <dl className="mt-2 space-y-1 text-subtitle">
+        {b.customer_type && <div className="flex gap-2"><dt className="w-20 shrink-0 text-ink-muted">Booked by</dt><dd className="text-ink">{WHO[b.customer_type] ?? b.customer_type}</dd></div>}
+        {b.contact && <div className="flex gap-2"><dt className="w-20 shrink-0 text-ink-muted">Contact</dt><dd className="text-ink">{b.contact.name} · {b.contact.phone}{b.contact.email ? ` · ${b.contact.email}` : ""}</dd></div>}
+        {b.contact && <div className="flex gap-2"><dt className="w-20 shrink-0 text-ink-muted">Address</dt><dd className="text-ink">{b.contact.address}, {b.contact.city} {b.contact.postal_code}</dd></div>}
+        {b.notes && <div className="flex gap-2"><dt className="w-20 shrink-0 text-ink-muted">Notes</dt><dd className="text-ink">{b.notes}</dd></div>}
+        <div className="flex gap-2"><dt className="w-20 shrink-0 text-ink-muted">Tip jar</dt><dd className="text-ink">{b.tip ? `$${b.tip}.00` : "None"}</dd></div>
+      </dl>
     </Card>
   );
 }
@@ -207,7 +230,7 @@ function LiveCallCard({ c }: { c: Case }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-subheading font-semibold text-ink">Live call with Bruce</h2>
         <div className="flex gap-1.5">
-          <Tag tone="blue" soft>{shots} AI-captured photo{shots === 1 ? "" : "s"}</Tag>
+          <Tag tone="brand" soft>{shots} AI-captured photo{shots === 1 ? "" : "s"}</Tag>
           {minutes && <Tag soft>{minutes} min</Tag>}
         </div>
       </div>
