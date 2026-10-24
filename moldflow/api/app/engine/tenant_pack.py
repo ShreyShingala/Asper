@@ -7,28 +7,25 @@ import uuid
 from dataclasses import dataclass
 from datetime import date, timedelta
 
+from app import clock
+from app.engine import consent
 from app.models.passport import Case, OutboxMessage, TenantPack
 
 PRICES = {"ai_report": "20.00", "tenant_pack": "50.00"}
 FROM = "care@bustmold.com"
 
-# --- demo clock -------------------------------------------------------------------------------------------------------
-_offset_days = 0
-
-
+# --- demo clock: the app-wide clock (app/clock.py), so tenant-pack deadlines and the Hub's time travel agree ---------
 def today() -> date:
-    return date.today() + timedelta(days=_offset_days)
+    return clock.today()
 
 
 def skip(days: int) -> date:
-    global _offset_days
-    _offset_days += days
-    return today()
+    clock.set_today(clock.today() + timedelta(days=days))
+    return clock.today()
 
 
 def reset_clock() -> None:
-    global _offset_days
-    _offset_days = 0
+    clock.set_today(None)
 
 
 # --- ladder -----------------------------------------------------------------------------------------------------------
@@ -75,8 +72,9 @@ def _body(step: Step, case: Case, pack: TenantPack) -> tuple[str, str, str, str]
     obs = "\n".join(f"  - {o}" for o in f["observations"])
     extra = [x for x, on in (("a persistent musty smell", f["smell"]), ("a leak or water damage nearby", f["leak"])) if on]
     reported = (" The tenant also reports " + " and ".join(extra) + ".") if extra else ""
-    footer = (f"\n\nSent by Mold Busters on behalf of {t} (copied), who approved this message. These observations come from a "
-              "remote pre-assessment and do not confirm mold; only professional sampling can. Replies go to the tenant and to this address.")
+    footer = (f"\n\nSent by Mold Busters on behalf of {t} (copied), who authorized this message. These observations come from a "
+              "remote pre-assessment and do not confirm mold; only professional sampling can. Replies go to the tenant and to this address."
+              f"\n\n{consent.COMPANY} · {consent.ADDRESS} · {consent.PHONE} · {consent.SITE}")
     if step.kind == "landlord_letter":
         return (ll, pack.landlord_email, f"Repair request: possible mold in the {f['room']}",
                 f"Dear {ll},\n\nI'm writing about visible discoloration in the {f['room']} of my unit, recorded in a Mold Busters remote "

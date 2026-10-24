@@ -37,7 +37,7 @@ export default function Muse() {
 
   return (
     <StaffShell title="Muse">
-      <p className="-mt-3 mb-5 text-subtitle font-light text-ink-body">Ask anything about any project. Muse reads every timeline, chat, message, check, estimate and approval, answers with sources, and can act: drafts go to Autopilot for your OK, evidence bundles download right away.</p>
+      <p className="-mt-3 mb-5 text-subtitle font-light text-ink-body">Ask anything about any project. Muse reads every timeline, chat, message, check, estimate and approval, answers with sources, and can act: drafts go to Outreach for your OK, evidence bundles download right away.</p>
       <div className="mx-auto max-w-3xl space-y-4">
         {turns.length === 0 && (
           <div className="grid gap-2 sm:grid-cols-2">
@@ -63,7 +63,7 @@ export default function Muse() {
                       ) : a.type === "open_project" ? (
                         <Link key={j} href={a.href!} className="inline-flex h-10 items-center gap-1.5 rounded-ds-xsm border border-brand px-4 text-subtitle font-medium text-brand"><ExternalLink size={15} aria-hidden />{a.label}</Link>
                       ) : (
-                        <Link key={j} href="/autopilot" className="inline-flex h-10 items-center gap-1.5 rounded-ds-xsm border border-kit-green px-4 text-subtitle font-medium text-kit-green">{a.label} · {a.status}</Link>
+                        <Link key={j} href={a.href ?? "/outreach"} className="inline-flex h-10 items-center gap-1.5 rounded-ds-xsm border border-kit-green px-4 text-subtitle font-medium text-kit-green">{a.label} · {a.status}</Link>
                       ))}
                     </div>
                   )}

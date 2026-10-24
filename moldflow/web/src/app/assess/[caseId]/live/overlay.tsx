@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, ChevronLeft, ChevronRight, ListChecks, MessageCircle, RotateCcw } from "lucide-react";
 import { cx } from "@/components/ui";
 import type { PlanShot } from "./precall";
@@ -132,15 +132,19 @@ export function CapturePreview({ src, title, autoKeepMs, onKeep, onRetake }: {
   src: string; title: string; autoKeepMs: number; onKeep: () => void; onRetake: () => void;
 }) {
   const [left, setLeft] = useState(autoKeepMs);
+  // The parent re-renders every second (call timer) and passes a new onKeep each time; keep the latest in a ref so the
+  // countdown isn't restarted on every render (otherwise auto-keep never fires during a call).
+  const keepRef = useRef(onKeep);
+  useEffect(() => { keepRef.current = onKeep; }, [onKeep]);
   useEffect(() => {
     const t0 = Date.now();
     const id = setInterval(() => {
       const l = autoKeepMs - (Date.now() - t0);
       setLeft(l);
-      if (l <= 0) { clearInterval(id); onKeep(); }
+      if (l <= 0) { clearInterval(id); keepRef.current(); }
     }, 100);
     return () => clearInterval(id);
-  }, [autoKeepMs, onKeep]);
+  }, [autoKeepMs, src]);
   return (
     <div className="absolute inset-0 z-30 grid place-items-center bg-kit-navy/70 p-6" role="dialog" aria-label="Check this photo">
       <div className="w-full max-w-sm overflow-hidden rounded-ds-sm bg-white shadow-ds-xl">

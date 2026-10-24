@@ -3,6 +3,7 @@ import json
 import logging
 import re
 import shutil
+from contextlib import asynccontextmanager
 import uuid
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -12,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, PlainTextResponse, Response
 from pydantic import BaseModel
 
-from app import config, store
+from app import clock, config, store
 from app.agents import bruce, tasks
 from app.agents.llm import AgentFailure, Result, prepare_image, structured
 from app.engine import autopilot, booking, checks, photo_plan, rules, tenant_pack
@@ -25,16 +26,45 @@ from app.models.passport import (Approval, Booking, BookingContact, Case, Event,
 from app.seed import seeds
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
-app = FastAPI(title="MoldFlow API", version="1.0")
+@asynccontextmanager
+async def lifespan(_app):
+    _startup()
+    yield
+
+
+app = FastAPI(title="MoldFlow API", version="1.0", lifespan=lifespan)
+from app.routers import hub as hub_router  # noqa: E402
+
+app.include_router(hub_router.router)
 app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 from app.projects_api import router as projects_router  # noqa: E402
 app.include_router(projects_router)
 
 
-@app.on_event("startup")
+def _seed_everything() -> list[Case]:
+    from app import crm_store
+    from app.routers.hub import run_moments  # noqa: F401  (moments are recomputed below)
+    from app.seed import crm_seed
+    cases = seeds.seed_all(store.save)
+    crm_store.wipe_all()
+    for c in cases:  # link the real sample-pack cases to their contact
+        c.contact_id = f"c-{c.id}"
+        store.save(c)
+    crm_seed.seed(cases)
+    crm_seed.seed_todays_visits(store.save)
+    from app import messaging
+    from app.models.crm import Contact
+    for contact in crm_store.query(Contact):
+        messaging.recompute_moments(contact)
+    return cases
+
+
 def _startup():
-    if not store.list_all():
-        seeds.seed_all(store.save)
+    from app import crm_store
+    from app.models.crm import Contact
+    if not store.list_all() or not crm_store.query(Contact):
+        store.wipe()
+        _seed_everything()
 
 
 def _get(case_id: str) -> Case:
@@ -229,7 +259,8 @@ async def pre_assessment(case_id: str) -> CaseOut:
             c.flags.append(Flag(id="esc_" + c.id, check="guardrail", severity="warn", message="AI asked for human review of this pre-assessment."))
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Pre-assessment ready", system="MoldFlow",
                                 what=f"Recommended: {routing.service}. Photos: {len(c.photos)}.", source="moldflow"))
-    return CaseOut(case=c)
+    await _run_autopilot(case_id)
+    return CaseOut(case=_get(case_id))
 
 
 # ---------- live camera + voice pre-assessment ----------
@@ -408,8 +439,35 @@ class CheckoutIn(BaseModel):
     card_number: str = "4242 4242 4242 4242"
     tenant_name: str | None = None
     tenant_email: str | None = None
+    tenant_phone: str | None = None
     landlord_name: str | None = None
     landlord_email: str | None = None
+    authorize_auto: bool = True   # tenant authorizes each ladder step to be sent on their behalf without asking again
+
+
+def _kill_switch_on() -> bool:
+    from app import crm_store
+    return crm_store.autonomy().paused
+
+
+def _auto_ladder(c: Case) -> None:
+    """Send any drafted ladder step the tenant pre-authorized, unless the owner hit the kill switch."""
+    pack = c.tenant_pack
+    if not pack or not pack.auto_send:
+        return
+    for m in c.outbox:
+        if m.step is not None and m.status == "awaiting_approval":
+            if _kill_switch_on():
+                m.reason = "Held: all outbound paused (kill switch)."
+                continue
+            m.approved_by.append("tenant (authorized at checkout)")
+            _send(c, m)
+
+
+async def _run_autopilot(case_id: str) -> None:
+    async with store.editing(case_id) as c:
+        if autopilot.ensure_contact(c):
+            autopilot.sync(c)
 
 
 @app.post("/cases/{case_id}/checkout")
@@ -432,18 +490,40 @@ async def checkout(case_id: str, body: CheckoutIn) -> CaseOut:
             c.booking = c.booking or Booking(service="remote_report", slot_text="Remote report", status="paid_simulated")
         else:
             tenant_pack.start(c, body.tenant_name.strip(), body.tenant_email.strip(), body.landlord_name.strip(), body.landlord_email.strip())
+            c.tenant_pack.auto_send = body.authorize_auto
             c.customer.alias = body.tenant_name.strip()
             c.customer.type = "tenant"
+            _auto_ladder(c)
+            autopilot.ensure_contact(c, body.tenant_name.strip(), (body.tenant_phone or "").strip(), body.tenant_email.strip())
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step=f"Paid: {what}", system="MoldFlow checkout (simulated)",
                                 what=f"${tenant_pack.PRICES[body.product]} · card ending {digits[-4:]}", source="simulated"))
     return CaseOut(case=c)
+
+
+class ContactIn(BaseModel):
+    name: str
+    phone: str = ""
+    email: str = ""
+
+
+@app.post("/cases/{case_id}/contact")
+async def case_contact(case_id: str, body: ContactIn) -> dict:
+    """Basic fields entered in the app -> the person's Hub profile, then Autopilot drafts/sends the next message."""
+    if not (body.phone.strip() or body.email.strip()):
+        raise HTTPException(422, "Add a phone number or an email so we can reach you.")
+    async with store.editing(case_id) as c:
+        contact = autopilot.ensure_contact(c, body.name.strip(), body.phone.strip(), body.email.strip())
+        c.customer.alias = body.name.strip() or c.customer.alias
+        sent = autopilot.sync(c)
+    return {"contact_id": contact.id if contact else None, "messages": [{"trigger": m.trigger, "status": m.status, "body": m.final_body or m.body}
+                                                                        for m in sent]}
 
 
 @app.get("/cases/{case_id}/pack")
 def pack_view(case_id: str) -> dict:
     c = _get(case_id)
     return {"pack": c.tenant_pack, "ladder": tenant_pack.ladder_view(c), "today": tenant_pack.today().isoformat(),
-            "outbox": [m for m in c.outbox if m.step is not None]}
+            "outbox": [m for m in c.outbox if m.step is not None], "paused": _kill_switch_on()}
 
 
 class DecisionIn(BaseModel):
@@ -467,6 +547,8 @@ async def outbox_approve(case_id: str, mid: str, body: DecisionIn) -> CaseOut:
         m = next((x for x in c.outbox if x.id == mid), None)
         if not m or m.status != "awaiting_approval":
             raise HTTPException(404, "Nothing to approve.")
+        if _kill_switch_on():
+            raise HTTPException(423, "All outbound is paused (kill switch in the staff header).")
         if body.body and body.body.strip():
             m.body = body.body.strip()
         role = "tenant" if body.by == "tenant" else "owner"
@@ -501,10 +583,16 @@ async def pack_state(case_id: str, body: PackStateIn) -> CaseOut:
             p.status = "paused"
         elif body.action == "resume":
             p.status = "active"
+            _auto_ladder(c)
         elif body.action == "landlord_replied":
             p.landlord_replied, p.status = True, "resolved"
             c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Landlord replied", system="MoldFlow (simulated)",
                                     what=f"{p.landlord_name} replied and agreed to arrange an inspection. Escalation stopped.", source="simulated"))
+            if contact := autopilot.ensure_contact(c):  # tell the tenant right away (routine update, sends on its own)
+                from app import messaging
+                messaging.create(contact, trigger="reminder", case_id=c.id, drafted_by="rule", is_cem=False, reason="Landlord replied",
+                                 body=f"Good news: {p.landlord_name} replied and agreed to arrange an inspection, so we stopped the escalation. "
+                                      "Reply here if anything changes.")
         else:
             raise HTTPException(422, "Unknown action.")
     return CaseOut(case=c)
@@ -516,92 +604,16 @@ class SkipIn2(BaseModel):
 
 @app.post("/demo/skip")
 async def demo_skip(body: SkipIn2) -> dict:
-    """Demo clock: move time forward and let every active tenant pack draft its next step if the landlord missed the deadline."""
+    """Demo clock: move time forward; every active tenant pack drafts (and, if authorized, sends) its next step."""
     day = tenant_pack.skip(max(1, min(body.days, 60)))
     drafted = []
     for case in store.list_all():
         if case.tenant_pack and case.tenant_pack.status == "active":
             async with store.editing(case.id) as c:
                 if msg := tenant_pack.advance(c):
-                    drafted.append({"case_id": c.id, "message_id": msg.id, "subject": msg.subject})
+                    _auto_ladder(c)
+                    drafted.append({"case_id": c.id, "message_id": msg.id, "subject": msg.subject, "status": msg.status})
     return {"today": day.isoformat(), "drafted": drafted}
-
-
-# ---------- autopilot inbox (owner: approve / edit / deny) ----------
-@app.get("/autopilot/inbox")
-async def autopilot_inbox() -> dict:
-    for case in store.list_all():
-        async with store.editing(case.id) as c:
-            autopilot.sync(c)
-    cases = store.list_all()
-    sent = [m for c in cases for m in c.outbox if m.status == "sent_simulated" and "owner" in m.needs]
-    sent_f = [f for c in cases for f in c.followups if f.status == "sent_simulated"]
-    return {"cards": autopilot.cards(cases), "today": tenant_pack.today().isoformat(),
-            "stats": {"approved": len(sent) + len(sent_f), "minutes_saved_estimate": sum(autopilot.MINUTES.get(m.kind, 5) for m in sent)
-                      + autopilot.MINUTES["followup"] * len(sent_f), "sent_on_behalf_of_tenants": sum(
-                          1 for c in cases for m in c.outbox if m.status == "sent_simulated" and m.on_behalf_of)}}
-
-
-class AutopilotDecision(BaseModel):
-    case_id: str
-    id: str
-    by: str = "Owner"
-    body: str | None = None
-    reason: str | None = None
-
-
-async def _owner_approve(case_id: str, item_id: str, by: str, body: str | None = None) -> bool:
-    async with store.editing(case_id) as c:
-        if m := next((x for x in c.outbox if x.id == item_id and x.status == "awaiting_approval"), None):
-            if "owner" not in m.needs:
-                raise HTTPException(403, "Only the tenant can approve messages sent on their behalf.")
-            if body and body.strip():
-                m.body = body.strip()
-            m.approved_by.append(by)
-            _send(c, m)
-            return True
-        if f := next((x for x in c.followups if x.id == item_id and x.status == "draft"), None):
-            if body and body.strip():
-                f.body = body.strip()
-            f.status = "sent_simulated"
-            c.approvals.append(Approval(what="followup", reviewed_by=by))
-            c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Follow-up sent", system="MoldFlow outbox (simulated)",
-                                    what=f.body[:120], source="simulated"))
-            return True
-    return False
-
-
-@app.post("/autopilot/approve")
-async def autopilot_approve(body: AutopilotDecision) -> dict:
-    if not await _owner_approve(body.case_id, body.id, body.by, body.body):
-        raise HTTPException(404, "Nothing to approve.")
-    return {"ok": True}
-
-
-@app.post("/autopilot/deny")
-async def autopilot_deny(body: AutopilotDecision) -> dict:
-    async with store.editing(body.case_id) as c:
-        if m := next((x for x in c.outbox if x.id == body.id and x.status == "awaiting_approval"), None):
-            m.status, m.denied_reason = "denied", body.reason or f"Denied by {body.by}"
-        elif f := next((x for x in c.followups if x.id == body.id and x.status == "draft"), None):
-            c.followups.remove(f)
-        else:
-            raise HTTPException(404, "Nothing to deny.")
-    return {"ok": True}
-
-
-class ApproveAllIn(BaseModel):
-    kind: str
-    by: str = "Owner"
-
-
-@app.post("/autopilot/approve-all")
-async def autopilot_approve_all(body: ApproveAllIn) -> dict:
-    done = 0
-    for card in autopilot.cards(store.list_all()):
-        if card["kind"] == body.kind and card["action"] == "approve":
-            done += await _owner_approve(card["case_id"], card["id"], body.by)
-    return {"approved": done}
 
 
 @app.get("/cases/{case_id}/export/pre-assessment.pdf")
@@ -630,7 +642,7 @@ def booking_availability() -> dict:
     return {"timezone": booking.TIMEZONE, "timezone_label": booking.TIMEZONE_LABEL, "policy": booking.POLICY,
             "tenant_phone": booking.TENANT_PHONE, "customer_types": booking.CUSTOMER_TYPES,
             "tips": [{"amount": a, "label": label} for a, label in booking.TIPS.items()],
-            "days": booking.availability(date.today(), _booked_slots())}
+            "days": booking.availability(clock.today(), _booked_slots())}
 
 
 class BookIn(BaseModel):
@@ -642,6 +654,7 @@ class BookIn(BaseModel):
     contact: BookingContact | None = None
     tip: int | None = None
     notes: str | None = None
+    marketing_consent: bool = False  # the unchecked box on the booking form; never pre-checked
 
 
 @app.post("/cases/{case_id}/book")
@@ -653,7 +666,7 @@ async def book(case_id: str, body: BookIn) -> CaseOut:
             raise HTTPException(403, f"Tenants must call us at {booking.TENANT_PHONE} to schedule. Additional fees may apply.")
         if body.customer_type not in booking.BOOKABLE_TYPES:
             raise HTTPException(422, "Tell us who is booking: homeowner, landlord, business or property manager.")
-        if not (body.slot_date and body.slot_time) or not booking.is_available(body.slot_date, body.slot_time, date.today(),
+        if not (body.slot_date and body.slot_time) or not booking.is_available(body.slot_date, body.slot_time, clock.today(),
                                                                                 _booked_slots(exclude_case=case_id)):
             raise HTTPException(409, "That time was just taken. Please pick another slot.")
         if not body.contact:
@@ -675,6 +688,12 @@ async def book(case_id: str, body: BookIn) -> CaseOut:
         extra = f" · tip ${body.tip}" if body.tip else ""
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Booked" if not paid else "Remote report purchased",
                                 system="MoldFlow (simulated)", what=f"{body.service}: {slot_text}{extra}", source="simulated"))
+    from app import hub_links
+    if contact := await hub_links.link_booking(c, body.marketing_consent, body.notes):
+        if c.contact_id != contact.id:
+            async with store.editing(case_id) as c2:
+                c2.contact_id = contact.id
+            c = c2
     return CaseOut(case=c)
 
 
@@ -816,7 +835,8 @@ async def approve(case_id: str, body: ApproveIn) -> CaseOut:
             c.estimate.status, c.stage = "approved", "quoted"
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step=f"{body.what.title()} approved", system="MoldFlow",
                                 what=f"Drafted by MoldFlow · Reviewed by {body.reviewed_by}", source="moldflow"))
-    return CaseOut(case=c)
+    await _run_autopilot(case_id)
+    return CaseOut(case=_get(case_id))
 
 
 @app.get("/cases/{case_id}/export/report.pdf")
@@ -848,7 +868,7 @@ async def followup_draft(case_id: str, body: FollowIn) -> CaseOut:
     c = _get(case_id)
     if not c.estimate:
         raise HTTPException(400, "No estimate on this case.")
-    as_of = body.as_of or date.today()
+    as_of = body.as_of or clock.today()
     try:
         d, offer_issues, res = await tasks.draft_followup(c, as_of, _prior_messages(c))
     except AgentFailure as e:
@@ -982,6 +1002,7 @@ def reset() -> dict:
         d = config.UPLOAD_DIR / cid
         if d.is_dir() and d.parent == config.UPLOAD_DIR:
             shutil.rmtree(d, ignore_errors=True)
-    cases = seeds.seed_all(store.save)
-    tenant_pack.reset_clock()
+    from app import clock
+    clock.set_today(None)
+    cases = _seed_everything()
     return {"ok": True, "cases": [c.id for c in cases]}

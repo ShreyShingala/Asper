@@ -18,8 +18,9 @@ export default function Checkout() {
   const product = (useSearchParams().get("product") ?? "tenant_pack") as Product;
   const router = useRouter();
   const p = PRODUCTS[product] ?? PRODUCTS.tenant_pack;
-  const [f, setF] = useState({ tenant_name: "", tenant_email: "", landlord_name: "", landlord_email: "", card_name: "", card_number: "4242 4242 4242 4242", exp: "12 / 29", cvc: "123" });
+  const [f, setF] = useState({ tenant_name: "", tenant_email: "", tenant_phone: "", landlord_name: "", landlord_email: "", card_name: "", card_number: "4242 4242 4242 4242", exp: "12 / 29", cvc: "123" });
   const [busy, setBusy] = useState(false);
+  const [auto, setAuto] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF((s) => ({ ...s, [k]: e.target.value }));
@@ -29,7 +30,7 @@ export default function Checkout() {
     e.preventDefault();
     setBusy(true); setErr(null);
     try {
-      await api.post<CaseOut>(`/cases/${caseId}/checkout`, { product, ...f });
+      await api.post<CaseOut>(`/cases/${caseId}/checkout`, { product, ...f, authorize_auto: auto });
       setDone(true);
     } catch (e) {
       setErr((e as Error).message);
@@ -46,7 +47,7 @@ export default function Checkout() {
           <h1 className="text-h6 font-semibold text-ink">Payment confirmed · ${p.price}.00</h1>
           <p className="text-subtitle font-light text-ink-body">Test mode: no money was charged. A receipt was added to your case.</p>
           {pack ? (
-            <Button size="lg" fullWidth leading={<Mail size={18} aria-hidden />} onClick={() => router.push(`/assess/${caseId}/pack`)}>Review your landlord letter</Button>
+            <Button size="lg" fullWidth leading={<Mail size={18} aria-hidden />} onClick={() => router.push(`/assess/${caseId}/pack`)}>Track your action pack</Button>
           ) : (
             <a href={`/api/cases/${caseId}/export/pre-assessment.pdf`} target="_blank" rel="noreferrer" className={buttonClass({ size: "lg", fullWidth: true })}>Download your report</a>
           )}
@@ -79,9 +80,17 @@ export default function Checkout() {
             <legend className="mb-1 text-subheading font-semibold text-ink">Who we write for, and to</legend>
             <TextField label="Your full name" autoComplete="name" value={f.tenant_name} onChange={set("tenant_name")} />
             <TextField label="Your email (you're copied on everything)" type="email" autoComplete="email" value={f.tenant_email} onChange={set("tenant_email")} />
+            <TextField label="Your mobile (for updates, optional)" type="tel" autoComplete="tel" value={f.tenant_phone} onChange={set("tenant_phone")} />
             <TextField label="Landlord or property manager name" value={f.landlord_name} onChange={set("landlord_name")} />
             <TextField label="Landlord email" type="email" value={f.landlord_email} onChange={set("landlord_email")} />
           </fieldset>
+        )}
+        {pack && (
+          <label className="flex items-start gap-3 rounded-ds-sm bg-kit-gray-faint p-4 text-subtitle text-ink">
+            <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--color-brand)]" />
+            <span>Send each step on my behalf automatically when it&apos;s due. I&apos;m copied on everything and can pause or stop at any time.
+              <span className="block text-caption text-ink-muted">Untick to approve each letter yourself first.</span></span>
+          </label>
         )}
         <fieldset className="space-y-3">
           <legend className="mb-1 flex items-center gap-1.5 text-subheading font-semibold text-ink"><CreditCard size={16} aria-hidden />Card</legend>

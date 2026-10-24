@@ -10,6 +10,7 @@ import { Button } from "@/components/ds/kit/Buttons";
 import { cardSurface } from "@/components/ds/kit/Cards";
 import { Loader, Modal, Tag } from "@/components/ds/kit/Feedback";
 import { Tabs } from "@/components/ds/kit/Navigation";
+import { HubSearch, PauseButton } from "@/components/hub";
 
 export { Button, IconButton, buttonClass } from "@/components/ds/kit/Buttons";
 export { EmptyState } from "@/components/ds/kit/Cards";
@@ -124,13 +125,18 @@ export function Logo({ small }: { small?: boolean }) {
 }
 
 const NAV = [
-  ["/autopilot", "Autopilot"],
+  ["/hub", "Hub"],
   ["/muse", "Muse"],
   ["/projects", "Projects"],
+  ["/people", "People"],
+  ["/outreach", "Outreach"],
+  ["/schedule", "Schedule"],
+] as const;
+const MORE = [
   ["/dashboard", "Cases"],
-  ["/cases/job1/inspect", "Job 1 · Inspect"],
-  ["/cases/job1/review", "Job 1 · Review"],
-  ["/compare", "Before / After"],
+  ["/alerts", "Alerts"],
+  ["/research", "Research"],
+  ["/settings", "Settings"],
   ["/proof", "Proof"],
 ] as const;
 
@@ -139,11 +145,11 @@ export function StaffShell({ children, title, actions }: { children: React.React
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-30 bg-white shadow-ds-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-5">
-          <Link href="/dashboard" className="shrink-0"><Logo small /></Link>
-          <nav aria-label="Primary" className="flex h-full gap-6 overflow-x-auto">
+        <div className="mx-auto flex h-16 max-w-[90rem] items-center gap-6 px-5">
+          <Link href="/hub" className="shrink-0"><Logo small /></Link>
+          <nav aria-label="Primary" className="flex h-full min-w-0 gap-5 overflow-x-auto">
             {NAV.map(([href, label]) => {
-              const on = path === href;
+              const on = path === href || (href !== "/hub" && path.startsWith(href + "/"));
               return (
                 <Link key={href} href={href} aria-current={on ? "page" : undefined}
                   className={cn("-mb-px inline-flex items-center whitespace-nowrap border-b-2 text-subtitle font-medium transition-colors",
@@ -152,14 +158,24 @@ export function StaffShell({ children, title, actions }: { children: React.React
                 </Link>
               );
             })}
+            <details className="relative -mb-px flex items-center">
+              <summary className={cn("flex h-full cursor-pointer list-none items-center whitespace-nowrap border-b-2 text-subtitle font-medium",
+                MORE.some(([h]) => path === h || path.startsWith(h + "/")) ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-ink")}>More ▾</summary>
+              <div className="fixed z-40 mt-2 min-w-40 rounded-ds-xsm bg-white py-1 shadow-ds-lg" style={{ top: "3.5rem" }}>
+                {MORE.map(([href, label]) => (
+                  <Link key={href} href={href} aria-current={path === href ? "page" : undefined}
+                    className={cn("block px-4 py-2 text-subtitle hover:bg-brand-tint", path === href ? "font-medium text-brand" : "text-ink")}>{label}</Link>
+                ))}
+              </div>
+            </details>
           </nav>
-          <div className="ml-auto flex shrink-0 items-center gap-2">{actions}<QrLink /></div>
+          <div className="ml-auto flex shrink-0 items-center gap-2">{actions}<HubSearch /><PauseButton /><QrLink /></div>
         </div>
       </header>
       <div className="bg-kit-navy text-white">
         <p className="mx-auto flex max-w-7xl items-center gap-2 px-5 py-2 text-caption">
           <Info size={14} className="shrink-0" aria-hidden />
-          Prototype · MoldFlow assists qualified inspectors; it does not identify, diagnose or confirm mold. Sending, booking and CRM sync are simulated.
+          Prototype · MoldFlow assists qualified inspectors; it does not identify, diagnose or confirm mold. Sending, booking and CRM sync are simulated; people marked &ldquo;synthetic&rdquo; are invented demo data.
         </p>
       </div>
       <main className="mx-auto max-w-7xl px-5 py-8">
@@ -180,7 +196,8 @@ export function QrLink() {
   }, []);
   return (
     <>
-      <Button variant="outline" size="sm" leading={<QrCode size={14} aria-hidden />} onClick={() => setOpen(true)}>Customer link / QR</Button>
+      <button onClick={() => setOpen(true)} title="Customer link / QR" aria-label="Customer link / QR"
+        className="grid h-10 w-10 place-items-center rounded-ds-xsm border border-brand/40 text-brand hover:bg-brand-tint"><QrCode size={16} aria-hidden /></button>
       <Modal open={open} onClose={() => setOpen(false)} title="Scan to start a pre-assessment">
         <div className="text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}

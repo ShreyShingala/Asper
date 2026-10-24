@@ -1,15 +1,14 @@
 """Muse: the company assistant with context from every project (timeline, chat, findings, checks, messages, estimates,
 approvals, payments). It answers with citations and can act, but only through the approval queue: drafted messages
-become Autopilot cards, and read-only actions (evidence bundle, open a project) run immediately."""
+go to the Hub's Outreach queue, and read-only actions (evidence bundle, open a project) run immediately."""
 import json
 import re
-import uuid
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
 from app.agents.llm import AgentFailure, structured
-from app.models.passport import Case, OutboxMessage
+from app.models.passport import Case
 
 _WORD = re.compile(r"[a-z0-9]{3,}")
 _STOP = {"the", "and", "for", "with", "that", "this", "from", "have", "can", "you", "give", "what", "was", "are", "about", "case",
@@ -33,7 +32,8 @@ class MuseAnswer(BaseModel):
 
 
 SYSTEM = """You are Muse, the internal assistant for Mold Busters (mold inspection and remediation). You have snippets from
-the company's project records (timelines, project chats, findings, checks, messages, estimates, approvals, payments).
+the company's project records (timelines, project chats, findings, checks, messages, estimates, approvals, payments)
+and customer profiles (people, interactions across tools, texts and emails, approved facts).
 Answer ONLY from the snippets and cite their refs. If something isn't in the snippets, say so. Never invent dates, prices
 or facts, never claim mold is confirmed, and never give legal advice (you can organise documentation for a lawyer).
 Offer up to 3 actions: draft_message (a message the owner will approve before it is sent), evidence_bundle (a downloadable
@@ -64,6 +64,28 @@ def snippets(case: Case) -> list[tuple[str, str]]:
     return out
 
 
+def people_snippets() -> list[tuple[str, str, str]]:
+    """(person name, ref, text) from the Hub: contacts, interactions, messages, approved facts. Health facts and anything
+    marked never-use stay out, the same rule the Hub applies to drafting."""
+    from app import crm_store as db
+    from app.models.crm import Contact, Interaction, Message, ProfileFact
+    out = []
+    for c in db.query(Contact):
+        out.append((c.name, f"person/{c.id}", f"Person {c.name} ({c.customer_type}, {c.language}{', synthetic demo' if c.synthetic else ''}) "
+                                              f"cases {', '.join(c.case_ids) or 'none'}; conversation owner {c.owner}"))
+    names = {c.id: c.name for c in db.query(Contact)}
+    for i in db.query(Interaction):
+        out.append((names.get(i.contact_id, ""), f"person/{i.contact_id}/interaction/{i.id}", f"{i.at:%Y-%m-%d} {i.system} {i.kind}: {i.summary}"))
+    for msg in db.query(Message):
+        if msg.status in ("sent_simulated", "received", "draft"):
+            who = "customer wrote" if msg.direction == "in" else f"we {msg.status.replace('_simulated', '')}"
+            out.append((names.get(msg.contact_id, ""), f"person/{msg.contact_id}/message/{msg.id}", f"{msg.created_at:%Y-%m-%d} {who}: {msg.body[:300]}"))
+    for f in db.query(ProfileFact, status="approved"):
+        if f.category != "health" and f.message_use != "never":
+            out.append((names.get(f.contact_id, ""), f"person/{f.contact_id}/fact/{f.id}", f"Fact: {f.text}"))
+    return out
+
+
 def retrieve(question: str, cases: list[Case], scope: str | None = None, k: int = 28) -> list[tuple[str, str]]:
     q = _tok(question)
     nums = {int(n) for n in re.findall(r"\b(?:case|project|#)\s*(\d{1,4})\b", question.lower())}
@@ -76,6 +98,11 @@ def retrieve(question: str, cases: list[Case], scope: str | None = None, k: int 
             s = len(q & _tok(text)) + boost
             if s:
                 scored.append((s, ref, text))
+    if not scope:
+        for name, ref, text in people_snippets():
+            boost = 4 if name and any(part.lower() in question.lower() for part in name.split() if len(part) > 2) else 0
+            if (s := len(q & _tok(text)) + boost):
+                scored.append((s, ref, text))
     scored.sort(key=lambda x: -x[0])
     return [(r, t) for _, r, t in scored[:k]]
 
@@ -83,7 +110,7 @@ def retrieve(question: str, cases: list[Case], scope: str | None = None, k: int 
 def _fallback(question: str, hits: list[tuple[str, str]], cases: list[Case]) -> MuseAnswer:
     if not hits:
         return MuseAnswer(answer="I couldn't find anything about that in the project records.")
-    cid = hits[0][0].split("/")[0]
+    cid = next((r.split("/")[0] for r, _ in hits if not r.startswith("person/")), hits[0][0].split("/")[0])
     case = next((c for c in cases if c.id == cid), None)
     legal = bool(LEGAL.search(question))
     mine = [(r, t) for r, t in hits if r.startswith(cid + "/")]
@@ -115,12 +142,7 @@ async def ask(question: str, cases: list[Case], scope: str | None = None) -> tup
     known = {c.id for c in cases}
     ans.actions = [a for a in ans.actions if a.case_id in known][:3]
     if LEGAL.search(question) and not any(a.type == "evidence_bundle" for a in ans.actions):
-        ans.actions.insert(0, MuseAction(type="evidence_bundle", case_id=hits[0][0].split("/")[0], label="Download the evidence bundle"))
+        if cid := next((r.split("/")[0] for r, _ in hits if not r.startswith("person/")), None):
+            ans.actions.insert(0, MuseAction(type="evidence_bundle", case_id=cid, label="Download the evidence bundle"))
     ans.cites = [c for c in ans.cites if any(c == r for r, _ in hits)]
     return ans, hits
-
-
-def to_outbox(case: Case, a: MuseAction) -> OutboxMessage:
-    return OutboxMessage(id="m" + uuid.uuid4().hex[:7], kind="muse_draft", to_role="customer" if a.to_role != "landlord" else "landlord",
-                         to_name=case.customer.alias, to_address=case.customer.contact_simulated or "contact on file",
-                         subject=a.subject or a.label, body=a.body or a.label, reason="Drafted by Muse at the owner's request.", needs=["owner"])

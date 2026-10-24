@@ -51,8 +51,10 @@ Finishing
 
 {GUARDRAILS}"""
 
-FIRST_MESSAGE = ("Hi, I'm Bruce from Mold Busters. I'll help you get the right photos. Point your back camera at the first "
-                 "spot and follow the orange box.")
+# Recording/transcription disclosure (PIPEDA meaningful consent, Quebec Law 25 transparency). The hub only learns facts
+# from transcripts whose opening line contains it (app/hub_links.py). Why: docs/04_decisions.md D16.
+FIRST_MESSAGE = ("Hi, I'm Bruce, Mold Busters' AI photo coach. This call is recorded and transcribed to help us. Point your back "
+                 "camera at the first spot and follow the orange box.")
 
 
 def client_tool(name: str, description: str, properties: dict | None = None, required: list[str] | None = None, **extra) -> dict:

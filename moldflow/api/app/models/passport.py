@@ -29,7 +29,8 @@ CENT = Decimal("0.01")
 
 
 def now() -> datetime:
-    return datetime.now().replace(microsecond=0)
+    from app import clock
+    return clock.now()
 
 
 class Customer(BaseModel):
@@ -265,6 +266,7 @@ class TenantPack(BaseModel):
     started_at: datetime = Field(default_factory=now)
     next_due: date | None = None
     landlord_replied: bool = False
+    auto_send: bool = True  # tenant authorized automatic sending of each step at checkout
 
 
 class ChatMessage(BaseModel):
@@ -309,6 +311,7 @@ class Case(BaseModel):
     stage: Stage = "intake"
     language: Literal["en", "fr"] = "en"
     intake_mode: Literal["upload", "live"] = "upload"
+    contact_id: str | None = None
     live: LiveSession | None = None
     payments: list[Payment] = []
     outbox: list[OutboxMessage] = []

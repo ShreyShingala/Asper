@@ -317,6 +317,7 @@ function Result({ c, busy, tick, reload, onRelocate }: { c: Case; busy: string |
         </div>
       </Card>
 
+      <StayInTouch c={c} />
       <Offers c={c} />
 
       <Card className="rise p-5" style={{ animationDelay: "0.1s" }}>
@@ -389,6 +390,50 @@ function Offers({ c }: { c: Case }) {
           <Link href={`/assess/${c.id}/checkout?product=ai_report`} className={cx(buttonClass({ variant: "outline", size: "md", fullWidth: true }), "mt-3")}>Get the report</Link>
         )}
       </div>
+    </Card>
+  );
+}
+
+/** Basic fields once: then the system texts/emails the next steps itself and answers replies automatically. */
+function StayInTouch({ c }: { c: Case }) {
+  const [f, setF] = useState({ name: c.customer.alias !== "New customer" ? c.customer.alias : "", phone: "", email: "" });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [sent, setSent] = useState<{ trigger: string; status: string; body: string }[] | null>(c.contact_id ? [] : null);
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true); setErr(null);
+    try {
+      const r = await api.post<{ messages: { trigger: string; status: string; body: string }[] }>(`/cases/${c.id}/contact`, f);
+      setSent(r.messages);
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (sent) {
+    return (
+      <Card className="rise space-y-2 p-5">
+        <p className="flex items-center gap-2 text-subtitle font-semibold text-ink"><Check size={16} className="text-kit-green" aria-hidden />We&apos;ll keep you posted</p>
+        {sent.filter((m) => m.status === "sent_simulated").map((m, i) => (
+          <p key={i} className="whitespace-pre-wrap rounded-ds-xsm bg-kit-gray-faint p-3 text-caption text-ink-body">{m.body}</p>
+        ))}
+        <p className="text-caption font-light text-ink-muted">Reply any time: you&apos;ll get an answer right away. Sending is simulated in this prototype.</p>
+      </Card>
+    );
+  }
+  return (
+    <Card className="rise p-5">
+      <Eyebrow className="mb-2">Where should we send your next steps?</Eyebrow>
+      <form onSubmit={save} className="grid gap-3">
+        <TextField label="Your name" autoComplete="name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+        <TextField label="Mobile (text)" type="tel" inputMode="tel" autoComplete="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
+        <TextField label="Email (optional)" type="email" autoComplete="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
+        {err && <p role="alert" className="text-subtitle text-kit-red">{err}</p>}
+        <Button type="submit" size="lg" fullWidth state={busy ? "loading" : undefined} disabled={!f.phone.trim() && !f.email.trim()}>Send me my next steps</Button>
+        <p className="text-caption font-light text-ink-muted">We use this to reply about your request. Reply STOP to opt out. <a href="/privacy" className="text-brand underline">Privacy</a></p>
+      </form>
     </Card>
   );
 }

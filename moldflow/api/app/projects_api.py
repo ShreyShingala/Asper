@@ -11,8 +11,8 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-from app import config, store
-from app.engine import muse, photo_plan
+from app import config, messaging, store
+from app.engine import autopilot, muse, photo_plan
 from app.exports import render
 from app.models.passport import Case, ChatMessage, Photo, now
 
@@ -99,10 +99,15 @@ async def muse_ask(body: MuseIn) -> dict:
     for a in ans.actions:
         if a.type == "draft_message":
             async with store.editing(a.case_id) as c:
-                msg = muse.to_outbox(c, a)
-                c.outbox.append(msg)
-            results.append({"type": a.type, "label": a.label, "case_id": a.case_id, "status": "Waiting for your approval in Autopilot",
-                            "message_id": msg.id, "body": msg.body})
+                contact = autopilot.ensure_contact(c)
+                if not contact:
+                    results.append({"type": a.type, "label": a.label, "case_id": a.case_id, "status": "No phone or email on file for this project",
+                                    "body": a.body})
+                    continue
+                msg = messaging.create(contact, trigger="muse_draft", body=a.body or a.label, subject=a.subject or None, case_id=c.id,
+                                       reason="Drafted by Muse at the owner's request", drafted_by="ai", is_cem=False)
+            results.append({"type": a.type, "label": a.label, "case_id": a.case_id, "status": "Waiting for your OK in Outreach",
+                            "message_id": msg.id, "body": msg.body, "href": "/outreach"})
         elif a.type == "evidence_bundle":
             results.append({"type": a.type, "label": a.label, "case_id": a.case_id, "href": f"/api/projects/{a.case_id}/evidence.zip"})
         else:

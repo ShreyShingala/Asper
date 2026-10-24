@@ -1,84 +1,90 @@
-"""Autopilot: the system drafts every next action; the owner only approves, edits or denies.
+"""Autopilot: drafts every next customer message from the case and hands it to the Hub's sending gate
+(messaging.create -> autonomy -> consent.check -> footer). Routine messages (booking offer, report ready) are 'auto' and
+send themselves; anything with money or personal facts stays locked for a person; the kill switch stops everything.
 
-`sync` is idempotent: it looks at a case and drafts what a coordinator would do next (booking offer, estimate follow-up,
-sending an approved report). Drafts are deterministic templates over case facts (no invented prices or claims).
-`cards` turns everything waiting into one inbox for the owner."""
-import uuid
+Case -> Contact: a customer who started a pre-assessment and left a phone or email has made an inquiry, which gives
+6 months of implied consent under CASL (same rule the Hub uses for bookings)."""
+import re
 
-from app.engine import tenant_pack
-from app.models.passport import Case, OutboxMessage
-
-# Rough coordinator minutes each automated action replaces (shown as an estimate, not a measurement).
-MINUTES = {"booking_offer": 5, "estimate_followup": 6, "report_email": 8, "followup": 6, "report_review": 40,
-           "landlord_letter": 15, "formal_notice": 15, "city_complaint": 20, "public_health": 15, "tribunal": 45, "councillor": 10}
-KIND_LABEL = {"booking_offer": "Booking offer", "estimate_followup": "Estimate follow-up", "report_email": "Send report",
-              "followup": "Follow-up text", "report_review": "Report review"}
+from app import clock, crm_store as db, messaging
+from app.engine import consent, geo
+from app.models.crm import ChannelConsent, Contact, Interaction, Message, PropertyRef
+from app.models.passport import Case
 
 
-def _has(case: Case, kind: str) -> bool:
-    return any(m.kind == kind for m in case.outbox)
+def _find(phone: str, email: str) -> Contact | None:
+    digits = re.sub(r"\D", "", phone or "")[-10:]
+    for c in db.query(Contact):
+        if digits and any(re.sub(r"\D", "", p)[-10:] == digits for p in c.phones):
+            return c
+        if email and email.lower() in (e.lower() for e in c.emails):
+            return c
+    return None
 
 
-def _msg(kind: str, case: Case, subject: str, body: str, reason: str, channel: str = "email") -> OutboxMessage:
-    return OutboxMessage(id="m" + uuid.uuid4().hex[:7], kind=kind, to_role="customer", to_name=case.customer.alias,
-                         to_address=case.customer.contact_simulated or "customer contact on file", channel=channel,
-                         subject=subject, body=body, reason=reason, needs=["owner"])
+def ensure_contact(case: Case, name: str | None = None, phone: str | None = None, email: str | None = None) -> Contact | None:
+    """The person behind a case, created from the basic fields entered in the app (or the tenant pack / booking)."""
+    tp, bc = case.tenant_pack, (case.booking.contact if case.booking else None)
+    name = name or (bc.name if bc else None) or (tp.tenant_name if tp else None)
+    phone = phone or (bc.phone if bc else "")
+    email = email or (bc.email if bc else "") or (tp.tenant_email if tp else "")
+    c = (db.get(Contact, case.contact_id) if case.contact_id else None) or _find(phone, email)
+    if not c and not (phone or email):
+        return None
+    if not c:
+        c = Contact(id=db.new_id("c-"), name=name or "New customer", tags=["pre-assessment"])
+    if name:
+        c.name = name
+    if phone and phone not in c.phones:
+        c.phones.insert(0, phone)
+    if email and email not in c.emails:
+        c.emails.insert(0, email)
+    c.language = case.language
+    if case.customer.type != "unknown":
+        c.customer_type = case.customer.type
+    postal = case.answers.get("location", "")
+    if (fsa := geo.fsa_of(postal)) and not any(p.fsa == fsa for p in c.properties):
+        loc = geo.locate(postal)
+        c.properties.insert(0, PropertyRef(postal=postal.upper(), fsa=fsa, lat=loc[0] if loc else None, lon=loc[1] if loc else None,
+                                           province=case.property.province if case.property.province in ("ON", "QC") else "unknown"))
+    if case.id not in c.case_ids:
+        c.case_ids.append(case.id)
+    today = clock.today()
+    for ch in ("sms", "email"):
+        cur: ChannelConsent = getattr(c.consent, ch)
+        if cur.basis == "none" and not cur.opt_out_at:
+            setattr(c.consent, ch, ChannelConsent(basis="implied_inquiry", granted_at=today, implied_until=consent.implied_until("implied_inquiry", today),
+                                                  granted_via="web_form", evidence_ref=f"pre-assessment {case.id}"))
+    c.prefs.channel = "sms" if phone else "email"
+    db.put(c)
+    if not any(i.case_id == case.id and i.kind == "pre_assessment" for i in db.query(Interaction, contact_id=c.id)):
+        db.put(Interaction(id=db.new_id("i"), contact_id=c.id, case_id=case.id, at=clock.now(), system="moldflow", kind="pre_assessment",
+                           summary=(case.pre_assessment.summary[:160] if case.pre_assessment else "Started a pre-assessment")))
+    case.contact_id = c.id
+    return c
 
 
-def sync(case: Case) -> list[OutboxMessage]:
-    new: list[OutboxMessage] = []
-    pa = case.pre_assessment
-    name = case.customer.alias if case.customer.alias != "New customer" else "there"
-    if pa and not case.booking and pa.recommended_service != "remote_report" and not _has(case, "booking_offer") and case.seeded_from is None:
-        tenant = case.customer.type == "tenant"
-        body = (f"Hi {name}, thanks for sending your photos to Mold Busters. Based on your pre-assessment we recommend: "
-                f"{pa.service_price_text}. " + ("As a tenant, please call us at 1-877-566-6653 to schedule (additional fees may apply)."
-                                                if tenant else "You can pick a time online here: https://bustmold.com/book") +
-                " Reply here with any questions. - Mold Busters")
-        new.append(_msg("booking_offer", case, "Your Mold Busters pre-assessment", body,
-                        "New pre-assessment with no booking yet: offer the recommended service.", "sms"))
-    est = case.estimate
-    if est and est.status in ("sent", "viewed") and not _has(case, "estimate_followup"):
-        expires = f" It's valid until {est.expires_on:%B %d}." if est.expires_on else ""
-        body = (f"Hi {name}, following up on your Mold Busters estimate ({est.id}, ${est.total:,.2f} incl. tax) for "
-                f"{', '.join(est.areas[:3]) or 'the affected areas'}.{expires} Happy to answer questions about the scope or the cause "
-                "we found. - Mold Busters")
-        new.append(_msg("estimate_followup", case, f"About your estimate {est.id}", body,
-                        f"Estimate {est.status}, not accepted yet.", "sms"))
-    if case.report and any(a.what == "report" for a in case.approvals) and not _has(case, "report_email"):
-        new.append(_msg("report_email", case, "Your Mold Busters report is ready",
-                        f"Hi {name}, your inspection report is ready. You'll find it attached, with the photos and our recommendations. "
-                        "Reply to this email if you have any questions. - Mold Busters", "Report approved: send it to the client."))
-    case.outbox += new
-    return new
+def _done(case: Case, trigger: str) -> bool:
+    return any(m.trigger == trigger for m in db.query(Message, contact_id=case.contact_id or "-") if m.case_id == case.id)
 
 
-def cards(cases: list[Case]) -> list[dict]:
+def sync(case: Case) -> list[Message]:
+    """Idempotent: draft (and, where autonomy allows, send) what a coordinator would do next for this case."""
+    if not case.contact_id or not (contact := db.get(Contact, case.contact_id)):
+        return []
     out = []
-    for c in cases:
-        for m in c.outbox:
-            if m.status != "awaiting_approval":
-                continue
-            owner = "owner" in m.needs
-            out.append({"id": m.id, "case_id": c.id, "case_title": c.title, "kind": m.kind, "label": KIND_LABEL.get(m.kind, "Tenant pack"),
-                        "title": m.subject or m.kind, "to": f"{m.to_name} <{m.to_address}>", "channel": m.channel, "body": m.body,
-                        "reason": m.reason, "action": "approve" if owner else "watch", "created_at": m.created_at.isoformat(),
-                        "minutes": MINUTES.get(m.kind, 5)})
-        for f in c.followups:
-            if f.status == "draft":
-                out.append({"id": f.id, "case_id": c.id, "case_title": c.title, "kind": "followup", "label": "Follow-up text",
-                            "title": f"Follow-up ({f.channel})", "to": c.customer.alias, "channel": f.channel, "body": f.body,
-                            "reason": f.reason, "action": "approve", "created_at": f.created_at.isoformat(), "minutes": MINUTES["followup"]})
-        if c.report and not any(a.what == "report" for a in c.approvals):
-            out.append({"id": f"review-{c.id}", "case_id": c.id, "case_title": c.title, "kind": "report_review", "label": "Report review",
-                        "title": "AI report draft ready for approval", "to": "", "channel": "review",
-                        "body": c.report.draft.summary,
-                        "reason": f"{len([f for f in c.flags if not f.resolved and f.severity == 'block'])} blocking check(s) open.",
-                        "action": "open", "link": f"/cases/{c.id}/review", "created_at": c.report.generated_at.isoformat(),
-                        "minutes": MINUTES["report_review"]})
-        if c.tenant_pack and c.tenant_pack.status == "active" and c.tenant_pack.next_due:
-            out.append({"id": f"pack-{c.id}", "case_id": c.id, "case_title": c.title, "kind": "tenant_pack", "label": "Tenant pack",
-                        "title": f"Waiting on {c.tenant_pack.landlord_name} (reply due {c.tenant_pack.next_due})", "to": "", "channel": "info",
-                        "body": "", "reason": f"Step {c.tenant_pack.step} drafts automatically if there is no reply by the deadline "
-                        f"(today: {tenant_pack.today()}).", "action": "watch", "created_at": c.tenant_pack.started_at.isoformat(), "minutes": 0})
-    return sorted(out, key=lambda x: (x["action"] != "approve", x["created_at"]), reverse=False)
+    pa = case.pre_assessment
+    first = contact.name.split()[0] if contact.name and contact.name != "New customer" else "there"
+    if pa and not case.booking and pa.recommended_service != "remote_report" and not _done(case, "booking_offer"):
+        tenant = case.customer.type == "tenant"
+        body = (f"Hi {first}, thanks for your photos. Based on your pre-assessment we recommend: {pa.service_price_text}. "
+                + ("As a tenant, please call 1-877-566-6653 to book (additional fees may apply)." if tenant
+                   else "Pick a time here: {booking_link}") + " Questions? Just reply.")
+        out.append(messaging.create(contact, trigger="booking_offer", body=body, reason="New pre-assessment, no booking yet", drafted_by="rule",
+                                    case_id=case.id, is_cem=not tenant))
+    if case.report and any(a.what == "report" for a in case.approvals) and not _done(case, "report_ready"):
+        out.append(messaging.create(contact, trigger="report_ready", subject="Your Mold Busters report is ready", channel="email",
+                                    body=f"Hi {first}, your inspection report is ready, with the photos and our recommendations. "
+                                         "Reply to this email with any questions.", reason="Report approved", drafted_by="rule",
+                                    case_id=case.id, is_cem=False))
+    return out
