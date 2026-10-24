@@ -6,7 +6,7 @@ from datetime import date
 
 from app.agents.llm import Result, structured
 from app.engine import checks
-from app.models.agents import AssessDraft, FindingsOut, FollowUpDraft, LiveSummary, PhotoAnalysis, ReportDraft
+from app.models.agents import AssessDraft, FindingsOut, FollowUpDraft, LiveSummary, LocateOut, PhotoAnalysis, ReportDraft
 from app.models.passport import AIUsage, ALLOWED_RESULTS, Case, Finding, Photo, Reading
 
 LANG_NAME = {"en": "English", "fr": "French (Canadian)"}
@@ -56,6 +56,19 @@ DARK_MEAN_LUMA = 28  # a frame this dark (mean 0-255) shows nothing usable: answ
 def mean_luma(image: bytes) -> float:
     from PIL import Image, ImageStat
     return ImageStat.Stat(Image.open(io.BytesIO(image)).convert("L").resize((64, 64))).mean[0]
+
+
+LOCATE_SYSTEM = ("You help a customer aim their phone camera during a mold pre-screening. Given ONE live video frame and a target "
+                 "description, return a tight box around the target only if it is clearly visible (prefer a visible stain, dark spots, "
+                 "damp mark or the named fixture). If it is not visible or the frame is unusable, return found=false. Never box the "
+                 "whole frame. Never say it is mold.")
+
+
+async def locate(image: bytes, target: str) -> Result:
+    if mean_luma(image) < DARK_MEAN_LUMA:
+        return Result(LocateOut(found=False), AIUsage(agent="locate", model="brightness check", latency_ms=0, tier="rule"))
+    return await structured(LocateOut, agent="locate", system=LOCATE_SYSTEM, user_text=json.dumps({"target": target[:120]}),
+                            images=[image], max_tokens=200, temperature=0.0)
 
 
 async def analyze_photo(case: Case, photo: Photo, image: bytes, prompt_text: str | None, fixture_key: str | None) -> Result:

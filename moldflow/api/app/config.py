@@ -35,6 +35,9 @@ CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 ELEVENLABS_AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID", "")
 ELEVENLABS_BASE_URL = "https://api.elevenlabs.io"
+# Voice for live mode: "elevenlabs" (real agent), "mock" (free test voice: browser speech + Bruce's prompt on OpenRouter),
+# "auto" = elevenlabs when configured, otherwise mock.
+LIVE_VOICE = os.getenv("LIVE_VOICE", "auto")
 LIVE_MAX_PHOTOS = int(os.getenv("LIVE_MAX_PHOTOS", "6"))
 LIVE_MAX_SECONDS = int(os.getenv("LIVE_MAX_SECONDS", "300"))
 

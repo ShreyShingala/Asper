@@ -6,7 +6,7 @@ pricing, routing and reports working unchanged whichever way the customer came i
 import re
 
 from app import config
-from app.engine import rules
+from app.engine import photo_plan, rules
 from app.models.passport import Case
 
 WET_ROOMS = ("Bathroom", "Basement", "Laundry", "Kitchen")
@@ -126,7 +126,32 @@ def next_step(case: Case, missing_q: list[dict], missing_shots: list[dict]) -> d
     return {"do": "finish"}
 
 
+def plan_checklist(case: Case, plan: list) -> dict:
+    """Photo-coaching call: the questions were answered before the call, so only the personalized shot list remains."""
+    photos = customer_photos(case)
+    taken = [p.prompt_id or "extra" for p in photos]
+    shots = photo_plan.plan_dicts(plan)
+    missing = [s for s in shots if s["id"] not in taken]
+    left = max(0, config.LIVE_MAX_PHOTOS - len(photos))
+    analyzed = sum(1 for p in photos if p.analysis)
+    nxt = missing[0] if missing and left else None
+    return {
+        "mode": "photo_plan",
+        "answered": {k: v for k, v in case.answers.items() if not k.startswith("skip:")},
+        "plan": shots,
+        "shots_taken": taken,
+        "missing_shots": [{"shot": s["id"], "title": s["title"], "instruction": s["instruction"]} for s in missing],
+        "missing_questions": [],
+        "photos_left": left,
+        "ready_to_finish": analyzed > 0 and (not missing or not left),
+        "can_finish_early": analyzed > 0,
+        "next_step": {"do": "capture", "shot": nxt["id"], "title": nxt["title"], "coach": nxt["instruction"]} if nxt else {"do": "finish"},
+    }
+
+
 def checklist(case: Case) -> dict:
+    if plan := photo_plan.plan_for_case(case.answers):
+        return plan_checklist(case, plan)
     chips, prompts = _chips(), _prompts()
     answered = {k: v for k, v in case.answers.items() if not k.startswith("skip:")}
     missing_q = [{"key": k, "ask": text, "allowed_answers": opts} for k, (text, opts) in chips.items() if k not in answered]
