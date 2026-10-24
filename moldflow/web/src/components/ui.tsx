@@ -6,7 +6,6 @@ import { AlertOctagon, AlertTriangle, CheckCircle2, Info, Sparkles, Database, Qr
 import QRCode from "qrcode";
 import { photoUrl, type Flag, type Photo } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { LogoMark } from "@/components/ds/Logo";
 import { Button } from "@/components/ds/kit/Buttons";
 import { cardSurface } from "@/components/ds/kit/Cards";
 import { Loader, Modal, Tag } from "@/components/ds/kit/Feedback";
@@ -114,13 +113,14 @@ export function Card({ className, tone, ...p }: React.HTMLAttributes<HTMLDivElem
 
 export function Logo({ small }: { small?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2.5">
-      <LogoMark size={small ? 32 : 40} color="#C2410C" label="MoldFlow" />
-      <span className="flex flex-col leading-none">
-        <span className={cn("font-semibold tracking-tight text-ink", small ? "text-subheading" : "text-h6")}>MoldFlow</span>
-        <span className="mt-0.5 text-[11px] font-light text-ink-muted">by Mold Busters</span>
-      </span>
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element -- brand wordmark asset; keep crisp at all densities
+    <img
+      src="/brand/mold-busters-wordmark.png"
+      alt="Mold Busters"
+      height={small ? 36 : 44}
+      className={cn("w-auto", small ? "h-9" : "h-11")}
+      draggable={false}
+    />
   );
 }
 

@@ -59,6 +59,12 @@ class PhotoAnalysis(BaseModel):
         return v if v in ("regular", "thermal", "test_kit", "instrument", "other") else "other"
 
 
+class LocateOut(BaseModel):
+    found: bool = Field(description="True only if the target is clearly visible in this frame")
+    box: Region | None = Field(default=None, description="Tight box around the target when found")
+    label: str = Field(default="", description="2-5 words naming what you boxed, e.g. 'dark spots on caulk'")
+
+
 class ChipQuestion(BaseModel):
     key: str
     text: str

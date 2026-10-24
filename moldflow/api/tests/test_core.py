@@ -259,3 +259,51 @@ def test_persona_checklist_reaches_ready(name):
 def test_whole_image_region_is_dropped():
     a = PhotoAnalysis.model_validate({"observations": ["x"], "regions": [{"label": "all", "box_2d": [0, 0, 1000, 1000]}, {"label": "spot", "box_2d": [100, 100, 300, 300]}]})
     assert [r.label for r in a.regions] == ["spot"]
+
+
+def test_live_voice_selection(monkeypatch):
+    from app import config, main
+    monkeypatch.setattr(config, "ELEVENLABS_API_KEY", "")
+    monkeypatch.setattr(config, "LIVE_VOICE", "auto")
+    assert main._default_voice() == "mock"          # no ElevenLabs configured -> free test voice
+    monkeypatch.setattr(config, "ELEVENLABS_API_KEY", "k")
+    monkeypatch.setattr(config, "ELEVENLABS_AGENT_ID", "a")
+    assert main._default_voice() == "elevenlabs"
+    monkeypatch.setattr(config, "LIVE_VOICE", "mock")  # forced, e.g. out of ElevenLabs credits
+    assert main._default_voice() == "mock"
+
+
+def test_bruce_turn_contract_shared():
+    from app.agents import bruce
+    assert {t["name"] for t in bruce.TOOLS} == {"get_checklist", "capture_photo", "finish_assessment"}  # photo coaching only
+    assert "capture_photo" in bruce.TURN_NOTE and bruce.FIRST_MESSAGE.startswith("Hi, I'm Bruce")
+    t = bruce.BruceTurn.model_validate({"say": "Hold still.", "tools": [{"name": "capture_photo", "args": {"shot": "wide"}}]})
+    assert t.tools[0].name == "capture_photo"
+
+
+def test_photo_plan_personalized():
+    from app.engine import photo_plan as pp
+    bath = [s.id for s in pp.build_plan([{"room": "Bathroom", "surface": "ceiling"}], "small")]
+    assert bath[:3] == ["s1_wide", "s1_close", "s1_scale"] and "s1_ceiling_around" in bath and "s1_bath_fan" in bath
+    base = [s.id for s in pp.build_plan([{"room": "Basement", "surface": "floor"}], "door")]
+    assert "s1_baseboard" in base and "s1_floor_joint" in base
+    vent = [s.id for s in pp.build_plan([{"room": "Laundry", "surface": "vent"}], "small")]
+    assert "s1_vent_grille" in vent and "s1_vent_inside" in vent
+    multi = pp.build_plan([{"room": "Laundry", "surface": "appliance"}, {"room": "Laundry", "surface": "vent"},
+                           {"room": "Kitchen", "surface": "appliance"}, {"room": "Attic", "surface": "wall"}], "several")
+    ids = [s.id for s in multi]
+    assert len(ids) == 6 and ids[0] == "sweep" and {"s1_wide", "s2_wide", "s3_wide"} <= set(ids) and not any(i.startswith("s4") for i in ids)
+    assert all(len(pp.build_plan([{"room": r, "surface": sf}], sz)) <= 6 for r in pp.ROOMS for sf in pp.SURFACES for sz in pp.SIZES)
+
+
+def test_plan_checklist_has_no_questions():
+    import json
+    from app.engine import live
+    from app.models.passport import Photo
+    c = Case(id="t", title="t", intake_mode="live", answers={"spots": json.dumps([{"room": "Bathroom", "surface": "ceiling"}]), "size": "small"})
+    cl = live.checklist(c)
+    assert cl["mode"] == "photo_plan" and cl["missing_questions"] == [] and cl["next_step"]["shot"] == "s1_wide"
+    c.photos = [Photo(id=f"p{i}", path="x", source="customer", prompt_id=s["id"], analysis=PhotoAnalysis(observations=["x"]))
+                for i, s in enumerate(cl["plan"])]
+    cl = live.checklist(c)
+    assert cl["ready_to_finish"] and cl["next_step"] == {"do": "finish"}

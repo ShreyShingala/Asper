@@ -780,6 +780,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cases/{case_id}/live/mock/turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Live Mock Turn
+         * @description Free test voice: Bruce's real prompt and tool contracts run on the OpenRouter model. The browser speaks the reply with
+         *     its built-in speech synthesis, runs the tools itself (same handlers as the ElevenLabs call) and sends the results back.
+         */
+        post: operations["live_mock_turn_cases__case_id__live_mock_turn_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/live/precall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Live Precall Options */
+        get: operations["live_precall_options_live_precall_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/live/precall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Live Precall
+         * @description The 5 tap questions before the call. Saves them as normal intake answers (so routing/pricing work unchanged) and
+         *     returns the personalized photo plan.
+         */
+        post: operations["live_precall_cases__case_id__live_precall_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/live/locate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Live Locate
+         * @description Focus box helper: where in this live frame is the target (e.g. 'the discoloured patch')? Not saved to the case.
+         */
+        post: operations["live_locate_cases__case_id__live_locate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cases/{case_id}/live/checklist": {
         parameters: {
             query?: never;
@@ -1346,6 +1425,13 @@ export interface components {
                 [key: string]: "auto" | "draft" | "off";
             };
         };
+        /** Body_live_locate_cases__case_id__live_locate_post */
+        Body_live_locate_cases__case_id__live_locate_post: {
+            /** File */
+            file: string;
+            /** Target */
+            target: string;
+        };
         /** Body_upload_photo_cases__case_id__photos_post */
         Body_upload_photo_cases__case_id__photos_post: {
             /** File */
@@ -1452,6 +1538,21 @@ export interface components {
              * @default en
              */
             language: string;
+        };
+        /** BruceTurn */
+        BruceTurn: {
+            /**
+             * Say
+             * @description Exactly what you say out loud now. Empty if you are only calling tools.
+             * @default
+             */
+            say: string;
+            /**
+             * Tools
+             * @description Tool calls to run, in order, after speaking (like parallel tool calls); empty list to wait for the customer.
+             * @default []
+             */
+            tools: components["schemas"]["ToolCall"][];
         };
         /** Case */
         Case: {
@@ -2196,6 +2297,11 @@ export interface components {
             /** Summary Tier */
             summary_tier?: string | null;
         };
+        /** LiveStartIn */
+        LiveStartIn: {
+            /** Voice */
+            voice?: string | null;
+        };
         /** ManualIn */
         ManualIn: {
             /** Body */
@@ -2309,6 +2415,16 @@ export interface components {
             contact_name: string;
             /** Contact Synthetic */
             contact_synthetic: boolean;
+        };
+        /** MockTurnIn */
+        MockTurnIn: {
+            /**
+             * History
+             * @default []
+             */
+            history: {
+                [key: string]: unknown;
+            }[];
         };
         /** Moment */
         Moment: {
@@ -2569,6 +2685,17 @@ export interface components {
              */
             generated_at?: string;
         };
+        /** PrecallIn */
+        PrecallIn: {
+            /** Spots */
+            spots: components["schemas"]["SpotIn"][];
+            /** Size */
+            size: string;
+            /** Smell Leak */
+            smell_leak: string;
+            /** Location */
+            location: string;
+        };
         /** Prefs */
         Prefs: {
             /**
@@ -2792,6 +2919,13 @@ export interface components {
             /** Prompt Id */
             prompt_id: string;
         };
+        /** SpotIn */
+        SpotIn: {
+            /** Room */
+            room: string;
+            /** Surface */
+            surface: string;
+        };
         /** StoredReport */
         StoredReport: {
             draft: components["schemas"]["ReportDraft"];
@@ -2838,6 +2972,22 @@ export interface components {
              * Format: date-time
              */
             created_at?: string;
+        };
+        /** ToolCall */
+        ToolCall: {
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "get_checklist" | "save_answer" | "capture_photo" | "finish_assessment";
+            /**
+             * Args
+             * @description Tool arguments, e.g. {'key':'room','value':'Laundry'} or {'shot':'wide','reason':'...'}
+             * @default {}
+             */
+            args: {
+                [key: string]: unknown;
+            };
         };
         /** TranscriptLine */
         TranscriptLine: {
@@ -4411,7 +4561,142 @@ export interface operations {
             };
             cookie?: never;
         };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LiveStartIn"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_mock_turn_cases__case_id__live_mock_turn_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MockTurnIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BruceTurn"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_precall_options_live_precall_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    live_precall_cases__case_id__live_precall_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrecallIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_locate_cases__case_id__live_locate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_live_locate_cases__case_id__live_locate_post"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

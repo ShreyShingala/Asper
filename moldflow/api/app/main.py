@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import re
 import shutil
 from contextlib import asynccontextmanager
 import uuid
@@ -12,9 +13,9 @@ from fastapi.responses import FileResponse, PlainTextResponse, Response
 from pydantic import BaseModel
 
 from app import clock, config, store
-from app.agents import tasks
-from app.agents.llm import AgentFailure, Result, prepare_image
-from app.engine import booking, checks, rules
+from app.agents import bruce, tasks
+from app.agents.llm import AgentFailure, Result, prepare_image, structured
+from app.engine import booking, checks, photo_plan, rules
 from app.engine import live as live_rules
 from app.exports import render
 from app.integrations import elevenlabs
@@ -163,7 +164,15 @@ async def _analyze(case_id: str, photo_id: str, image: bytes, prompt_text: str |
 
 
 def _prompt_text(case: Case, prompt_id: str | None) -> str | None:
+    if plan := photo_plan.plan_for_case(case.answers):
+        if shot := next((s for s in plan if s.id == prompt_id), None):
+            return f"{shot.title} ({shot.room}, {photo_plan.SURFACES[shot.surface].lower()}): {shot.instruction}"
     return next((p.text for p in rules.PHOTO_PROMPTS[case.language] if p.prompt_id == prompt_id), None)
+
+
+def _shot_room(case: Case, prompt_id: str | None) -> str | None:
+    plan = photo_plan.plan_for_case(case.answers) or []
+    return next((s.room for s in plan if s.id == prompt_id), None)
 
 
 @app.post("/cases/{case_id}/photos")
@@ -181,7 +190,7 @@ async def upload_photo(case_id: str, file: UploadFile = File(...), source: str =
     (config.DATA_DIR / "uploads" / case_id).mkdir(parents=True, exist_ok=True)
     (config.DATA_DIR / rel).write_bytes(img)
     async with store.editing(case_id) as c:
-        c.photos.append(Photo(id=pid, path=rel, room=room or c.answers.get("room"), source="inspector" if source == "inspector" else "customer",
+        c.photos.append(Photo(id=pid, path=rel, room=room or _shot_room(c, prompt_id) or c.answers.get("room"), source="inspector" if source == "inspector" else "customer",
                               prompt_id=prompt_id))
     await _analyze(case_id, pid, img, _prompt_text(c, prompt_id), fixture_key)
     c = _get(case_id)
@@ -251,25 +260,127 @@ async def pre_assessment(case_id: str) -> CaseOut:
 
 
 # ---------- live camera + voice pre-assessment ----------
+def _default_voice() -> str:
+    if config.LIVE_VOICE in ("elevenlabs", "mock"):
+        return config.LIVE_VOICE
+    return "elevenlabs" if elevenlabs.enabled() else "mock"
+
+
+def _mock_available() -> bool:
+    return bool(config.OPENROUTER_API_KEY) or config.DEMO_MODE == "fixture"
+
+
 @app.get("/live/config")
 def live_config() -> dict:
-    return {"enabled": elevenlabs.enabled(), "max_photos": config.LIVE_MAX_PHOTOS, "max_seconds": config.LIVE_MAX_SECONDS}
+    voice = _default_voice()
+    return {"enabled": elevenlabs.enabled() if voice == "elevenlabs" else _mock_available(), "voice": voice,
+            "mock_available": _mock_available(), "max_photos": config.LIVE_MAX_PHOTOS, "max_seconds": config.LIVE_MAX_SECONDS}
+
+
+class LiveStartIn(BaseModel):
+    voice: str | None = None  # "elevenlabs" | "mock"; defaults to the server setting
 
 
 @app.post("/cases/{case_id}/live/start")
-async def live_start(case_id: str) -> dict:
+async def live_start(case_id: str, body: LiveStartIn | None = None) -> dict:
     _get(case_id)
-    try:
-        url = await elevenlabs.signed_url()
-    except elevenlabs.VoiceUnavailable as e:
-        raise HTTPException(503, str(e))
+    voice = (body.voice if body and body.voice in ("elevenlabs", "mock") else None) or _default_voice()
+    url = None
+    if voice == "elevenlabs":
+        try:
+            url = await elevenlabs.signed_url()
+        except elevenlabs.VoiceUnavailable as e:
+            raise HTTPException(503, str(e))
+    elif not _mock_available():
+        raise HTTPException(503, "The test voice needs OPENROUTER_API_KEY on the server.")
+    system = "MoldFlow + ElevenLabs" if voice == "elevenlabs" else "MoldFlow (test voice)"
     async with store.editing(case_id) as c:
         c.intake_mode, c.language = "live", "en"
         c.live = c.live or LiveSession()
         if not any(e.step == "Live call started" for e in c.timeline):
-            c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Live call started", system="MoldFlow + ElevenLabs",
+            c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Live call started", system=system,
                                     what="Customer started a live camera + voice pre-assessment.", source="moldflow"))
-    return {"signed_url": url, "max_photos": config.LIVE_MAX_PHOTOS, "max_seconds": config.LIVE_MAX_SECONDS, "checklist": live_rules.checklist(c)}
+    return {"voice": voice, "signed_url": url, "first_message": bruce.FIRST_MESSAGE, "max_photos": config.LIVE_MAX_PHOTOS,
+            "max_seconds": config.LIVE_MAX_SECONDS, "checklist": live_rules.checklist(c)}
+
+
+class MockTurnIn(BaseModel):
+    history: list[dict] = []
+
+
+@app.post("/cases/{case_id}/live/mock/turn")
+async def live_mock_turn(case_id: str, body: MockTurnIn) -> bruce.BruceTurn:
+    """Free test voice: Bruce's real prompt and tool contracts run on the OpenRouter model. The browser speaks the reply with
+    its built-in speech synthesis, runs the tools itself (same handlers as the ElevenLabs call) and sends the results back."""
+    _get(case_id)
+    history = body.history[-70:]
+    try:
+        res = await structured(bruce.BruceTurn, agent="bruce_mock", system=bruce.PROMPT + bruce.TURN_NOTE,
+                               user_text=json.dumps({"conversation_so_far": history}), max_tokens=500, temperature=0.3)
+    except AgentFailure as e:
+        raise HTTPException(503, f"Bruce is unavailable right now: {e}")
+    turn: bruce.BruceTurn = res.value
+    turn.say = re.sub(r"\[[a-z ]{2,24}\]\s*", "", turn.say).strip()
+    turn.tools = turn.tools[:4]
+    return turn
+
+
+@app.get("/live/precall")
+def live_precall_options() -> dict:
+    return photo_plan.precall_options()
+
+
+class SpotIn(BaseModel):
+    room: str
+    surface: str
+
+
+class PrecallIn(BaseModel):
+    spots: list[SpotIn]
+    size: str
+    smell_leak: str
+    location: str
+
+
+@app.post("/cases/{case_id}/live/precall")
+async def live_precall(case_id: str, body: PrecallIn) -> dict:
+    """The 5 tap questions before the call. Saves them as normal intake answers (so routing/pricing work unchanged) and
+    returns the personalized photo plan."""
+    spots = [s.model_dump() for s in body.spots if s.room in photo_plan.ROOMS and s.surface in photo_plan.SURFACES][:photo_plan.MAX_SPOTS]
+    if not spots:
+        raise HTTPException(422, "Pick at least one spot (room and where in it).")
+    if body.size not in photo_plan.SIZES or body.smell_leak not in photo_plan.SMELL_LEAK:
+        raise HTTPException(422, "Answer the size and smell/leak questions.")
+    try:
+        location = live_rules.validate_answer("location", body.location)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    odor, leak = photo_plan.SMELL_LEAK_ANSWERS[body.smell_leak]
+    async with store.editing(case_id) as c:
+        c.intake_mode, c.language = "live", "en"
+        c.answers["spots"] = json.dumps(spots)
+        c.answers["size"] = body.size
+        for key, value in (("room", spots[0]["room"]), ("odor", odor), ("leak", leak), ("location", location)):
+            _apply_answer(c, key, value)
+    plan = photo_plan.plan_for_case(c.answers) or []
+    return {"plan": photo_plan.plan_dicts(plan), "checklist": live_rules.checklist(c)}
+
+
+@app.post("/cases/{case_id}/live/locate")
+async def live_locate(case_id: str, file: UploadFile = File(...), target: str = Form(...)) -> dict:
+    """Focus box helper: where in this live frame is the target (e.g. 'the discoloured patch')? Not saved to the case."""
+    _get(case_id)
+    if config.E2E_STUB:
+        return {"found": False}
+    try:
+        img = prepare_image(await file.read(), max_side=640)
+        res = await tasks.locate(img, target)
+    except AgentFailure as e:
+        raise HTTPException(503, f"Locator unavailable: {e}")
+    except Exception:
+        raise HTTPException(400, "Could not read that frame.")
+    out = res.value
+    return {"found": bool(out.found and out.box), "box_2d": out.box.box_2d if out.found and out.box else None, "label": out.label}
 
 
 @app.get("/cases/{case_id}/live/checklist")
