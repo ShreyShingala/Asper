@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Close-up of white horizontal slats, likely a vent or blind, with dark gaps between them.\",\"Dark speckled material is visible through the gaps behind the slats.\",\"Image is blurry and lacks clear context for the surface behind the slats.\"],\"regions\":[{\"label\":\"look closer: dark material behind slats\",\"box_2d\":[0,0,1000,1000]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"blurry\",\"follow_up_question\":\"What is behind the slats, and have you noticed any dampness or musty smell in that area?\",\"declined_to_confirm_mold\":true}"
+}

@@ -1,0 +1,4 @@
+{
+ "model": "openrouter/free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"The image shows a ceiling area with a vent or louvered grille and a light fixture below it.\",\"There is a dark, discolored horizontal band at the very top of the image, above the vent structure.\",\"The photo is somewhat blurry and taken at a close, upward angle.\"],\"regions\":[{\"label\":\"look closer: dark discoloration above the vent\",\"box_2d\":[0,0,1000,150]},{\"label\":\"look closer: vent louvers and frame\",\"box_2d\":[330,0,1000,560]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"blurry\",\"follow_up_question\":\"Is there a history of leaking pipes, a roof leak, or high humidity in this laundry room, particularly near the ceiling?\",\"declined_to_confirm_mold\":true}"
+}

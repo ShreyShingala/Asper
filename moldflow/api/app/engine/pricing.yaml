@@ -1,0 +1,20 @@
+# Documented Mold Busters prices (from the sample pack). These are the ONLY prices shown before an inspection.
+services:
+  virtual:  {price: "100.00", tax_included: true,  label_en: "Virtual assessment", label_fr: "Évaluation virtuelle"}
+  onsite:   {price: "195.00", tax_included: false, label_en: "On-site visual & diagnostic inspection", label_fr: "Inspection visuelle et diagnostique sur place"}
+  iaq:      {price: "520.00", tax_included: false, label_en: "Indoor Air Quality (IAQ) assessment", label_fr: "Évaluation de la qualité de l'air intérieur (QAI)"}
+  remote_report: {price: "25.00", tax_included: false, label_en: "AI pre-assessment report (remote, outside service area)", label_fr: "Rapport de pré-évaluation IA (à distance, hors zone)", proposed: true}
+taxes:
+  "ON": {rate: "0.13", label: "HST 13%"}
+  "QC": {rate: "0.14975", label: "GST 5% + QST 9.975%"}
+estimate_terms:
+  deposit_pct: 40
+  valid_days: 60
+# ILLUSTRATIVE ONLY: placeholder split of a remediation subtotal into line items so the review screen can show
+# structure. Mold Busters must configure real unit pricing. Shares are not sourced from MB data.
+illustrative_remediation_split:
+  - {code: CONTAIN, description: "Containment (plastic barriers + zipper doors, negative air when possible)", share: "0.20"}
+  - {code: HEPA,    description: "HEPA vacuum + manual cleaning", share: "0.25"}
+  - {code: TREAT,   description: "2-step treatment: stain removal, then eco fungicide", share: "0.30"}
+  - {code: FOG,     description: "Disinfection: HEPA vacuum + fogging of contained area", share: "0.10"}
+  - {code: CLEAR,   description: "Clearance: visual check + 3 instant swabs + written certificate", share: "0.15"}

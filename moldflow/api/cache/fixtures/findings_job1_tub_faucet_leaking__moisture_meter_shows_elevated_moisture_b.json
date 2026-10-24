@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"findings\":[{\"room\":\"Upstairs washrooms\",\"observation\":\"Tub faucet leaking.\",\"reading_kind\":\"moisture\",\"reading_result\":\"elevated\",\"evidence_photo_ids\":[\"p16\"]},{\"room\":\"Upstairs washrooms\",\"observation\":\"Ball slope test failed shower.\",\"reading_kind\":\"ball_slope\",\"reading_result\":\"failed\",\"evidence_photo_ids\":[\"p12\"]},{\"room\":\"Upstairs washrooms\",\"observation\":\"Discoloration visible.\",\"reading_kind\":\"visual\",\"reading_result\":\"anomaly\",\"evidence_photo_ids\":[\"p13\",\"p14\",\"p15\"]}]}"
+}
