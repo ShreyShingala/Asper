@@ -11,6 +11,7 @@ import { Button } from "@/components/ds/kit/Buttons";
 import { cardSurface } from "@/components/ds/kit/Cards";
 import { Loader, Modal, Tag } from "@/components/ds/kit/Feedback";
 import { Tabs } from "@/components/ds/kit/Navigation";
+import { HubSearch, PauseButton } from "@/components/hub";
 
 export { Button, IconButton, buttonClass } from "@/components/ds/kit/Buttons";
 export { EmptyState } from "@/components/ds/kit/Cards";
@@ -124,7 +125,11 @@ export function Logo({ small }: { small?: boolean }) {
 }
 
 const NAV = [
-  ["/dashboard", "Inbox"],
+  ["/hub", "Hub"],
+  ["/people", "People"],
+  ["/outreach", "Outreach"],
+  ["/alerts", "Alerts"],
+  ["/dashboard", "Cases"],
   ["/cases/job1/inspect", "Job 1 · Inspect"],
   ["/cases/job1/review", "Job 1 · Review"],
   ["/compare", "Before / After"],
@@ -136,11 +141,11 @@ export function StaffShell({ children, title, actions }: { children: React.React
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-30 bg-white shadow-ds-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-5">
-          <Link href="/dashboard" className="shrink-0"><Logo small /></Link>
+        <div className="mx-auto flex h-16 max-w-[90rem] items-center gap-6 px-5">
+          <Link href="/hub" className="shrink-0"><Logo small /></Link>
           <nav aria-label="Primary" className="flex h-full gap-6 overflow-x-auto">
             {NAV.map(([href, label]) => {
-              const on = path === href;
+              const on = path === href || (href !== "/hub" && path.startsWith(href + "/"));
               return (
                 <Link key={href} href={href} aria-current={on ? "page" : undefined}
                   className={cn("-mb-px inline-flex items-center whitespace-nowrap border-b-2 text-subtitle font-medium transition-colors",
@@ -150,13 +155,13 @@ export function StaffShell({ children, title, actions }: { children: React.React
               );
             })}
           </nav>
-          <div className="ml-auto flex shrink-0 items-center gap-2">{actions}<QrLink /></div>
+          <div className="ml-auto flex shrink-0 items-center gap-2">{actions}<HubSearch /><PauseButton /><QrLink /></div>
         </div>
       </header>
       <div className="bg-kit-navy text-white">
         <p className="mx-auto flex max-w-7xl items-center gap-2 px-5 py-2 text-caption">
           <Info size={14} className="shrink-0" aria-hidden />
-          Prototype · MoldFlow assists qualified inspectors; it does not identify, diagnose or confirm mold. Sending, booking and CRM sync are simulated.
+          Prototype · MoldFlow assists qualified inspectors; it does not identify, diagnose or confirm mold. Sending, booking and CRM sync are simulated; people marked &ldquo;synthetic&rdquo; are invented demo data.
         </p>
       </div>
       <main className="mx-auto max-w-7xl px-5 py-8">

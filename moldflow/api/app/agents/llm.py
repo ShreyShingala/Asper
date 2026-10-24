@@ -48,6 +48,24 @@ class AgentFailure(Exception):
     pass
 
 
+_quota_until = 0.0  # epoch seconds; set when the provider says the daily free quota is used up
+
+
+def quota_exhausted() -> bool:
+    return time.time() < _quota_until
+
+
+def _note_quota(err: Exception) -> None:
+    """Daily free-tier quota hit: stop calling the provider until 00:00 UTC (fail fast to fixtures/rules)."""
+    global _quota_until
+    msg = str(err).lower()
+    if "per-day" in msg or "free-models-per-day" in msg or "daily" in msg and "limit" in msg:
+        import datetime as _dt
+        tomorrow = (_dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        _quota_until = tomorrow.timestamp()
+        log.warning("daily AI quota exhausted; using fixtures/rules until %s UTC", tomorrow.isoformat())
+
+
 class TransientError(Exception):
     """Provider returned an empty/malformed response (seen on free tiers): retry like a 5xx."""
 
@@ -162,6 +180,7 @@ async def structured(model_cls: type[T], *, agent: str, system: str, user_text: 
         from app.agents.stubs import STUBS
         if model_cls.__name__ in STUBS:
             return done(model_cls.model_validate(STUBS[model_cls.__name__]), "e2e-stub", "fixture")
+        raise AgentFailure(f"e2e: no stub for {model_cls.__name__} (rule-based fallback)")
     if mode == "fixture" and fixture and (v := _read(fixture, model_cls)):
         return done(v, "fixture", "fixture")
     if mode in ("fixture", "hybrid") and (v := _read(exact, model_cls)):
@@ -173,6 +192,10 @@ async def structured(model_cls: type[T], *, agent: str, system: str, user_text: 
     messages = [{"role": "system", "content": full_system}, {"role": "user", "content": content}]
 
     errors = []
+    if quota_exhausted() and mode != "live":
+        if fixture and (v := _read(fixture, model_cls)):
+            return done(v, "fixture", "fixture")
+        raise AgentFailure("daily AI quota exhausted (resets 00:00 UTC)")
     attempts = [("live", config.PRIMARY_MODEL)] * (1 + config.PRIMARY_RETRIES) + [("fallback", config.FALLBACK_MODEL)]
     for n, (tier, model) in enumerate(attempts):
         if n and tier == "live":
@@ -193,6 +216,10 @@ async def structured(model_cls: type[T], *, agent: str, system: str, user_text: 
             errors.append(f"{model}: {type(e).__name__} {str(e)[:160]}")
             log.warning("agent %s failed on %s: %s", agent, model, errors[-1])
             status = getattr(e, "status_code", None)
+            if status == 429:
+                _note_quota(e)
+                if quota_exhausted():
+                    break
             if tier == "live" and status is not None and status not in (429, 500, 502, 503, 504):
                 attempts[n + 1:] = [a for a in attempts[n + 1:] if a[0] != "live"]  # 4xx won't fix itself
     if fixture and (v := _read(fixture, model_cls)):

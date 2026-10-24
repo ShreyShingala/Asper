@@ -29,7 +29,8 @@ CENT = Decimal("0.01")
 
 
 def now() -> datetime:
-    return datetime.now().replace(microsecond=0)
+    from app import clock
+    return clock.now()
 
 
 class Customer(BaseModel):
@@ -253,6 +254,7 @@ class Case(BaseModel):
     stage: Stage = "intake"
     language: Literal["en", "fr"] = "en"
     intake_mode: Literal["upload", "live"] = "upload"
+    contact_id: str | None = None
     live: LiveSession | None = None
     seeded_from: str | None = None
     customer: Customer = Customer()
