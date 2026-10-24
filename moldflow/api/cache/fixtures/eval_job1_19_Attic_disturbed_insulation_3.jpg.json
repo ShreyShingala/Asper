@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Attic or crawlspace framing with exposed wood rafters and sheathing.\",\"Some wood surfaces appear discolored or stained; lighting is uneven and shadows obscure detail.\",\"Small blue rectangular pieces, possibly tape or markers, are visible on some wood members.\",\"No instruments, test kits, or thermal screens are visible.\"],\"regions\":[{\"label\":\"look closer: discolored roof sheathing\",\"box_2d\":[380,240,720,560]},{\"label\":\"look closer: stained rafter near center\",\"box_2d\":[350,360,620,720]},{\"label\":\"look closer: dark wood area upper left\",\"box_2d\":[180,0,450,320]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Has there been any roof leakage or water intrusion in this area?\",\"declined_to_confirm_mold\":true}"
+}

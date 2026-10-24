@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"channel\":\"sms\",\"body\":\"Likely sources: leaking tub faucet and standing water in the upstairs washrooms, plus poor exterior drainage near the entrance. Estimate EST-CASE01 covers the upstairs washrooms and attic for $4,181.00 and expires 2026-12-06. Reply with any questions.\",\"reason\":\"Follow up on unaccepted estimate, answer moisture-source concern using findings, cite estimate details and expiry.\",\"cites\":[\"F3\",\"AI1\",\"F5\",\"EST-CASE01\"],\"uses_offer_token\":false}"
+}

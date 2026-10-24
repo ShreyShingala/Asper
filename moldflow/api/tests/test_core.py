@@ -119,3 +119,11 @@ def test_intake_is_photo_first_then_chips():
 
 def test_extract_json_handles_fences_and_think():
     assert _extract_json('<think>hmm</think>```json\n{"a": 1}\n```') == '{"a": 1}'
+
+
+def test_findings_grounding_words():
+    from app.agents.tasks import _words
+    note = _words("Tub faucet leaking, moisture meter shows elevated moisture below the faucet.")
+    assert _words("Tub faucet leaking.") & note
+    assert not (_words("Ball slope test failed shower.") & note)
+    assert not (_words("Discoloration visible.") & note)

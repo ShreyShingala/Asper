@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Pink fiberglass insulation covers the floor between wooden support posts and beams.\",\"The lower portion of the image is dark and shadowed.\",\"No instruments, test kits, or thermal screens are visible.\"],\"regions\":[{\"label\":\"look closer: insulation near support posts\",\"box_2d\":[200,200,700,600]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Has there been any water intrusion or flooding in this area?\",\"declined_to_confirm_mold\":true}"
+}

@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"instrument\",\"observations\":[\"A person is holding a black handheld thermal imaging camera labeled E02.\",\"The camera screen shows a thermal image with yellow, green, and blue colors and temperature readings including 23.36, Max 24.0, and Min 17.8.\",\"The background shows a room with wooden framing, buckets, and a red object; no mold or moisture is visible in the photo itself.\"],\"regions\":[{\"label\":\"look closer: thermal screen temperature readout\",\"box_2d\":[420,490,640,580]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"What area or surface was the thermal camera pointed at when this image was captured?\",\"declined_to_confirm_mold\":true}"
+}

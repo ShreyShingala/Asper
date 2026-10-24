@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Wall opening with white trim around two flexible metal supply lines entering the wall cavity.\",\"Dark interior of the wall opening is partially visible behind the lines.\",\"Some surface wear or discoloration is visible on the wall to the left of the opening.\",\"No instruments, test kits, or thermal screens are present in the photo.\"],\"regions\":[{\"label\":\"look closer: interior of wall opening behind supply lines\",\"box_2d\":[280,160,640,650]},{\"label\":\"look closer: wall surface to left of opening\",\"box_2d\":[0,300,150,500]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Has there been any water leak or plumbing issue near this wall opening?\",\"declined_to_confirm_mold\":true}"
+}

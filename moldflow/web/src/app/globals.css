@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-paper: #f5f1e8;
+  --color-paper-2: #ece6d8;
+  --color-card: #fffdf8;
+  --color-ink: #16211d;
+  --color-ink-2: #4b5a54;
+  --color-line: #d9d1bf;
+  --color-moss: #0e5a4a;
+  --color-moss-2: #e2efe9;
+  --color-amber: #d98a12;
+  --color-amber-2: #fbf0dc;
+  --color-rust: #b2391f;
+  --color-rust-2: #f8e3dc;
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-plex);
+  --font-mono: var(--font-plex-mono);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html, body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui;
+  -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+  background-image: radial-gradient(rgba(22, 33, 29, 0.06) 1px, transparent 1px);
+  background-size: 18px 18px;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.stamp {
+  font-family: var(--font-plex-mono), ui-monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
 }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(217, 138, 18, 0.28) 50%, transparent 100%);
+  animation: scan 1.6s ease-in-out infinite;
+}
+
+@keyframes draw {
+  from { clip-path: inset(0 100% 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.box-draw { animation: draw 0.7s ease-out both; }

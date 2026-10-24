@@ -103,9 +103,12 @@ async def _call_model(model: str, model_cls: type[T], messages: list[dict], max_
     cost = 0.0
     last_err = ""
     for attempt in range(3):
+        extra: dict = {"usage": {"include": True}}
+        if model == config.PRIMARY_MODEL and config.DISABLE_REASONING:
+            extra["reasoning"] = {"enabled": False}  # ~3x faster on Nemotron; some routers (openrouter/free) reject this
         async with _sem:
             resp = await client().chat.completions.create(model=model, messages=msgs, max_tokens=max_tokens,
-                                                          temperature=0.2, extra_body={"usage": {"include": True}, "reasoning": {"enabled": False}})
+                                                          temperature=0.2, extra_body=extra)
         u = resp.usage
         if u:
             tokens_in += u.prompt_tokens or 0

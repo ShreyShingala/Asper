@@ -1,0 +1,453 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "run_at": "2026-10-24 01:11",
+ "rows": [
+  {
+   "photo": "01_No_thermal_anomalies_basement_1.jpg",
+   "job": "job1",
+   "caption": "No thermal anomalies basement 1",
+   "image_type": "instrument",
+   "observations": [
+    "A person is holding a black handheld thermal imaging camera labeled E02.",
+    "The camera screen shows a thermal image with yellow, green, and blue colors and temperature readings including 23.36, Max 24.0, and Min 17.8.",
+    "The background shows a room with wooden framing, buckets, and a red object; no mold or moisture is visible in the photo itself."
+   ],
+   "regions": 1,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2131,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "02_No_thermal_anomalies_basement_2.jpg",
+   "job": "job1",
+   "caption": "No thermal anomalies basement 2",
+   "image_type": "instrument",
+   "observations": [
+    "A hand holds a black handheld thermal imaging device labeled EO2.",
+    "The screen displays a thermal image with yellow, green, and blue color zones.",
+    "On-screen text includes 'HIKMICRO' and temperature-related readings.",
+    "The background shows a room interior with shelving, boxes, and flooring."
+   ],
+   "regions": 1,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 1978,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "03_Humidity_within_normal_range.jpg",
+   "job": "job1",
+   "caption": "Humidity within normal range",
+   "image_type": "regular",
+   "observations": [
+    "A black and yellow ProTmex HT607 temperature and humidity meter rests on a light wood-grain surface.",
+    "The screen reads 77.0 \u00b0F temperature, 44.2 % RH, and 53.6 \u00b0F dew point.",
+    "No mold, discoloration, water stains, or visible moisture are present in the photo."
+   ],
+   "regions": 0,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 1782,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "04_Swab_test_1.jpg",
+   "job": "job1",
+   "caption": "Swab test 1",
+   "image_type": "regular",
+   "observations": [
+    "A hand is holding a long, thin probe or swab with a purple handle, reaching into a narrow gap between panels or surfaces.",
+    "The surfaces appear to be drywall, concrete, or insulation material, showing some shadowing and slight discoloration.",
+    "The lighting is uneven, with a bright flashlight beam illuminating the area around the hand and the probe.",
+    "The image is somewhat blurry and taken from a tight, obstructed angle."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "fallback",
+   "latency_ms": 7349,
+   "model": "openrouter/free"
+  },
+  {
+   "photo": "05_Swab_test_2.jpg",
+   "job": "job1",
+   "caption": "Swab test 2",
+   "image_type": "test_kit",
+   "observations": [
+    "A hand is holding a purple-capped swab with a white flexible shaft and a beige tip.",
+    "The swab is positioned near the junction of a concrete floor and a wall.",
+    "The wall has a greenish lower section and a lighter upper section with some texture and discoloration.",
+    "There is a small circular hole or indentation in the green section of the wall near the floor.",
+    "The concrete floor appears dusty and has some debris near the wall base."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "fallback",
+   "latency_ms": 10795,
+   "model": "openrouter/free"
+  },
+  {
+   "photo": "06_Swab_test_3.jpg",
+   "job": "job1",
+   "caption": "Swab test 3",
+   "image_type": "regular",
+   "observations": [
+    "Black pipe with printed text '/2\" / 40mm C' runs horizontally across the frame.",
+    "Greenish discoloration is visible at the pipe joint on the right side.",
+    "A white wall is visible behind the pipe.",
+    "A person's arm is visible at the top of the image.",
+    "A barcode label is attached to the left end of the pipe."
+   ],
+   "regions": 1,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 3097,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "07_Swab_test_positive_for_mold.jpg",
+   "job": "job1",
+   "caption": "Swab test positive for mold",
+   "image_type": "test_kit",
+   "observations": [
+    "A hand holds a white test strip with a green band and purple color pads near the tip over a concrete floor.",
+    "Pipes and fittings are visible in the background against a wall.",
+    "A white plastic step stool sits on the floor behind the strip.",
+    "The concrete floor has scattered light-colored specks and faint smudges.",
+    "No visible standing water or active dripping is seen."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 3404,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "08_Thermal_anomaly_1.jpg",
+   "job": "job1",
+   "caption": "Thermal anomaly 1",
+   "image_type": "instrument",
+   "observations": [
+    "A hand holds a black handheld thermal imaging camera labeled E02.",
+    "The screen shows a thermal image with yellow and blue areas and on-screen text including Cen 20.0 \u00b0C, Max 20.7, Min 17.8.",
+    "A second black instrument with a silver probe is partially visible behind the camera.",
+    "The background shows a light blue wall, ceiling, floor lamp, and furniture.",
+    "No visible moisture, staining, or discoloration is present in the photo."
+   ],
+   "regions": 0,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2263,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "09_Thermal_anomaly_2.jpg",
+   "job": "job1",
+   "caption": "Thermal anomaly 2",
+   "image_type": "thermal",
+   "observations": [
+    "A person is holding a black handheld thermal camera labeled E02.",
+    "The screen shows a thermal image with yellow, green, and blue colors and a horizontal cooler band across the middle.",
+    "A second handheld instrument with a silver spherical top is held beside the thermal camera.",
+    "The background shows a light blue wall, ceiling, and a bright window.",
+    "No visible mold growth or standing water is shown in the photo."
+   ],
+   "regions": 1,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 4602,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "10_Thermal_anomaly_3.jpg",
+   "job": "job1",
+   "caption": "Thermal anomaly 3",
+   "image_type": "thermal",
+   "observations": [
+    "A person is holding a black handheld thermal imaging camera labeled E02.",
+    "The camera screen shows a thermal image with a temperature range of Min 16.4 \u00b0C to Max 210 \u00b0C and a center reading of 19.3 \u00b0C.",
+    "The background is an out-of-focus room with light-colored walls, a window, shelves, and a desk.",
+    "The thermal screen itself is an instrument display; no mold or moisture is visible or confirmed."
+   ],
+   "regions": 1,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2309,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "11_Thermal_anomaly_4.jpg",
+   "job": "job1",
+   "caption": "Thermal anomaly 4",
+   "image_type": "thermal",
+   "observations": [
+    "Handheld thermal imaging device labeled E02 is pointed at a wall and ceiling corner.",
+    "Thermal screen shows a color gradient with cooler blue bands across the lower wall area and warmer yellow/green tones elsewhere.",
+    "A small red dot is visible on the ceiling near the wall junction.",
+    "Device screen displays center temperature 20.8 \u00b0C, max 22.2 \u00b0C, min 18.6 \u00b0C."
+   ],
+   "regions": 2,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 7536,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "12_Ball_slope_test_failed_shower.jpg",
+   "job": "job1",
+   "caption": "Ball slope test failed shower",
+   "image_type": "regular",
+   "observations": [
+    "Shower stall with light gray textured wall tiles and large floor tiles.",
+    "Floor tiles show a mottled, cloudy pattern across multiple tiles.",
+    "Grout lines appear dark along the wall-floor junction and near the drain channel.",
+    "Small orange ball sits on the floor near the center.",
+    "Glass shower door frame visible on left and right edges.",
+    "No instruments, test kits, or thermal screens visible."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 4441,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "13_Washroom_discoloration_1.jpg",
+   "job": "job1",
+   "caption": "Washroom discoloration 1",
+   "image_type": "regular",
+   "observations": [
+    "Bathroom shower with glass enclosure and black frame",
+    "Ceiling appears uniformly light-colored with a bright reflection from overhead lighting",
+    "Shower walls are tiled with light-colored tile",
+    "No visible instruments, test kits, or thermal screens in the photo"
+   ],
+   "regions": 0,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 5561,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "14_Washroom_discoloration_2.jpg",
+   "job": "job1",
+   "caption": "Washroom discoloration 2",
+   "image_type": "regular",
+   "observations": [
+    "Ceiling shows yellowish-brown discoloration concentrated near the corner where it meets tiled walls.",
+    "Several small dark speckles are visible on the ceiling surface.",
+    "White subway tiles cover the walls; grout lines appear intact.",
+    "A horizontal white pipe or rod runs across the lower portion of the image.",
+    "Bright flash reflection on the ceiling obscures some surface detail."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2999,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "15_Washroom_discoloration_3.jpg",
+   "job": "job1",
+   "caption": "Washroom discoloration 3",
+   "image_type": "regular",
+   "observations": [
+    "Shower area with white subway tile walls and a white ceiling.",
+    "A handheld showerhead and hose are mounted on the wall.",
+    "A bright circular reflection from a light source is visible on the ceiling.",
+    "No visible instruments, test kits, or thermal screens in the photo."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2605,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "16_Elevated_moisture_at_tub_faucet.jpg",
+   "job": "job1",
+   "caption": "Elevated moisture at tub faucet",
+   "image_type": "instrument",
+   "observations": [
+    "A hand holds a green and black moisture meter against a light-colored tiled floor near a white bathtub.",
+    "A black flexible hose or cord runs along the floor beside a silver floor drain cover.",
+    "The wall has light-colored textured tile with a diagonal pattern.",
+    "No visible discoloration, staining, or standing water is apparent in the frame."
+   ],
+   "regions": 1,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2517,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "17_Attic_disturbed_insulation_1.jpg",
+   "job": "job1",
+   "caption": "Attic disturbed insulation 1",
+   "image_type": "regular",
+   "observations": [
+    "Pink fiberglass insulation covers the floor between wooden support posts and beams.",
+    "The lower portion of the image is dark and shadowed.",
+    "No instruments, test kits, or thermal screens are visible."
+   ],
+   "regions": 1,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2269,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "18_Attic_disturbed_insulation_2.jpg",
+   "job": "job1",
+   "caption": "Attic disturbed insulation 2",
+   "image_type": "regular",
+   "observations": [
+    "Exposed OSB sheathing on an overhead surface with visible wood strands.",
+    "A horizontal wooden beam runs across the middle of the frame with lighter discoloration along its surface.",
+    "Vertical wooden studs below the beam, some with blue tape near the top.",
+    "Pink fibrous insulation visible in the lower portion between framing members.",
+    "Lower area is dark and shadowed, limiting detail."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 4016,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "19_Attic_disturbed_insulation_3.jpg",
+   "job": "job1",
+   "caption": "Attic disturbed insulation 3",
+   "image_type": "regular",
+   "observations": [
+    "Attic or crawlspace framing with exposed wood rafters and sheathing.",
+    "Some wood surfaces appear discolored or stained; lighting is uneven and shadows obscure detail.",
+    "Small blue rectangular pieces, possibly tape or markers, are visible on some wood members.",
+    "No instruments, test kits, or thermal screens are visible."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 3528,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "20_Attic_disturbed_insulation_4.jpg",
+   "job": "job1",
+   "caption": "Attic disturbed insulation 4",
+   "image_type": "regular",
+   "observations": [
+    "Dark attic or crawlspace illuminated by a flashlight",
+    "Exposed wood framing including joists, beams, and posts",
+    "Pink loose-fill insulation covering the floor",
+    "Some wood surfaces appear lighter or discolored where lit",
+    "No instruments, test kits, or thermal screens visible"
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2357,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "21_Exterior_drainage_and_depression.jpg",
+   "job": "job1",
+   "caption": "Exterior drainage and depression",
+   "image_type": "regular",
+   "observations": [
+    "White downspout runs along exterior wall and empties onto a low retaining wall next to pavers.",
+    "Green shrubs and leafy branches partially obscure the wall and downspout area.",
+    "Paver walkway in foreground with some weeds growing between joints.",
+    "No visible instruments, test kits, or thermal screens in the photo."
+   ],
+   "regions": 3,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 5439,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "01_Discoloration_dryer_vent_hose.jpg",
+   "job": "job2",
+   "caption": "Discoloration dryer vent hose",
+   "image_type": "regular",
+   "observations": [
+    "Wall opening with white trim around two flexible metal supply lines entering the wall cavity.",
+    "Dark interior of the wall opening is partially visible behind the lines.",
+    "Some surface wear or discoloration is visible on the wall to the left of the opening.",
+    "No instruments, test kits, or thermal screens are present in the photo."
+   ],
+   "regions": 2,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 2750,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "02_Discoloration_ceiling_vent.jpg",
+   "job": "job2",
+   "caption": "Discoloration ceiling vent",
+   "image_type": "regular",
+   "observations": [
+    "Upper portion of the image shows a dark horizontal band with faint discoloration along the top edge.",
+    "Below that is a section with horizontal ribbed texture.",
+    "Lower portion shows a white ceiling surface with a small dark spot near a screw or fastener.",
+    "A bright circular light fixture is visible at the bottom with a curved frame around it.",
+    "Image is somewhat dim and lacks sharp detail."
+   ],
+   "regions": 2,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 3074,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  },
+  {
+   "photo": "03_Discoloration_vent_grille.jpg",
+   "job": "job2",
+   "caption": "Discoloration vent grille",
+   "image_type": "regular",
+   "observations": [
+    "Close-up view of white horizontal slats, likely window blinds.",
+    "Dark speckled material visible through gaps between slats.",
+    "Image is blurry and lacks clear context or scale reference."
+   ],
+   "regions": 1,
+   "declined_to_confirm_mold": true,
+   "mentions_mold_as_fact": false,
+   "tier": "live",
+   "latency_ms": 1547,
+   "model": "nvidia/nemotron-3.5-super-vl:free"
+  }
+ ],
+ "summary": {
+  "photos analysed": "24/24",
+  "declined to confirm mold": "24/24",
+  "overclaims (mold stated as fact)": 0,
+  "median live latency (s)": 3.0,
+  "thermal/instrument photos recognised": "6/6"
+ },
+ "note": "Illustrative (n=24), not an accuracy benchmark. Ground truth = organizer photo filenames."
+}

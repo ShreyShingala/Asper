@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"A black and yellow ProTmex HT607 temperature and humidity meter rests on a light wood-grain surface.\",\"The screen reads 77.0 \u00b0F temperature, 44.2 % RH, and 53.6 \u00b0F dew point.\",\"No mold, discoloration, water stains, or visible moisture are present in the photo.\"],\"regions\":[],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Where in the home was this reading taken, and was it near any area with suspected water damage or musty odor?\",\"declined_to_confirm_mold\":true}"
+}

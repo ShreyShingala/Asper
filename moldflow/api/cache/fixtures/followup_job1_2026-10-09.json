@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"channel\":\"sms\",\"body\":\"Hi, your basement discoloration under the sink tested positive for possible fungal growth, but humidity and moisture were normal. The likely moisture sources are upstairs washroom leaks and exterior drainage near the entrance. Estimate EST-CASE01 covers the upstairs washrooms and attic for $4,181.00 and expires Dec 6, 2026. Reply if you'd like to proceed.\",\"reason\":\"Follow up on basement concern and estimate without repeating generic check-ins or offering discounts.\",\"cites\":[\"F1\",\"F3\",\"F5\"],\"uses_offer_token\":false}"
+}

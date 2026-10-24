@@ -504,7 +504,7 @@ def compare_job1() -> dict:
 
 @app.get("/proof")
 def proof() -> dict:
-    path = config.DATA_DIR.parent / "proof" / "eval_photos.json"
+    path = config.API_DIR / "proof" / "eval_photos.json"
     evald = json.loads(path.read_text()) if path.exists() else None
     usage = [u for c in store.list_all() for u in c.ai_usage]
     live = [u for u in usage if u.tier in ("live", "fallback")]
@@ -532,8 +532,11 @@ def photo(case_id: str, photo_id: str):
 
 @app.post("/admin/reset")
 def reset() -> dict:
+    ids = [c.id for c in store.list_all()]
     store.wipe()
-    shutil.rmtree(config.DATA_DIR / "uploads", ignore_errors=True)
-    (config.DATA_DIR / "uploads").mkdir(parents=True, exist_ok=True)
+    for cid in ids:  # only delete MoldFlow's own per-case upload folders, never the whole directory
+        d = config.UPLOAD_DIR / cid
+        if d.is_dir() and d.parent == config.UPLOAD_DIR:
+            shutil.rmtree(d, ignore_errors=True)
     cases = seeds.seed_all(store.save)
     return {"ok": True, "cases": [c.id for c in cases]}

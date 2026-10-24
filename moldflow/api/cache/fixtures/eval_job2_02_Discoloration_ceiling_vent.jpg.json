@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Upper portion of the image shows a dark horizontal band with faint discoloration along the top edge.\",\"Below that is a section with horizontal ribbed texture.\",\"Lower portion shows a white ceiling surface with a small dark spot near a screw or fastener.\",\"A bright circular light fixture is visible at the bottom with a curved frame around it.\",\"Image is somewhat dim and lacks sharp detail.\"],\"regions\":[{\"label\":\"look closer: dark band at top edge\",\"box_2d\":[0,0,1000,1000]},{\"label\":\"look closer: small dark spot on white ceiling\",\"box_2d\":[560,580,640,630]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"blurry\",\"follow_up_question\":\"Has there been any water leak or moisture issue in this area?\",\"declined_to_confirm_mold\":true}"
+}

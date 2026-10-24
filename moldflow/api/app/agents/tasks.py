@@ -1,5 +1,6 @@
 """All MoldFlow agents. Each = prompt + Pydantic output model + deterministic post-processing."""
 import json
+import re
 from datetime import date
 
 from app.agents.llm import Result, structured
@@ -8,6 +9,11 @@ from app.models.agents import AssessDraft, FindingsOut, FollowUpDraft, PhotoAnal
 from app.models.passport import ALLOWED_RESULTS, Case, Finding, Photo, Reading
 
 LANG_NAME = {"en": "English", "fr": "French (Canadian)"}
+_STOP = {"the", "and", "with", "below", "above", "under", "from", "that", "this", "shows", "show", "there", "visible", "is", "was", "were", "has"}
+
+
+def _words(text: str) -> set[str]:
+    return {w.rstrip("s") for w in re.findall(r"[a-z]{4,}", text.lower())} - _STOP
 
 
 async def analyze_photo(case: Case, photo: Photo, image: bytes, prompt_text: str | None, fixture_key: str | None) -> Result:
@@ -28,6 +34,7 @@ async def assess(case: Case, fixture_key: str | None) -> Result:
               "whether growth is fungal, air quality), and suggest the most appropriate PAID next service: 'virtual' (small, visible, "
               "single area, no leak), 'onsite' (hidden/multiple areas, leaks, water damage, attic/structure), or 'iaq' (odour or health "
               "symptoms, especially without much visible growth). Never say no inspection is needed. Never mention prices. "
+              "Write the summary directly TO the customer in the second person ('you', 'your photos'), warm and calm; first sentence <= 14 words. "
               f"Write in {LANG_NAME[case.language]}.")
     ctx = {"concern": case.concern, "answers": {k: v for k, v in case.answers.items() if not k.startswith("skip:")},
            "customer_type": case.customer.type,
@@ -40,13 +47,17 @@ async def findings_from_note(case: Case, room: str, note: str) -> tuple[list[Fin
     system = ("You turn an inspector's quick field note into structured findings. Use ONLY facts stated in the note. One finding per distinct "
               "observation. Pick reading_kind/reading_result only if the note states a test or reading result. Allowed results per kind: "
               + json.dumps({k: sorted(v) for k, v in ALLOWED_RESULTS.items()})
-              + ". Choose evidence_photo_ids from the provided photo list (match by caption/room); never invent ids.")
+              + ". The photo list is ONLY for choosing evidence_photo_ids (match by caption/room); it is NEVER a source of findings. "
+              "If the note mentions one thing, return one finding. Never invent ids.")
     ctx = {"room": room, "note": note, "photos": [{"id": p.id, "room": p.room, "caption": p.caption_from_pack} for p in case.photos]}
     res = await structured(FindingsOut, agent="findings", system=system, user_text=json.dumps(ctx), max_tokens=900,
                            fixture_key=f"findings:{case.id}:{note.strip().lower()[:60]}")
     photo_ids = {p.id for p in case.photos}
     out, n = [], sum(1 for f in case.findings if f.source == "ai_structured")
+    note_words = _words(note)
     for d in res.value.findings:
+        if not (_words(d.observation) & note_words):  # grounding check: finding must come from the note
+            continue
         ev = [i for i in d.evidence_photo_ids if i in photo_ids] or [p.id for p in case.photos if p.room == (d.room or room)][:1]
         if not ev:
             continue
@@ -97,7 +108,9 @@ async def draft_followup(case: Case, as_of: date, prior_messages: list[str]) -> 
     system = ("You draft ONE follow-up message to a customer who received a mold inspection report and estimate but has not accepted it. "
               "Answer their original concern directly using the recorded findings (e.g. what was found and the likely moisture sources). "
               "You may reference: the estimate number, what the scope covers, the total, and the expiry date. You must NOT create or mention "
-              "discounts, percentages off, or new offers. Do not repeat generic check-ins like the prior messages. Pick the 1-2 most relevant facts only. Warm, specific, <= 320 chars "
+              "discounts, percentages off, or new offers. Do not repeat generic check-ins like the prior messages. "
+              "Use exactly 3 short sentences, <= 300 characters total: (1) answer 'where is it coming from' with the most likely moisture "
+              "source(s) from findings with elevated moisture / failed tests; (2) what the estimate covers; (3) the expiry date + invite a question. "
               f"for SMS. Language: {LANG_NAME[case.language]}. If the customer is a tenant, offer a summary letter they can share with their landlord.")
     ctx = {"as_of": as_of.isoformat(), "customer_type": case.customer.type, "original_concern": case.concern,
            "findings": [{"id": f.id, "room": f.room, "observation": f.observation} for f in case.findings if f.confirmed],

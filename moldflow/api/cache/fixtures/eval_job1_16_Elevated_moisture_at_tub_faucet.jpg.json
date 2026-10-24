@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"instrument\",\"observations\":[\"A hand holds a green and black moisture meter against a light-colored tiled floor near a white bathtub.\",\"A black flexible hose or cord runs along the floor beside a silver floor drain cover.\",\"The wall has light-colored textured tile with a diagonal pattern.\",\"No visible discoloration, staining, or standing water is apparent in the frame.\"],\"regions\":[{\"label\":\"look closer: floor tile near drain\",\"box_2d\":[300,250,820,820]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Has there been any recent water leak or flooding in this bathroom?\",\"declined_to_confirm_mold\":true}"
+}

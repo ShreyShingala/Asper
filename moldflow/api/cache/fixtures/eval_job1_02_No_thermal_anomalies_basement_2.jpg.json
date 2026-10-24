@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"instrument\",\"observations\":[\"A hand holds a black handheld thermal imaging device labeled EO2.\",\"The screen displays a thermal image with yellow, green, and blue color zones.\",\"On-screen text includes 'HIKMICRO' and temperature-related readings.\",\"The background shows a room interior with shelving, boxes, and flooring.\"],\"regions\":[{\"label\":\"look closer: thermal screen display\",\"box_2d\":[460,510,700,710]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"What area or surface was the thermal camera pointed at when this image was captured?\",\"declined_to_confirm_mold\":true}"
+}

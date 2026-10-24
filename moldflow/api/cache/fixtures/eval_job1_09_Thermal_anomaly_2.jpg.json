@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"thermal\",\"observations\":[\"A person is holding a black handheld thermal camera labeled E02.\",\"The screen shows a thermal image with yellow, green, and blue colors and a horizontal cooler band across the middle.\",\"A second handheld instrument with a silver spherical top is held beside the thermal camera.\",\"The background shows a light blue wall, ceiling, and a bright window.\",\"No visible mold growth or standing water is shown in the photo.\"],\"regions\":[{\"label\":\"look closer: cooler horizontal band on thermal screen\",\"box_2d\":[350,420,600,560]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Where in the room was the thermal camera pointed when this image was taken?\",\"declined_to_confirm_mold\":true}"
+}

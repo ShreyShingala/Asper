@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"thermal\",\"observations\":[\"Handheld thermal imaging device labeled E02 is pointed at a wall and ceiling corner.\",\"Thermal screen shows a color gradient with cooler blue bands across the lower wall area and warmer yellow/green tones elsewhere.\",\"A small red dot is visible on the ceiling near the wall junction.\",\"Device screen displays center temperature 20.8 \u00b0C, max 22.2 \u00b0C, min 18.6 \u00b0C.\"],\"regions\":[{\"label\":\"look closer: cooler blue band on lower wall\",\"box_2d\":[300,850,950,1000]},{\"label\":\"look closer: red dot on ceiling near wall junction\",\"box_2d\":[200,230,700,320]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Have you noticed any water stains, dampness, or musty odors in this corner or nearby rooms?\",\"declined_to_confirm_mold\":true}"
+}

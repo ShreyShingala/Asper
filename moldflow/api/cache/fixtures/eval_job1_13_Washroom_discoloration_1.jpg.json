@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Bathroom shower with glass enclosure and black frame\",\"Ceiling appears uniformly light-colored with a bright reflection from overhead lighting\",\"Shower walls are tiled with light-colored tile\",\"No visible instruments, test kits, or thermal screens in the photo\"],\"regions\":[],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Have you noticed any water stains, peeling paint, or musty odors on or near the shower ceiling?\",\"declined_to_confirm_mold\":true}"
+}

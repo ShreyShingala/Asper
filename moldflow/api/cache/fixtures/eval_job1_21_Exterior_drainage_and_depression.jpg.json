@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"White downspout runs along exterior wall and empties onto a low retaining wall next to pavers.\",\"Green shrubs and leafy branches partially obscure the wall and downspout area.\",\"Paver walkway in foreground with some weeds growing between joints.\",\"No visible instruments, test kits, or thermal screens in the photo.\"],\"regions\":[{\"label\":\"look closer: downspout discharge area at retaining wall\",\"box_2d\":[370,340,690,590]},{\"label\":\"look closer: wall area behind shrubs near downspout\",\"box_2d\":[0,150,520,420]},{\"label\":\"look closer: pavers and joints near wall base\",\"box_2d\":[0,580,1000,1000]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Have you noticed any water pooling or dampness near the downspout after rain?\",\"declined_to_confirm_mold\":true}"
+}

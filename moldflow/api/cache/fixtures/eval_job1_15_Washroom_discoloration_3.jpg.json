@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Shower area with white subway tile walls and a white ceiling.\",\"A handheld showerhead and hose are mounted on the wall.\",\"A bright circular reflection from a light source is visible on the ceiling.\",\"No visible instruments, test kits, or thermal screens in the photo.\"],\"regions\":[{\"label\":\"look closer: ceiling near corner\",\"box_2d\":[0,0,620,620]},{\"label\":\"look closer: shower wall tile grout lines\",\"box_2d\":[0,580,680,1000]},{\"label\":\"look closer: right wall tile near corner\",\"box_2d\":[580,260,1000,1000]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Have you noticed any water stains, peeling paint, or musty odors in this bathroom?\",\"declined_to_confirm_mold\":true}"
+}

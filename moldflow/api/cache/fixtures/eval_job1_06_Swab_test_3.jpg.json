@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Black pipe with printed text '/2\\\" / 40mm C' runs horizontally across the frame.\",\"Greenish discoloration is visible at the pipe joint on the right side.\",\"A white wall is visible behind the pipe.\",\"A person's arm is visible at the top of the image.\",\"A barcode label is attached to the left end of the pipe.\"],\"regions\":[{\"label\":\"look closer: greenish discoloration at pipe joint\",\"box_2d\":[540,520,850,790]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Is this pipe located in a bathroom, kitchen, or basement, and has there been any water leak nearby?\",\"declined_to_confirm_mold\":true}"
+}

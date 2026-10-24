@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"thermal\",\"observations\":[\"A person is holding a black handheld thermal imaging camera labeled E02.\",\"The camera screen shows a thermal image with a temperature range of Min 16.4 \u00b0C to Max 210 \u00b0C and a center reading of 19.3 \u00b0C.\",\"The background is an out-of-focus room with light-colored walls, a window, shelves, and a desk.\",\"The thermal screen itself is an instrument display; no mold or moisture is visible or confirmed.\"],\"regions\":[{\"label\":\"look closer: thermal screen temperature readout\",\"box_2d\":[240,440,490,630]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"What area or surface was the thermal camera pointed at when this image was captured?\",\"declined_to_confirm_mold\":true}"
+}

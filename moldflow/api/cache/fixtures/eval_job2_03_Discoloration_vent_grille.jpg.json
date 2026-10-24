@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Close-up view of white horizontal slats, likely window blinds.\",\"Dark speckled material visible through gaps between slats.\",\"Image is blurry and lacks clear context or scale reference.\"],\"regions\":[{\"label\":\"look closer: dark material visible between slats\",\"box_2d\":[0,0,1000,1000]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"blurry\",\"follow_up_question\":\"What room are these blinds in, and have you noticed any water leaks or condensation nearby?\",\"declined_to_confirm_mold\":true}"
+}

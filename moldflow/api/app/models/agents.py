@@ -122,7 +122,18 @@ class ReportDraft(BaseModel):
 
 class FollowUpDraft(BaseModel):
     channel: Literal["sms", "email"] = "sms"
-    body: str = Field(max_length=360, description="The message to the customer, <= 320 characters for SMS")
+    body: str = Field(description="The message to the customer, <= 320 characters for SMS")
     reason: str = Field(description="Why this message, for staff")
     cites: list[str] = Field(default=[], description="Finding/photo ids referenced")
     uses_offer_token: bool = False
+
+    @field_validator("body")
+    @classmethod
+    def _sms_length(cls, v: str):
+        """Deterministically trim to whole sentences within 320 chars (never rewrites wording)."""
+        v = v.strip()
+        if len(v) <= 320:
+            return v
+        cut = v[:320]
+        end = max(cut.rfind(". "), cut.rfind("? "), cut.rfind("! "))
+        return cut[:end + 1] if end > 120 else cut[:cut.rfind(" ")] + "…"

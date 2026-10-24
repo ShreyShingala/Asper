@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"instrument\",\"observations\":[\"A hand holds a black handheld thermal imaging camera labeled E02.\",\"The screen shows a thermal image with yellow and blue areas and on-screen text including Cen 20.0 \u00b0C, Max 20.7, Min 17.8.\",\"A second black instrument with a silver probe is partially visible behind the camera.\",\"The background shows a light blue wall, ceiling, floor lamp, and furniture.\",\"No visible moisture, staining, or discoloration is present in the photo.\"],\"regions\":[],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"What area or surface was the thermal camera pointed at when this image was taken?\",\"declined_to_confirm_mold\":true}"
+}

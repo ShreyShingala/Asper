@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"image_type\":\"regular\",\"observations\":[\"Dark attic or crawlspace illuminated by a flashlight\",\"Exposed wood framing including joists, beams, and posts\",\"Pink loose-fill insulation covering the floor\",\"Some wood surfaces appear lighter or discolored where lit\",\"No instruments, test kits, or thermal screens visible\"],\"regions\":[{\"label\":\"look closer: horizontal beam discoloration\",\"box_2d\":[310,375,1000,525]},{\"label\":\"look closer: vertical post surface\",\"box_2d\":[475,450,540,720]},{\"label\":\"look closer: foreground wood debris\",\"box_2d\":[0,510,620,990]}],\"visible_moisture\":null,\"scale_reference_visible\":false,\"quality\":\"ok\",\"follow_up_question\":\"Has there been any past roof leak, plumbing leak, or flooding in this area?\",\"declined_to_confirm_mold\":true}"
+}
