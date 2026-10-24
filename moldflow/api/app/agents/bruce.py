@@ -3,6 +3,7 @@
 Single source of truth used by the real ElevenLabs agent (scripts/setup_elevenlabs_agent.py pushes it), the free test
 voice (POST /cases/{id}/live/mock/turn runs it on the OpenRouter model) and the call simulator (scripts/simulate_call.py)."""
 import json
+import re
 
 from pydantic import BaseModel, Field
 from typing import Literal
@@ -23,8 +24,10 @@ photos on their personalized shot list, so an inspector can judge what it is, ho
 Do not ask screening questions (room, smell, leak, owner/tenant, symptoms, postal code). They are handled outside the call.
 
 How the app works
-- The screen shows an orange focus box and a shot list. When the target is framed and steady, the app snaps the photo
-  automatically and shows it to the customer to keep or retake. You can also snap with capture_photo.
+- The screen shows an orange focus box and a short shot list (usually 2 photos per spot: the area around it, then the
+  spot itself up close). The CUSTOMER taps the white shutter button when the box is framed; the photo is shown to keep or
+  retake. The box turns green when the phone is steady. They can also skip a shot. Only call capture_photo if they ask you
+  to take it for them.
 - You only see the photos that get captured (their analysis comes back to you as text), never the live video.
 - Messages starting with [step], [photo] or [camera] come from the app, not the customer. Act on them; never read them aloud.
   [step] = the next shot to coach. [photo] = a photo was just kept (with its analysis). [camera] = the view is too dark or shaky.
@@ -33,7 +36,7 @@ Coaching
 - Call get_checklist right after your greeting. Coach shots in the order of next_step; each tool result has the updated list.
 - Speak like a calm inspector whispering cues: at most two short sentences (about 20 words) per turn, one instruction at a time.
   Examples: "Step back a little so the whole wall fits.", "Pan slightly to the right.", "Come closer, about an arm's length.",
-  "Tilt up to the ceiling above it.", "Turn on your flashlight and point it into the vent.", "Hold still, I'll snap that."
+  "Tilt up to the ceiling above it.", "Turn on your flashlight and point it into the vent.", "Hold still and tap the shutter."
 - After a [photo] arrives, mention one thing the analysis noticed in plain words (no diagnosis), then give the cue for the
   next shot. If its quality is too_dark or blurry, coach a retake of the same shot once (light, flashlight, hold still).
 - If the customer says the shot is impossible (no access, can't open it), say that's fine and move to the next shot.
@@ -41,7 +44,7 @@ Coaching
   pre-assessment; for health, "I can't give medical advice, so please check with a doctor."
 - If the customer mentions something useful (how long it's been there, a recent leak), acknowledge it in a few words; it is
   recorded in the transcript for the inspector.
-- Never say "take a photo"; the app and you capture. Describe camera moves instead.
+- Tell them where to point, then "tap the shutter when it looks good". Keep the call short: about two minutes.
 - You have at most {config.LIVE_MAX_PHOTOS} photos.
 
 Finishing
@@ -54,7 +57,7 @@ Finishing
 # Recording/transcription disclosure (PIPEDA meaningful consent, Quebec Law 25 transparency). The hub only learns facts
 # from transcripts whose opening line contains it (app/hub_links.py). Why: docs/04_decisions.md D16.
 FIRST_MESSAGE = ("Hi, I'm Bruce, Mold Busters' AI photo coach. This call is recorded and transcribed to help us. Point your back "
-                 "camera at the first spot and follow the orange box.")
+                 "camera at the first spot, fit it in the orange box and tap the shutter.")
 
 
 def client_tool(name: str, description: str, properties: dict | None = None, required: list[str] | None = None, **extra) -> dict:
@@ -101,3 +104,57 @@ def tool_catalogue() -> str:
 TURN_NOTE = ("\n\n(Turn format) You are not on a native voice platform: each turn, reply with JSON. 'say' = your spoken words, "
              "'tools' = the tool calls to run now (several allowed, e.g. two save_answer calls) or []. After tool results arrive "
              "you get another turn to react; reply with say='' and tools=[] if you have nothing new to add. Tools:\n" + tool_catalogue())
+
+
+# ---------------------------------------------------------------- rule-based Bruce (no AI available)
+_FINISH = re.compile(r"\b(stop|done|finish|finished|that'?s (it|all)|end (the )?call|wrap (it )?up|i'?m good)\b", re.I)
+_SKIP = re.compile(r"\b(skip|can'?t|cannot|no access|don'?t have|not possible|next one)\b", re.I)
+_COST = re.compile(r"\b(cost|price|how much|expensive|charge|fee)\b", re.I)
+_HEALTH = re.compile(r"\b(danger\w*|safe|health|sick|asthma|cough\w*|allerg\w*|breath\w*|toxic|black mold)\b", re.I)
+_HI = re.compile(r"^\W*(hi|hello|hey|bonjour)\b", re.I)
+_OK = re.compile(r"\b(ok(ay)?|ready|yes|yep|yeah|sure|got it|done that|alright|there)\b", re.I)
+_SAID_RECENTLY = 3
+
+
+def _cue(cl: dict) -> tuple[str, list[ToolCall]]:
+    nxt = cl.get("next_step") or {}
+    if nxt.get("do") == "capture":
+        return f"{nxt.get('coach') or 'Point at the spot.'} Tap the shutter when it looks good.", []
+    return "That's everything the inspector needs. I'll put your pre-assessment together now.", [ToolCall(name="finish_assessment", args={"reason": "complete"})]
+
+
+def rule_turn(history: list[dict], checklist: dict) -> BruceTurn:
+    """Deterministic stand-in when the AI is unavailable (quota, outage): Bruce still hears the customer, answers the common
+    questions, reacts to each photo and coaches the next shot from the checklist."""
+    last = history[-1] if history else {}
+    recent_bruce = [h["bruce"] for h in history[-6:] if "bruce" in h][-_SAID_RECENTLY:]
+    cue, tools = _cue(checklist)
+    if "tool_call" in last:
+        say = "" if any(cue in b for b in recent_bruce) else cue
+        return BruceTurn(say=say, tools=tools if say else [])
+    if (app := last.get("app")) is not None:
+        if app.startswith("[camera]"):
+            return BruceTurn(say="It's a bit dark. Turn on a light or tap the flashlight." if "dark" in app else "Hold the phone steady for a second.")
+        if app.startswith("[photo]"):
+            m = re.search(r'"observations":\s*\["([^"]+)"', app)
+            seen = (f"Got it, I can see {m[1][0].lower() + m[1][1:].rstrip('.')}." if m and not m[1].lower().startswith("photo saved")
+                    else "Got it, that one's saved.")
+            return BruceTurn(say=f"{seen} {cue}", tools=tools)
+        return BruceTurn(say="")
+    said = str(last.get("customer", ""))
+    if _FINISH.search(said):
+        if checklist.get("can_finish_early") or checklist.get("ready_to_finish"):
+            return BruceTurn(say="No problem, I have what I need. I'll put your pre-assessment together now.",
+                             tools=[ToolCall(name="finish_assessment", args={"reason": "customer_requested"})])
+        return BruceTurn(say="Sure. Let's grab just one photo first so the inspector has something to look at. " + cue)
+    if _SKIP.search(said):
+        return BruceTurn(say="That's fine. Tap Skip on the screen and we'll move to the next one.")
+    if _COST.search(said):
+        return BruceTurn(say=f"Pricing comes with your pre-assessment right after this call. {cue}", tools=tools)
+    if _HEALTH.search(said):
+        return BruceTurn(say=f"I can't give medical advice, so please check with a doctor. {cue}", tools=tools)
+    if _HI.search(said):
+        return BruceTurn(say=f"Hi! {cue}", tools=tools)
+    if _OK.search(said):
+        return BruceTurn(say=f"Great. {cue}", tools=tools)
+    return BruceTurn(say=f"Thanks, I've noted that for the inspector. {cue}", tools=tools)

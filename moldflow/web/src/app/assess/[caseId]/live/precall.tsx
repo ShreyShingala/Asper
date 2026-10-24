@@ -118,7 +118,7 @@ export function Precall({ caseId, onPlan, onStart }: { caseId: string; onPlan: (
         </Q>
       )}
       {step === "plan" && (
-        <Q title={`Bruce will guide you through ${plan.length} photos`} sub="Follow the orange box. Photos snap automatically when you hold steady, and you can retake any of them.">
+        <Q title={`Bruce will guide you through ${plan.length} photos`} sub="Fit each one in the orange box and tap the shutter. You can retake or skip any of them. About 2 minutes.">
           <ol className="space-y-2">
             {plan.map((s, i) => (
               <li key={s.id}>

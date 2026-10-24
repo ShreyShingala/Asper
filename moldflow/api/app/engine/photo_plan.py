@@ -113,13 +113,42 @@ def _sources(i: int, room: str, surface: str) -> list[Shot]:
     return out
 
 
-def build_plan(spots: list[dict], size: str | None, max_photos: int | None = None) -> list[Shot]:
-    """Ordered shot list. Priority: sweep (big area / several spots) > wide per spot > close-up per spot > size check (one spot)
-    > source shots, alternating between spots, until the photo limit."""
-    max_photos = max_photos or config.LIVE_MAX_PHOTOS
+CLOSE_INSTRUCTION = {  # the close-up is about the thing itself
+    "vent": ("The vent up close", "Come close to the vent so the grille fills the box.", "the vent grille"),
+    "window": ("The window up close", "Come close to the sill and frame corner so they fill the box.", "the sill and frame corner"),
+    "plumbing": ("The pipes up close", "Come close to the pipes and joints so they fill the box.", "pipe joints and wet marks"),
+    "appliance": ("The appliance up close", "Open it and come close to the seal or the marks so they fill the box.", "the seal or gasket"),
+}
+
+
+def _quick(i: int, room: str, surface: str, sweep: bool) -> list[Shot]:
+    """Two photos per spot, the way the virtual inspector worked: the area around it, then the spot itself up close."""
+    pre, where = f"s{i + 1}_", f"the {SURFACE_PHRASE.get(surface, surface)}"
+    around = (Shot("sweep", i, room, surface, "sweep", "Slow scan around the area",
+                   "Start at the left edge of the problem area and follow the arrow slowly to the right.", "the whole affected zone", "full")
+              if sweep else
+              Shot(pre + "wide", i, room, surface, "wide", f"The area around it · {room}",
+                   f"Step back so {where} and what's around it are all in view.", f"the whole affected area on {where}", "full"))
+    title, instr, target = CLOSE_INSTRUCTION.get(surface, (f"The spot up close · {room}",
+                                                          "Come closer, about an arm's length, so the spot fills the box.",
+                                                          "the discoloured or damaged patch"))
+    return [around, Shot(pre + "close", i, room, surface, "close", title, instr, target, "center")]
+
+
+def build_plan(spots: list[dict], size: str | None, max_photos: int | None = None, detailed: bool = False) -> list[Shot]:
+    """Ordered shot list. Default (live call): 2 photos per spot, at most config.LIVE_PLAN_MAX (4). detailed=True is the
+    thorough inspector plan: sweep > wide > close-up > size check > source shots, alternating between spots."""
     spots = [s for s in spots if s.get("room") in ROOMS and s.get("surface") in SURFACES][:MAX_SPOTS] or [{"room": "Other", "surface": "wall"}]
-    plan: list[Shot] = []
-    if size in ("large", "several"):
+    big = size in ("large", "several")
+    if not detailed:
+        plan: list[Shot] = []
+        for i, s in enumerate(spots):
+            pair = _quick(i, s["room"], s["surface"], sweep=big and i == 0)
+            plan += pair if i == 0 or len(spots) <= 2 else pair[1:]   # 3 spots: context once, then each spot up close
+        return plan[:max_photos or config.LIVE_PLAN_MAX]
+    max_photos = max_photos or config.LIVE_MAX_PHOTOS
+    plan = []
+    if big:
         r, sf = spots[0]["room"], spots[0]["surface"]
         plan.append(Shot("sweep", 0, r, sf, "sweep", "Slow scan around the area",
                          "Start at the left edge of the problem area and follow the arrow slowly to the right.", "the whole affected zone", "full"))

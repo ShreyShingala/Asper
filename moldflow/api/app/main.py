@@ -166,6 +166,9 @@ async def _analyze(case_id: str, photo_id: str, image: bytes, prompt_text: str |
         _log(c, res)
 
 
+_BACKGROUND: set[asyncio.Task] = set()
+
+
 def _prompt_text(case: Case, prompt_id: str | None) -> str | None:
     if plan := photo_plan.plan_for_case(case.answers):
         if shot := next((s for s in plan if s.id == prompt_id), None):
@@ -195,7 +198,13 @@ async def upload_photo(case_id: str, file: UploadFile = File(...), source: str =
     async with store.editing(case_id) as c:
         c.photos.append(Photo(id=pid, path=rel, room=room or _shot_room(c, prompt_id) or c.answers.get("room"), source="inspector" if source == "inspector" else "customer",
                               prompt_id=prompt_id))
-    await _analyze(case_id, pid, img, _prompt_text(c, prompt_id), fixture_key)
+    task = asyncio.create_task(_analyze(case_id, pid, img, _prompt_text(c, prompt_id), fixture_key))
+    _BACKGROUND.add(task)
+    task.add_done_callback(_BACKGROUND.discard)
+    try:  # never hold the request open long (phone tunnels drop requests after ~100 s); analysis finishes in the background
+        await asyncio.wait_for(asyncio.shield(task), timeout=config.PHOTO_WAIT_S)
+    except asyncio.TimeoutError:
+        logging.info("photo %s: analysis still running, returning early", pid)
     c = _get(case_id)
     return CaseOut(case=c, turn=rules.next_turn(c) if c.stage == "intake" else None)
 
@@ -316,14 +325,20 @@ class MockTurnIn(BaseModel):
 async def live_mock_turn(case_id: str, body: MockTurnIn) -> bruce.BruceTurn:
     """Free test voice: Bruce's real prompt and tool contracts run on the OpenRouter model. The browser speaks the reply with
     its built-in speech synthesis, runs the tools itself (same handlers as the ElevenLabs call) and sends the results back."""
-    _get(case_id)
+    c = _get(case_id)
     history = body.history[-70:]
-    try:
-        res = await structured(bruce.BruceTurn, agent="bruce_mock", system=bruce.PROMPT + bruce.TURN_NOTE,
-                               user_text=json.dumps({"conversation_so_far": history}), max_tokens=500, temperature=0.3)
-    except AgentFailure as e:
-        raise HTTPException(503, f"Bruce is unavailable right now: {e}")
-    turn: bruce.BruceTurn = res.value
+    from app.agents.llm import quota_exhausted
+    turn: bruce.BruceTurn | None = None
+    if not quota_exhausted():
+        try:
+            res = await asyncio.wait_for(structured(bruce.BruceTurn, agent="bruce_mock", system=bruce.PROMPT + bruce.TURN_NOTE,
+                                                    user_text=json.dumps({"conversation_so_far": history}), max_tokens=500, temperature=0.3),
+                                         timeout=12)
+            turn = res.value
+        except (AgentFailure, asyncio.TimeoutError) as e:
+            logging.info("Bruce AI unavailable (%s); using the rule-based coach", type(e).__name__)
+    if turn is None:  # quota used up, slow or failing: Bruce keeps working on rules instead of "sorry, I missed that"
+        turn = bruce.rule_turn(history, live_rules.checklist(c))
     turn.say = re.sub(r"\[[a-z ]{2,24}\]\s*", "", turn.say).strip()
     turn.tools = turn.tools[:4]
     return turn

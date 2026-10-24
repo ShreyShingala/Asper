@@ -39,7 +39,9 @@ ELEVENLABS_BASE_URL = "https://api.elevenlabs.io"
 # "auto" = elevenlabs when configured, otherwise mock.
 LIVE_VOICE = os.getenv("LIVE_VOICE", "auto")
 LIVE_MAX_PHOTOS = int(os.getenv("LIVE_MAX_PHOTOS", "6"))
-LIVE_MAX_SECONDS = int(os.getenv("LIVE_MAX_SECONDS", "300"))
+LIVE_MAX_SECONDS = int(os.getenv("LIVE_MAX_SECONDS", "150"))  # short coaching call: about 2 minutes
+LIVE_PLAN_MAX = int(os.getenv("LIVE_PLAN_MAX", "4"))         # shots in the live plan: 2 per spot, at most 4
+PHOTO_WAIT_S = float(os.getenv("PHOTO_WAIT_S", "15"))         # max wait for photo analysis inside the upload request
 
 for d in (UPLOAD_DIR, FIXTURE_DIR, EXACT_CACHE_DIR):
     d.mkdir(parents=True, exist_ok=True)

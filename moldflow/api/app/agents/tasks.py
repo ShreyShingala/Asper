@@ -4,7 +4,7 @@ import json
 import re
 from datetime import date
 
-from app.agents.llm import Result, structured
+from app.agents.llm import AgentFailure, Result, structured
 from app.engine import checks
 from app.models.agents import AssessDraft, FindingsOut, FollowUpDraft, LiveSummary, LocateOut, PhotoAnalysis, ReportDraft
 from app.models.passport import AIUsage, ALLOWED_RESULTS, Case, Finding, Photo, Reading
@@ -81,8 +81,15 @@ async def analyze_photo(case: Case, photo: Photo, image: bytes, prompt_text: str
     system = PHOTO_SYSTEM + f"\nWrite observations, labels and the question in {LANG_NAME[case.language]}."
     ctx = {"room": photo.room or case.answers.get("room"), "photo_prompt": prompt_text,
            "customer_answers": {k: v for k, v in case.answers.items() if not k.startswith("skip:")}}
-    return await structured(PhotoAnalysis, agent="photo", system=system, user_text=json.dumps(ctx), images=[image],
-                            fixture_key=fixture_key, max_tokens=900, temperature=0.0)
+    try:
+        return await structured(PhotoAnalysis, agent="photo", system=system, user_text=json.dumps(ctx), images=[image],
+                                fixture_key=fixture_key, max_tokens=900, temperature=0.0)
+    except AgentFailure:  # AI quota/outage: keep the photo moving; an inspector reviews it
+        fr = case.language == "fr"
+        note = PhotoAnalysis(image_type="regular", quality="ok", declined_to_confirm_mold=True,
+                             observations=["Photo enregistrée pour l'inspecteur." if fr else "Photo saved for the inspector to review."],
+                             follow_up_question="Depuis combien de temps l'avez-vous remarqué?" if fr else "How long have you noticed this?")
+        return Result(note, AIUsage(agent="photo", model="rule (AI unavailable)", latency_ms=0, tier="rule"))
 
 
 async def assess(case: Case, fixture_key: str | None) -> Result:
@@ -99,7 +106,29 @@ async def assess(case: Case, fixture_key: str | None) -> Result:
                        "visible_moisture": p.analysis.visible_moisture} for p in case.photos if p.analysis]}
     if case.live and case.live.key_points:
         ctx["reported_on_live_call"] = case.live.key_points
-    return await structured(AssessDraft, agent="assess", system=system, user_text=json.dumps(ctx), fixture_key=fixture_key, max_tokens=900)
+    try:
+        return await structured(AssessDraft, agent="assess", system=system, user_text=json.dumps(ctx), fixture_key=fixture_key, max_tokens=900)
+    except AgentFailure:
+        return Result(rule_assess(case), AIUsage(agent="assess", model="rule (AI unavailable)", latency_ms=0, tier="rule"))
+
+
+def rule_assess(case: Case) -> AssessDraft:
+    """Deterministic pre-assessment from the answers when the AI is unavailable (never a diagnosis, never a price)."""
+    a, fr = case.answers, case.language == "fr"
+    room = (a.get("room") or ("la pièce" if fr else "the area")).lower()
+    smell, leak, sick = a.get("odor") == "Yes", a.get("leak") == "Yes", a.get("symptoms") == "Yes" or case.health_flag
+    big = a.get("size") in ("large", "several") or a.get("room") in ("Attic", "Basement")
+    service = "iaq" if smell or sick else "onsite" if leak or big else "virtual"
+    why = {"iaq": "A musty smell or health symptoms are best checked with air sampling.",
+           "onsite": "A leak, a large area or a hidden space needs an inspector on site.",
+           "virtual": "A small, visible area can be reviewed on a short video call."}[service]
+    n = len([p for p in case.photos if p.source == "customer"])
+    return AssessDraft(
+        summary=(f"Merci, nous avons reçu {n} photo(s) de {room}. Un inspecteur les examinera." if fr else
+                 f"Thanks, we have your {n} photo(s) of the {room}. An inspector will review them."),
+        observed=[p.analysis.observations[0] for p in case.photos if p.analysis and p.analysis.observations][:3] or ["Photos received."],
+        cannot_tell=["Whether it is mould (only sampling can tell)", "Moisture hidden behind surfaces", "Air quality"],
+        suggested_service=service, reasons=[why], escalate=False)
 
 
 async def live_summary(case: Case) -> Result:

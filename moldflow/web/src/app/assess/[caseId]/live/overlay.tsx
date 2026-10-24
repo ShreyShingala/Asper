@@ -37,7 +37,7 @@ export function FocusBox({ box, state, label }: { box: Box; state: BoxState; lab
       ))}
       {label && (
         <span className={cx("absolute -top-8 left-0 max-w-[85vw] truncate rounded-ds-xsm px-2 py-1 text-caption font-semibold text-white",
-          state === "aim" ? "bg-brand" : "bg-kit-green")}>{state === "aim" ? label : state === "steady" ? "Hold still…" : "Got it"}</span>
+          state === "aim" ? "bg-brand" : "bg-kit-green")}>{state === "aim" ? label : state === "steady" ? "Looks good: tap the shutter" : "Got it"}</span>
       )}
     </div>
   );

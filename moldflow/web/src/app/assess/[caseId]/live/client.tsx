@@ -1,9 +1,9 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import type { Conversation, DisconnectionDetails } from "@elevenlabs/react";
-import { Camera, Check, Flashlight, FlashlightOff, Keyboard, ListChecks, Mic, MicOff, PhoneOff, Send, Video } from "lucide-react";
+import { Camera, Check, Flashlight, FlashlightOff, Keyboard, ListChecks, Mic, MicOff, PhoneOff, Send, SkipForward, Video } from "lucide-react";
 import { api, type CaseOut, type Photo } from "@/lib/api";
 import { DARK_LUMA, MOVING_DIFF, captureSteady, probe, setTorch, stats, torchSupported } from "@/lib/camera";
 import { Button, Card, Eyebrow, Logo, Spinner, buttonClass, cx } from "@/components/ui";
@@ -37,7 +37,7 @@ const AFTER_QUESTIONS = [
   { key: "symptoms", text: "Is anyone in the home having health symptoms?", options: ["Yes", "No", "Prefer not to say"] },
 ];
 const SWEEP_MS = 6000;
-const STEADY_TICKS = 3;  // ~1.8 s steady inside the box before auto-capture
+const STEADY_TICKS = 2;  // ~1.2 s steady: the box turns green (the customer taps the shutter)
 
 function describe(p: Photo | undefined) {
   const a = p?.analysis;
@@ -75,6 +75,7 @@ async function frameBlob(video: HTMLVideoElement, maxSide = 480): Promise<Blob |
 }
 
 const DEMO_CLIP = "/demo/walkthrough-30s.mp4";
+const noopSubscribe = () => () => {};
 const DEMO_MODE = () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "1";
 
 const UNAVAILABLE = "Live mode is temporarily unavailable. Please upload photos instead; it only takes a few minutes.";
@@ -109,6 +110,7 @@ export default function Live() {
   const [draft, setDraft] = useState("");
   const [afterStep, setAfterStep] = useState(0);
   const [finishStep, setFinishStep] = useState(0);
+  const demo = useSyncExternalStore(noopSubscribe, DEMO_MODE, () => false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -160,7 +162,17 @@ export default function Live() {
     setPhase("finishing");
     setFinishStep(1);
     try {
-      if (hasPhotosRef.current) await api.post(`/cases/${caseId}/pre-assessment`);
+      let c = (await api.get<CaseOut>(`/cases/${caseId}`)).case;
+      const mine = () => c.photos.filter((p) => p.source === "customer");
+      for (let i = 0; i < 15 && mine().length && !mine().some((p) => p.analysis); i++) {  // analysis may still be finishing
+        await new Promise((r) => setTimeout(r, 2000));
+        c = (await api.get<CaseOut>(`/cases/${caseId}`)).case;
+      }
+      if (!mine().some((p) => p.analysis) && DEMO_MODE()) {  // demo: skipped every shot -> show the result with the sample photos
+        await api.post(`/cases/${caseId}/sample-photos`);
+        c = (await api.get<CaseOut>(`/cases/${caseId}`)).case;
+      }
+      if (mine().some((p) => p.analysis)) await api.post(`/cases/${caseId}/pre-assessment`);
       router.replace(`/assess/${caseId}`);
     } catch (e) {
       setErr(`We saved your photos, but couldn't finish the pre-assessment: ${(e as Error).message}`);
@@ -347,6 +359,14 @@ export default function Live() {
     }
   }
 
+  async function skipShot() {
+    const shot = currentRef.current;
+    if (!shot) return;
+    await api.post(`/cases/${caseId}/skip-photo`, { prompt_id: shot.id }).catch(() => {});
+    const cl = await refreshChecklist();
+    convRef.current?.sendContextualUpdate(`[step] The customer skipped "${shot.title}". Next step: ${JSON.stringify(cl.next_step)}`);
+  }
+
   function sendTyped(e: React.FormEvent) {
     e.preventDefault();
     if (!draft.trim() || !convRef.current) return;
@@ -391,14 +411,17 @@ export default function Live() {
       const shot = currentRef.current;
       const calm = s.diff !== null && s.diff < MOVING_DIFF * 0.7 && s.luma >= DARK_LUMA;
       steady = shot && shot.kind !== "sweep" && calm && Date.now() > armedAtRef.current ? steady + 1 : 0;
-      setBoxState(steady >= STEADY_TICKS - 1 ? "steady" : "aim");
-      if (shot && steady >= STEADY_TICKS) {
-        steady = 0;
-        void takeShot(shot.id, "auto");
-      }
+      setBoxState(steady >= STEADY_TICKS ? "steady" : "aim");  // green = steady, tap the shutter (no auto-capture)
     }, 600);
     return () => clearInterval(id);
-  }, [phase, takeShot]);
+  }, [phase]);
+
+  // Short call: once every shot is taken or skipped, wrap up on our own a moment later.
+  useEffect(() => {
+    if (phase !== "live" || preview || !checklist?.ready_to_finish) return;
+    const id = setTimeout(() => void finish(), 3500);
+    return () => clearTimeout(id);
+  }, [phase, preview, checklist?.ready_to_finish, finish]);
 
   // Focus box: every few seconds ask the AI where the target is in the live frame; the box moves onto it.
   useEffect(() => {
@@ -482,7 +505,7 @@ export default function Live() {
             {[
               [ListChecks, "5 taps first: where the problem is, how big, smell or leak, postal code. Your photo plan is built from them."],
               [Video, "Follow the orange box. Bruce says \"come closer\", \"tilt up\" or \"turn on a light\"."],
-              [Camera, "Hold steady: the photo snaps by itself. Keep it or retake it."],
+              [Camera, "Usually just 2 photos per spot: the area around it, then the spot up close. Tap the shutter, keep or retake."],
             ].map(([Icon, text], i) => {
               const I = Icon as typeof Video;
               return (
@@ -500,6 +523,10 @@ export default function Live() {
               {plan.length ? "Start live call" : "Start"}
             </Button>
             <Link href={`/assess/${caseId}`} className={buttonClass({ variant: "outline", size: "lg", fullWidth: true })}>Upload photos instead</Link>
+            {demo && (
+              <Button size="lg" variant="text" fullWidth
+                onClick={() => { finishingRef.current = true; void buildAssessment(); }}>Demo: skip to the results (sample photos)</Button>
+            )}
             <p className="text-center text-caption font-light text-ink-muted">
               English only. The call is transcribed and saved to your case so our team can review it.{" "}
               {voice === "mock" ? "Test voice: Bruce speaks with your browser's built-in voice and hears you with its speech recognition (best in Chrome or Edge); photos go to our AI provider."
@@ -539,7 +566,7 @@ export default function Live() {
             {preview && <CapturePreview src={preview.src} title={preview.title} autoKeepMs={2500} onKeep={() => preview.resolve(true)} onRetake={() => preview.resolve(false)} />}
             {checklist?.ready_to_finish && phase === "live" && !preview && (
               <div className="absolute inset-x-6 top-1/3 rounded-ds-sm bg-kit-navy/85 p-4 text-center">
-                <p className="text-body font-semibold">All the photos are done.</p>
+                <p className="text-body font-semibold">All done. Wrapping up…</p>
                 <Button size="lg" className="mt-3" onClick={() => void finish()}>Finish</Button>
               </div>
             )}
@@ -589,7 +616,9 @@ export default function Live() {
               <RoundButton label="Type instead" onClick={() => setTyping(!typing)} active={typing} disabled={phase !== "live"}>
                 <Keyboard size={20} aria-hidden />
               </RoundButton>
-              <span className="h-12 w-12" aria-hidden />
+              <RoundButton label="Skip this photo" onClick={() => void skipShot()} disabled={phase !== "live" || !current || capturing || !!preview}>
+                <SkipForward size={20} aria-hidden />
+              </RoundButton>
             </div>
           </div>
         </div>

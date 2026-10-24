@@ -131,8 +131,9 @@ def plan_checklist(case: Case, plan: list) -> dict:
     """Photo-coaching call: the questions were answered before the call, so only the personalized shot list remains."""
     photos = customer_photos(case)
     taken = [p.prompt_id or "extra" for p in photos]
+    skipped = [k[5:] for k in case.answers if k.startswith("skip:")]
     shots = photo_plan.plan_dicts(plan)
-    missing = [s for s in shots if s["id"] not in taken]
+    missing = [s for s in shots if s["id"] not in taken and s["id"] not in skipped]
     left = max(0, config.LIVE_MAX_PHOTOS - len(photos))
     analyzed = sum(1 for p in photos if p.analysis)
     nxt = missing[0] if missing and left else None
@@ -141,10 +142,12 @@ def plan_checklist(case: Case, plan: list) -> dict:
         "answered": {k: v for k, v in case.answers.items() if not k.startswith("skip:")},
         "plan": shots,
         "shots_taken": taken,
+        "shots_skipped": skipped,
         "missing_shots": [{"shot": s["id"], "title": s["title"], "instruction": s["instruction"]} for s in missing],
         "missing_questions": [],
         "photos_left": left,
-        "ready_to_finish": analyzed > 0 and (not missing or not left),
+        "ready_to_finish": not missing or not left,
+        "photos_analyzed": analyzed,
         "can_finish_early": analyzed > 0,
         "next_step": {"do": "capture", "shot": nxt["id"], "title": nxt["title"], "coach": nxt["instruction"]} if nxt else {"do": "finish"},
     }

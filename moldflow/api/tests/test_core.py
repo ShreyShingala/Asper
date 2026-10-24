@@ -283,17 +283,61 @@ def test_bruce_turn_contract_shared():
 
 def test_photo_plan_personalized():
     from app.engine import photo_plan as pp
-    bath = [s.id for s in pp.build_plan([{"room": "Bathroom", "surface": "ceiling"}], "small")]
+    bath = [s.id for s in pp.build_plan([{"room": "Bathroom", "surface": "ceiling"}], "small", detailed=True)]
     assert bath[:3] == ["s1_wide", "s1_close", "s1_scale"] and "s1_ceiling_around" in bath and "s1_bath_fan" in bath
-    base = [s.id for s in pp.build_plan([{"room": "Basement", "surface": "floor"}], "door")]
+    base = [s.id for s in pp.build_plan([{"room": "Basement", "surface": "floor"}], "door", detailed=True)]
     assert "s1_baseboard" in base and "s1_floor_joint" in base
-    vent = [s.id for s in pp.build_plan([{"room": "Laundry", "surface": "vent"}], "small")]
+    vent = [s.id for s in pp.build_plan([{"room": "Laundry", "surface": "vent"}], "small", detailed=True)]
     assert "s1_vent_grille" in vent and "s1_vent_inside" in vent
     multi = pp.build_plan([{"room": "Laundry", "surface": "appliance"}, {"room": "Laundry", "surface": "vent"},
-                           {"room": "Kitchen", "surface": "appliance"}, {"room": "Attic", "surface": "wall"}], "several")
+                           {"room": "Kitchen", "surface": "appliance"}, {"room": "Attic", "surface": "wall"}], "several", detailed=True)
     ids = [s.id for s in multi]
     assert len(ids) == 6 and ids[0] == "sweep" and {"s1_wide", "s2_wide", "s3_wide"} <= set(ids) and not any(i.startswith("s4") for i in ids)
-    assert all(len(pp.build_plan([{"room": r, "surface": sf}], sz)) <= 6 for r in pp.ROOMS for sf in pp.SURFACES for sz in pp.SIZES)
+    assert all(len(pp.build_plan([{"room": r, "surface": sf}], sz, detailed=True)) <= 6 for r in pp.ROOMS for sf in pp.SURFACES for sz in pp.SIZES)
+
+
+def test_live_plan_is_short():
+    from app.engine import photo_plan as pp
+    vent = pp.build_plan([{"room": "Laundry", "surface": "vent"}], "small")
+    assert [s.id for s in vent] == ["s1_wide", "s1_close"] and vent[1].title == "The vent up close"
+    two = pp.build_plan([{"room": "Bathroom", "surface": "ceiling"}, {"room": "Laundry", "surface": "vent"}], "door")
+    assert len(two) == 4
+    three = pp.build_plan([{"room": r, "surface": "wall"} for r in ("Bathroom", "Kitchen", "Bedroom")], "several")
+    assert len(three) <= 4 and three[0].kind == "sweep"
+    assert all(len(pp.build_plan([{"room": r, "surface": sf}], sz)) <= 2 for r in pp.ROOMS for sf in pp.SURFACES for sz in pp.SIZES)
+
+
+def test_skipped_shots_finish_the_call():
+    import json
+    from app.engine import live
+    c = Case(id="t2", title="t", intake_mode="live", answers={"spots": json.dumps([{"room": "Laundry", "surface": "vent"}]), "size": "small"})
+    assert live.checklist(c)["next_step"]["shot"] == "s1_wide"
+    c.answers["skip:s1_wide"] = "yes"
+    assert live.checklist(c)["next_step"]["shot"] == "s1_close"
+    c.answers["skip:s1_close"] = "yes"
+    cl = live.checklist(c)
+    assert cl["ready_to_finish"] and cl["next_step"] == {"do": "finish"}
+
+
+def test_rule_bruce_responds_without_ai():
+    """No AI available: Bruce must still answer what the customer says, react to photos and finish."""
+    from app.agents.bruce import rule_turn
+    cl = {"next_step": {"do": "capture", "shot": "s1_close", "coach": "Come close to the vent so the grille fills the box."},
+          "can_finish_early": True, "ready_to_finish": False}
+    hi = rule_turn([{"bruce": "Hi"}, {"customer": "hello"}], cl)
+    assert "vent" in hi.say and "shutter" in hi.say
+    cost = rule_turn([{"customer": "how much will this cost?"}], cl)
+    assert "Pricing" in cost.say and "$" not in cost.say
+    health = rule_turn([{"customer": "is it dangerous for my asthma"}], cl)
+    assert "medical advice" in health.say
+    photo = rule_turn([{"app": '[photo] kept. Result: {"observations": ["Dark dust on the vent slats."]}'}], cl)
+    assert "dark dust on the vent slats" in photo.say
+    stop = rule_turn([{"customer": "I'm done, that's it"}], cl)
+    assert stop.tools and stop.tools[0].name == "finish_assessment"
+    done = rule_turn([{"customer": "ok"}], {"next_step": {"do": "finish"}, "ready_to_finish": True})
+    assert done.tools[0].name == "finish_assessment"
+    other = rule_turn([{"customer": "it started after the dryer flooded in May"}], cl)
+    assert other.say.startswith("Thanks")
 
 
 def test_plan_checklist_has_no_questions():
