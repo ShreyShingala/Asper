@@ -9,6 +9,9 @@ Plan and red-team history: [`../plan/PLAN.md`](../plan/PLAN.md), [`../plan/REDTE
 # one-time
 cd api && uv sync && cd ../web && npm install && cd ..
 echo "OPENROUTER_API_KEY=sk-or-..." > api/.env.local      # gitignored
+# optional: live camera + voice mode ("Go live with AI")
+echo "ELEVENLABS_API_KEY=sk_..." >> api/.env.local          # needs ElevenAgents write + Voices read
+cd api && uv run python ../scripts/setup_elevenlabs_agent.py && cd ..   # creates the agent, writes ELEVENLABS_AGENT_ID
 # every time
 scripts/dev.sh            # API :8000 + web :3000 (dev)
 scripts/dev.sh prod       # production build (use this for the demo)
@@ -23,10 +26,19 @@ Open http://localhost:3000 (customer) and http://localhost:3000/dashboard (staff
 | `MOLDFLOW_DEMO_MODE` | `hybrid` | `hybrid` = cache -> live -> fallback -> fixture; `fixture` = offline replay; `live` = always call the model |
 | `DISABLE_REASONING` | `1` | turn off model reasoning on the primary model (about 3x faster) |
 | `MOLDFLOW_DATA_DIR` | `api/data` | SQLite + uploads |
+| `ELEVENLABS_API_KEY` / `ELEVENLABS_AGENT_ID` | unset | live mode; the "Go live" button only shows when both are set |
+| `LIVE_MAX_PHOTOS` / `LIVE_MAX_SECONDS` | `6` / `300` | per-call limits (re-run the setup script after changing seconds) |
+
+Live mode: the browser talks to an ElevenLabs agent ("Bruce") over a signed URL minted by the API (the key stays server-side).
+The agent drives the conversation and calls four client tools in the browser: `get_checklist`, `save_answer`,
+`capture_photo` (steady frame -> `/photos` -> photo analysis) and `finish_assessment`. What still has to be collected and
+which answers are valid comes from `api/app/engine/live.py`, built on the same rules as the tap-through intake. On-device
+checks (dark / shaky video) are sent to the agent as `[camera]` context. The transcript and an AI summary are saved on the
+case (`case.live`), shown in staff Review and included in the PDFs. Phones need HTTPS for the camera (`scripts/tunnel.sh`).
 
 ## Verify
 ```bash
-cd api && uv run pytest -q                          # 21 unit tests (pricing, checks, routing, guardrails)
+cd api && uv run pytest -q                          # 23 unit tests (pricing, checks, routing, guardrails, live rules)
 uv run python ../scripts/demo_api_run.py            # whole demo path via the API; must pass before each rehearsal
 uv run python ../scripts/eval_photos.py             # proof page: AI vs organizer captions on all 24 photos (~90 s)
 cd ../web && npx tsc --noEmit && npx eslint src && npx next build

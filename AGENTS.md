@@ -9,3 +9,6 @@
 - All AI calls go through `api/app/agents/llm.py::structured` with a Pydantic output model. Prices never come from the LLM.
 - OpenRouter key has a $0 credit limit, so only `:free` models work (1,000 req/day, 20/min). `openrouter/free` rejects `reasoning.enabled=false`.
 - Sample data: `Mold-Busters-Hackathon-Sample-Pack-v2/`. Never feed the reference report PDFs to a model.
+- Live mode (ElevenLabs agent "Bruce"): prompt, voice, tools and limits live in `moldflow/scripts/setup_elevenlabs_agent.py`; edit there and re-run it (idempotent, from `moldflow/api`: `uv run python ../scripts/setup_elevenlabs_agent.py`). Never edit the agent in the dashboard. Collection rules are in `api/app/engine/live.py`. The ElevenLabs key must stay server-side (signed URLs only).
+- The agent can be tested without a mic by connecting to the signed URL over WebSocket and sending `{"type":"user_message","text":...}`; answer `client_tool_call` with `client_tool_result` and `ping` with `pong`. Each test call uses ElevenLabs agent credits.
+- On this Windows machine `uv` is installed as a pip user package: run it as `python -m uv ...`.

@@ -5,7 +5,7 @@ from datetime import date
 
 from app.agents.llm import Result, structured
 from app.engine import checks
-from app.models.agents import AssessDraft, FindingsOut, FollowUpDraft, PhotoAnalysis, ReportDraft
+from app.models.agents import AssessDraft, FindingsOut, FollowUpDraft, LiveSummary, PhotoAnalysis, ReportDraft
 from app.models.passport import ALLOWED_RESULTS, Case, Finding, Photo, Reading
 
 LANG_NAME = {"en": "English", "fr": "French (Canadian)"}
@@ -40,7 +40,19 @@ async def assess(case: Case, fixture_key: str | None) -> Result:
            "customer_type": case.customer.type,
            "photos": [{"id": p.id, "prompt": p.prompt_id, "observations": p.analysis.observations,
                        "visible_moisture": p.analysis.visible_moisture} for p in case.photos if p.analysis]}
+    if case.live and case.live.key_points:
+        ctx["reported_on_live_call"] = case.live.key_points
     return await structured(AssessDraft, agent="assess", system=system, user_text=json.dumps(ctx), fixture_key=fixture_key, max_tokens=900)
+
+
+async def live_summary(case: Case) -> Result:
+    system = ("You summarize a recorded call between a customer and Mold Busters' AI pre-assessment assistant for the company's staff. "
+              "Use ONLY what the customer said and what the photo observations state. Do not add facts, diagnose, or name mold species. "
+              "Write in English.")
+    lines = [f"{'Customer' if t.role == 'customer' else 'Assistant'}: {t.text}" for t in case.live.transcript][-120:]
+    ctx = {"transcript": lines, "answers": {k: v for k, v in case.answers.items() if not k.startswith("skip:")},
+           "photo_observations": [o for p in case.photos if p.analysis for o in p.analysis.observations[:2]]}
+    return await structured(LiveSummary, agent="live_summary", system=system, user_text=json.dumps(ctx), max_tokens=700)
 
 
 async def findings_from_note(case: Case, room: str, note: str) -> tuple[list[Finding], Result]:

@@ -14,9 +14,12 @@ from app import config, store
 from app.agents import tasks
 from app.agents.llm import AgentFailure, Result, prepare_image
 from app.engine import checks, rules
+from app.engine import live as live_rules
 from app.exports import render
+from app.integrations import elevenlabs
 from app.models.agents import IntakeTurn
-from app.models.passport import Approval, Booking, Case, Event, Flag, FollowUp, Letter, Photo, PreAssessment, Reading, StoredReport, now
+from app.models.passport import (Approval, Booking, Case, Event, Flag, FollowUp, Letter, LiveSession, Photo, PreAssessment, Reading,
+                                 StoredReport, TranscriptLine, now)
 from app.seed import seeds
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -93,22 +96,25 @@ class AnswerIn(BaseModel):
     value: str
 
 
+def _apply_answer(c: Case, key: str, v: str) -> None:
+    c.answers[key] = v
+    if key == "occupant":
+        c.customer.type = {"Owner": "homeowner", "Tenant": "tenant", "Landlord / manager": "landlord"}.get(v, "unknown")
+    elif key == "symptoms":
+        c.health_flag = v == "Yes"
+    elif key == "location":
+        rules.apply_location(c, v)
+    elif key == "concern":
+        c.concern = v
+    elif key == "room":
+        for p in c.photos:
+            p.room = p.room or v
+
+
 @app.post("/cases/{case_id}/answers")
 async def answer(case_id: str, body: AnswerIn) -> CaseOut:
     async with store.editing(case_id) as c:
-        v = rules.canon(body.value.strip())
-        c.answers[body.key] = v
-        if body.key == "occupant":
-            c.customer.type = {"Owner": "homeowner", "Tenant": "tenant", "Landlord / manager": "landlord"}.get(v, "unknown")
-        elif body.key == "symptoms":
-            c.health_flag = v == "Yes"
-        elif body.key == "location":
-            rules.apply_location(c, v)
-        elif body.key == "concern":
-            c.concern = v
-        elif body.key == "room":
-            for p in c.photos:
-                p.room = p.room or v
+        _apply_answer(c, body.key, rules.canon(body.value.strip()))
     return CaseOut(case=c, turn=rules.next_turn(c))
 
 
@@ -134,6 +140,8 @@ def _prompt_text(case: Case, prompt_id: str | None) -> str | None:
 async def upload_photo(case_id: str, file: UploadFile = File(...), source: str = Form("customer"), prompt_id: str | None = Form(None),
                        room: str | None = Form(None), fixture_key: str | None = Form(None)) -> CaseOut:
     c = _get(case_id)
+    if c.intake_mode == "live" and source != "inspector" and len(live_rules.customer_photos(c)) >= config.LIVE_MAX_PHOTOS:
+        raise HTTPException(409, f"This live call already has {config.LIVE_MAX_PHOTOS} photos, the maximum.")
     try:
         img = prepare_image(await file.read())
     except Exception:
@@ -210,6 +218,73 @@ async def pre_assessment(case_id: str) -> CaseOut:
         c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Pre-assessment ready", system="MoldFlow",
                                 what=f"Recommended: {routing.service}. Photos: {len(c.photos)}.", source="moldflow"))
     return CaseOut(case=c)
+
+
+# ---------- live camera + voice pre-assessment ----------
+@app.get("/live/config")
+def live_config() -> dict:
+    return {"enabled": elevenlabs.enabled(), "max_photos": config.LIVE_MAX_PHOTOS, "max_seconds": config.LIVE_MAX_SECONDS}
+
+
+@app.post("/cases/{case_id}/live/start")
+async def live_start(case_id: str) -> dict:
+    _get(case_id)
+    try:
+        url = await elevenlabs.signed_url()
+    except elevenlabs.VoiceUnavailable as e:
+        raise HTTPException(503, str(e))
+    async with store.editing(case_id) as c:
+        c.intake_mode, c.language = "live", "en"
+        c.live = c.live or LiveSession()
+        if not any(e.step == "Live call started" for e in c.timeline):
+            c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Live call started", system="MoldFlow + ElevenLabs",
+                                    what="Customer started a live camera + voice pre-assessment.", source="moldflow"))
+    return {"signed_url": url, "max_photos": config.LIVE_MAX_PHOTOS, "max_seconds": config.LIVE_MAX_SECONDS, "checklist": live_rules.checklist(c)}
+
+
+@app.get("/cases/{case_id}/live/checklist")
+def live_checklist(case_id: str) -> dict:
+    return live_rules.checklist(_get(case_id))
+
+
+@app.post("/cases/{case_id}/live/answer")
+async def live_answer(case_id: str, body: AnswerIn) -> dict:
+    """Agent tool target. Returns 200 with ok=false on a bad value so the agent can re-ask instead of failing the call."""
+    try:
+        v = live_rules.validate_answer(body.key, body.value)
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "checklist": live_rules.checklist(_get(case_id))}
+    async with store.editing(case_id) as c:
+        _apply_answer(c, body.key, v)
+    return {"ok": True, "saved": {body.key: v}, "checklist": live_rules.checklist(c)}
+
+
+class LiveEndIn(BaseModel):
+    conversation_id: str | None = None
+    transcript: list[TranscriptLine] = []
+
+
+@app.post("/cases/{case_id}/live/end")
+async def live_end(case_id: str, body: LiveEndIn) -> CaseOut:
+    async with store.editing(case_id) as c:
+        c.live = c.live or LiveSession()
+        c.live.conversation_id = body.conversation_id or c.live.conversation_id
+        c.live.transcript = [t for t in body.transcript if t.text.strip()][:400]
+        c.live.ended_at = now()
+        c.timeline.append(Event(at=now(), at_text=now().strftime("%b %d %H:%M"), step="Live call ended", system="MoldFlow + ElevenLabs",
+                                what=f"{len(c.live.transcript)} transcript lines, {len(live_rules.customer_photos(c))} photos.", source="moldflow"))
+    if any(t.role == "customer" for t in c.live.transcript):
+        try:
+            res = await tasks.live_summary(c)
+        except AgentFailure as e:
+            logging.warning("live summary failed: %s", e)
+        else:
+            async with store.editing(case_id) as c:
+                _log(c, res)
+                c.live.summary, c.live.key_points, c.live.summary_tier = res.value.summary, res.value.key_points[:6], res.usage.tier
+                if not c.concern and res.value.concern.strip():
+                    _apply_answer(c, "concern", res.value.concern.strip())
+    return CaseOut(case=c, turn=rules.next_turn(c) if c.stage == "intake" else None)
 
 
 @app.get("/cases/{case_id}/export/pre-assessment.pdf")

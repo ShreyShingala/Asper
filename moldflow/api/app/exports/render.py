@@ -3,6 +3,7 @@ property & concern -> findings by room with evidence photos -> recommendations -
 import csv
 import io
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 from PIL import Image, ImageDraw
 from reportlab.lib import colors
@@ -73,6 +74,20 @@ def _doc(story: list) -> bytes:
     return buf.getvalue()
 
 
+def _live_section(case: Case, transcript: bool) -> list:
+    lv = case.live
+    if not lv or not (lv.summary or lv.transcript):
+        return []
+    s = [Paragraph("Live call with the AI assistant", H2)]
+    if lv.summary:
+        s.append(Paragraph(escape(lv.summary), BODY))
+    s += [Paragraph(f"• {escape(k)}", BODY) for k in lv.key_points]
+    if transcript and lv.transcript:
+        s += [Spacer(1, 4), Paragraph("Transcript", SMALL)]
+        s += [Paragraph(f"<b>{'Customer' if t.role == 'customer' else 'AI'}:</b> {escape(t.text)}", SMALL) for t in lv.transcript]
+    return s
+
+
 def report_pdf(case: Case) -> bytes:
     rep = case.report.draft if case.report else None
     approval = next((a for a in reversed(case.approvals) if a.what == "report"), None)
@@ -94,6 +109,7 @@ def report_pdf(case: Case) -> bytes:
         s += [Paragraph("Recommendations", H2)] + [Paragraph(f"► {c.text} <font color='#6b7280' size='7'>[{', '.join(c.cites)}]</font>", BODY)
                                                     for c in rep.recommendations]
         s += [Paragraph("Limitations", H2)] + [Paragraph(f"• {x}", BODY) for x in rep.limitations]
+    s += _live_section(case, transcript=True)
     if e := case.estimate:
         s += [Paragraph(f"Estimate {e.id}", H2), Paragraph(f"Areas: {', '.join(e.areas)}", BODY)]
         s += [Paragraph(f"• {x}", BODY) for x in e.scope_text]
@@ -115,6 +131,7 @@ def pre_assessment_pdf(case: Case) -> bytes:
         s += [Paragraph(f"• {r}", BODY) for r in pa.reasons]
         if pa.health_note:
             s += [Spacer(1, 4), Paragraph(pa.health_note, BODY)]
+    s += _live_section(case, transcript=False)
     if grid := _photo_grid([p for p in case.photos if p.source == "customer"]):
         s += [Paragraph("Your photos (highlighted areas = suggestions for a closer look, not confirmed mold)", H2), grid]
     s += [Spacer(1, 10), Paragraph(DISCLAIMER + " Prices shown are Mold Busters' published service rates; remediation costs can only be "

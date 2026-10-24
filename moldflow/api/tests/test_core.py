@@ -127,3 +127,30 @@ def test_findings_grounding_words():
     assert _words("Tub faucet leaking.") & note
     assert not (_words("Ball slope test failed shower.") & note)
     assert not (_words("Discoloration visible.") & note)
+
+
+def test_live_answer_validation():
+    from app.engine import live
+    assert live.validate_answer("odor", "yes") == "Yes"
+    assert live.validate_answer("occupant", "landlord") == "Landlord / manager"
+    assert live.validate_answer("room", "Salle de bain") == "Bathroom"
+    assert live.validate_answer("location", " K1A 0B1 ") == "K1A 0B1"
+    with pytest.raises(ValueError):
+        live.validate_answer("odor", "purple")
+    with pytest.raises(ValueError):
+        live.validate_answer("favourite_colour", "blue")
+
+
+def test_live_checklist_follows_intake_rules():
+    from app.engine import live
+    from app.models.passport import Photo
+    c = Case(id="t", title="t", intake_mode="live")
+    cl = live.checklist(c)
+    assert not cl["ready_to_finish"] and not cl["can_finish_early"]
+    assert {s["shot"] for s in cl["missing_shots"]} == {"wide", "close", "above", "nearby"}
+    c.answers = {"leak": "No", "room": "Bedroom"}
+    assert {s["shot"] for s in live.checklist(c)["missing_shots"]} == {"wide", "close"}
+    c.photos = [Photo(id="p1", path="x", source="customer", prompt_id="wide",
+                      analysis=PhotoAnalysis(observations=["wall"]))]
+    cl = live.checklist(c)
+    assert cl["can_finish_early"] and cl["photos_left"] == 5 and cl["shots_taken"] == ["wide"]

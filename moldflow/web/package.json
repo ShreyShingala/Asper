@@ -10,6 +10,7 @@
     "gen:types": "openapi-typescript http://127.0.0.1:8000/openapi.json -o src/lib/api-types.ts"
   },
   "dependencies": {
+    "@elevenlabs/react": "^1.18.0",
     "lucide-react": "^1.57.0",
     "next": "16.4.2",
     "qrcode": "^1.5.4",

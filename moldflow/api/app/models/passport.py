@@ -212,6 +212,23 @@ class StoredReport(BaseModel):
     generated_at: datetime = Field(default_factory=now)
 
 
+class TranscriptLine(BaseModel):
+    role: Literal["customer", "ai"]
+    text: str
+    at_ms: int | None = Field(default=None, description="Milliseconds since the call started")
+
+
+class LiveSession(BaseModel):
+    """A live camera + voice pre-assessment call (ElevenLabs agent). The full transcript is kept as evidence for staff."""
+    conversation_id: str | None = None
+    started_at: datetime = Field(default_factory=now)
+    ended_at: datetime | None = None
+    transcript: list[TranscriptLine] = []
+    summary: str | None = None
+    key_points: list[str] = []
+    summary_tier: str | None = None
+
+
 class Case(BaseModel):
     schema_version: int = SCHEMA_VERSION
     id: str
@@ -219,6 +236,8 @@ class Case(BaseModel):
     created_at: datetime = Field(default_factory=now)
     stage: Stage = "intake"
     language: Literal["en", "fr"] = "en"
+    intake_mode: Literal["upload", "live"] = "upload"
+    live: LiveSession | None = None
     seeded_from: str | None = None
     customer: Customer = Customer()
     property: Property = Property()

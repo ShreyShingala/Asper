@@ -90,6 +90,7 @@ export default function Review() {
             <div className="space-y-2">{c.flags.map((f) => <FlagRow key={f.id} flag={f} onResolve={(fl) => { setResolving(fl); setNote(""); }} />)}</div>
           </Card>
           {c.estimate && <EstimateCard c={c} />}
+          {c.live && <LiveCallCard c={c} />}
           {c.pre_assessment && (
             <Card className="p-5">
               <h2 className="text-subheading font-semibold text-ink">Customer pre-assessment</h2>
@@ -193,6 +194,39 @@ function EstimateCard({ c }: { c: Case }) {
         {e.expires_on && <Row k="Valid until" v={e.expires_on} />}
       </dl>
       {e.real_world_status && <p className="mt-3 rounded-ds-xsm bg-alert-warning-bg p-2 text-caption font-medium text-[#8a5a0a]">Recorded outcome: {e.real_world_status}</p>}
+    </Card>
+  );
+}
+
+function LiveCallCard({ c }: { c: Case }) {
+  const lv = c.live!;
+  const shots = c.photos.filter((p) => p.source === "customer").length;
+  const minutes = lv.ended_at && lv.started_at ? Math.max(1, Math.round((new Date(lv.ended_at).getTime() - new Date(lv.started_at).getTime()) / 60000)) : null;
+  return (
+    <Card className="p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-subheading font-semibold text-ink">Live call with Bruce</h2>
+        <div className="flex gap-1.5">
+          <Tag tone="blue" soft>{shots} AI-captured photo{shots === 1 ? "" : "s"}</Tag>
+          {minutes && <Tag soft>{minutes} min</Tag>}
+        </div>
+      </div>
+      {lv.summary ? <p className="mt-2 text-subtitle font-light text-ink-body">{lv.summary}</p>
+        : <p className="mt-2 text-subtitle font-light text-ink-muted">{lv.ended_at ? "No summary (the call had no transcript or the AI was unavailable)." : "Call in progress or not finished."}</p>}
+      {lv.key_points.length > 0 && <ul className="mt-2 list-disc space-y-1 pl-5 text-subtitle text-ink">{lv.key_points.map((k, i) => <li key={i}>{k}</li>)}</ul>}
+      {lv.transcript.length > 0 && (
+        <details className="mt-3 rounded-ds-xsm bg-kit-gray-faint p-3">
+          <summary className="cursor-pointer text-caption font-medium text-ink-body">Full transcript ({lv.transcript.length} lines)</summary>
+          <ol className="mt-2 max-h-80 space-y-1.5 overflow-y-auto text-caption">
+            {lv.transcript.map((t, i) => (
+              <li key={i} className={cx(t.role === "ai" ? "text-ink-body" : "font-medium text-ink")}>
+                <span className="text-ink-muted">{t.at_ms != null ? `${Math.floor(t.at_ms / 60000)}:${String(Math.floor(t.at_ms / 1000) % 60).padStart(2, "0")} ` : ""}</span>
+                {t.role === "ai" ? "Bruce" : "Customer"}: {t.text}
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
     </Card>
   );
 }

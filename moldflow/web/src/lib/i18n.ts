@@ -23,6 +23,8 @@ const en = {
   paid: "Paid (simulated). Your report is unlocked.", pdf: "Download PDF", changeLoc: "Different location?", apply: "Update",
   photos: "photos", step: "Step", of: "of", outside: "Outside our service area: we can still help remotely.",
   close: "Close", callMe: "Call me instead",
+  goLive: "Go live with AI", uploadPhotos: "Upload photos",
+  liveNote: "Live: our AI talks you through it on camera and takes the photos (English, about 4 min). Upload: snap a few photos and tap answers.",
 };
 const fr: typeof en = {
   heroTitle: "On dirait de la moisissure?",
@@ -47,5 +49,7 @@ const fr: typeof en = {
   paid: "Payé (simulé). Votre rapport est débloqué.", pdf: "Télécharger le PDF", changeLoc: "Autre emplacement?", apply: "Mettre à jour",
   photos: "photos", step: "Étape", of: "sur", outside: "Hors de notre zone : nous pouvons quand même vous aider à distance.",
   close: "Fermer", callMe: "Appelez-moi plutôt",
+  goLive: "En direct avec l'IA (anglais)", uploadPhotos: "Téléverser des photos",
+  liveNote: "En direct : notre IA vous guide à la caméra et prend les photos (en anglais, environ 4 min). Téléverser : quelques photos et des réponses rapides.",
 };
 export const STRINGS = { en, fr };

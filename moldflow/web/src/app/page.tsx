@@ -1,7 +1,7 @@
 "use client";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, ListChecks, FileText, ArrowRight } from "lucide-react";
+import { Camera, ListChecks, FileText, ArrowRight, ImageUp, Video } from "lucide-react";
 import { api, type CaseOut } from "@/lib/api";
 import { STRINGS, type Lang } from "@/lib/i18n";
 import { Button, Card, Eyebrow, LangToggle, Logo } from "@/components/ui";
@@ -13,19 +13,23 @@ export default function Landing() {
   const [langPick, setLang] = useState<Lang | null>(null);
   const lang: Lang = langPick ?? (langStored === "fr" ? "fr" : "en");
   const resumeId = resumeStored || null;
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"upload" | "live" | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [liveEnabled, setLiveEnabled] = useState(false);
   const t = STRINGS[lang];
+  useEffect(() => {
+    api.get<{ enabled: boolean }>("/live/config").then((c) => setLiveEnabled(c.enabled)).catch(() => {});
+  }, []);
 
-  async function start() {
-    setBusy(true); setErr(null);
+  async function start(mode: "upload" | "live") {
+    setBusy(mode); setErr(null);
     try {
-      const out = await api.post<CaseOut>("/cases", { language: lang });
+      const out = await api.post<CaseOut>("/cases", { language: mode === "live" ? "en" : lang });
       localStorage.setItem("moldflow_case", out.case.id);
-      router.push(`/assess/${out.case.id}`);
+      router.push(mode === "live" ? `/assess/${out.case.id}/live` : `/assess/${out.case.id}`);
     } catch (e) {
       setErr((e as Error).message || "Couldn't reach the server. Please try again.");
-      setBusy(false);
+      setBusy(null);
     }
   }
 
@@ -54,9 +58,19 @@ export default function Landing() {
         })}
       </ol>
       <div className="mt-auto space-y-3 pt-10">
-        <Button size="lg" fullWidth onClick={start} state={busy ? "loading" : undefined} trailing={<ArrowRight size={18} aria-hidden />}>
-          {t.start}
+        {liveEnabled && (
+          <Button size="lg" fullWidth multiline onClick={() => start("live")} disabled={!!busy && busy !== "live"} state={busy === "live" ? "loading" : undefined}
+            leading={<Video size={18} aria-hidden className="shrink-0" />}>
+            {t.goLive}
+          </Button>
+        )}
+        <Button size="lg" fullWidth multiline variant={liveEnabled ? "outline" : "primary"} onClick={() => start("upload")}
+          disabled={!!busy && busy !== "upload"} state={busy === "upload" ? "loading" : undefined}
+          leading={liveEnabled ? <ImageUp size={18} aria-hidden className="shrink-0" /> : undefined}
+          trailing={liveEnabled ? undefined : <ArrowRight size={18} aria-hidden />}>
+          {liveEnabled ? t.uploadPhotos : t.start}
         </Button>
+        {liveEnabled && <p className="text-center text-caption font-light text-ink-muted">{t.liveNote}</p>}
         {err && <p role="alert" className="rounded-ds-sm bg-alert-danger-bg p-3 text-center text-subtitle text-kit-red">{err}</p>}
         {resumeId && (
           <Button variant="outline" size="lg" fullWidth onClick={() => router.push(`/assess/${resumeId}`)}>{t.resume}</Button>

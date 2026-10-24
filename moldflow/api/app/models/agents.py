@@ -84,6 +84,12 @@ class AssessDraft(BaseModel):
     escalate: bool = False
 
 
+class LiveSummary(BaseModel):
+    concern: str = Field(default="", description="The customer's main concern in one sentence, in their own terms; empty string if they did not describe one")
+    summary: str = Field(description="3-4 sentence neutral summary of the call for Mold Busters staff; no diagnosis")
+    key_points: list[str] = Field(default=[], description="Up to 6 short facts the customer reported (how long, smell, leaks, what they tried)")
+
+
 class Routing(BaseModel):
     service: Literal["self_help", "virtual", "onsite", "iaq", "remediation", "remote_report", "referral"]
     reasons: list[str]

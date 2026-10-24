@@ -161,6 +161,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/live/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Live Config */
+        get: operations["live_config_live_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/live/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Live Start */
+        post: operations["live_start_cases__case_id__live_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/live/checklist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Live Checklist */
+        get: operations["live_checklist_cases__case_id__live_checklist_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/live/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Live Answer
+         * @description Agent tool target. Returns 200 with ok=false on a bad value so the agent can re-ask instead of failing the call.
+         */
+        post: operations["live_answer_cases__case_id__live_answer_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{case_id}/live/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Live End */
+        post: operations["live_end_cases__case_id__live_end_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cases/{case_id}/export/pre-assessment.pdf": {
         parameters: {
             query?: never;
@@ -633,6 +721,13 @@ export interface components {
              * @enum {string}
              */
             language: "en" | "fr";
+            /**
+             * Intake Mode
+             * @default upload
+             * @enum {string}
+             */
+            intake_mode: "upload" | "live";
+            live?: components["schemas"]["LiveSession"] | null;
             /** Seeded From */
             seeded_from?: string | null;
             /**
@@ -1036,6 +1131,45 @@ export interface components {
              */
             illustrative: boolean;
         };
+        /** LiveEndIn */
+        LiveEndIn: {
+            /** Conversation Id */
+            conversation_id?: string | null;
+            /**
+             * Transcript
+             * @default []
+             */
+            transcript: components["schemas"]["TranscriptLine"][];
+        };
+        /**
+         * LiveSession
+         * @description A live camera + voice pre-assessment call (ElevenLabs agent). The full transcript is kept as evidence for staff.
+         */
+        LiveSession: {
+            /** Conversation Id */
+            conversation_id?: string | null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at?: string;
+            /** Ended At */
+            ended_at?: string | null;
+            /**
+             * Transcript
+             * @default []
+             */
+            transcript: components["schemas"]["TranscriptLine"][];
+            /** Summary */
+            summary?: string | null;
+            /**
+             * Key Points
+             * @default []
+             */
+            key_points: string[];
+            /** Summary Tier */
+            summary_tier?: string | null;
+        };
         /** NewCase */
         NewCase: {
             /**
@@ -1287,6 +1421,21 @@ export interface components {
              * Format: date-time
              */
             generated_at?: string;
+        };
+        /** TranscriptLine */
+        TranscriptLine: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "customer" | "ai";
+            /** Text */
+            text: string;
+            /**
+             * At Ms
+             * @description Milliseconds since the call started
+             */
+            at_ms?: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1595,6 +1744,166 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_config_live_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    live_start_cases__case_id__live_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_checklist_cases__case_id__live_checklist_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_answer_cases__case_id__live_answer_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    live_end_cases__case_id__live_end_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LiveEndIn"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

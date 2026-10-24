@@ -26,5 +26,12 @@ LLM_CONCURRENCY = int(os.getenv("LLM_CONCURRENCY", "3"))
 DEMO_MODE = os.getenv("MOLDFLOW_DEMO_MODE", "hybrid")
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 
+# Live camera + voice pre-assessment (ElevenLabs Agents). The agent is created by scripts/setup_elevenlabs_agent.py.
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+ELEVENLABS_AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID", "")
+ELEVENLABS_BASE_URL = "https://api.elevenlabs.io"
+LIVE_MAX_PHOTOS = int(os.getenv("LIVE_MAX_PHOTOS", "6"))
+LIVE_MAX_SECONDS = int(os.getenv("LIVE_MAX_SECONDS", "300"))
+
 for d in (UPLOAD_DIR, FIXTURE_DIR, EXACT_CACHE_DIR):
     d.mkdir(parents=True, exist_ok=True)
