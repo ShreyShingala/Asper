@@ -181,20 +181,6 @@ from fastapi import File, UploadFile  # noqa: E402
 
 from app import config  # noqa: E402
 
-ONSITE_DIR = config.PACK_DIR.parent / "moldflow/web/public/demo/onsite"
-PREPARED_SIZE = 10408780  # the prepared clip: Montreal walkthrough (client camera, 4:12-7:08)
-FRAME_T = [8, 30, 52, 75, 98, 120, 142, 165]
-MOMENTS = [  # (from s, to s, room, what the footage + speech show, reading)
-    (0, 12, "Laundry", "Black and white discoloration inside the washing machine drum and door seal.", ("visual", "anomaly")),
-    (13, 46, "Laundry", "Discoloration around the washer's power cable and outlet; camera focus poor, re-shot from farther away.", None),
-    (47, 53, "Laundry", "Visible discoloration confirmed on the wall surface beside the washer.", ("visual", "anomaly")),
-    (54, 117, "Laundry", "Ceiling ventilation duct with dark discoloration inside; occupant reports it gets worse when the ventilation runs.", ("visual", "anomaly")),
-    (118, 127, "Laundry", "Cardboard boxes brought in the day before: no discoloration, not a source.", None),
-    (128, 142, "Kitchen", "Abandoned food found behind removed kitchen cabinets: an organic food source for growth.", None),
-    (143, 176, "Kitchen", "Dust or dark speckles around the oven and microwave area.", ("visual", "anomaly")),
-]
-
-
 @router.post("/onsite/video")
 async def onsite_video(video: UploadFile = File(...)) -> dict:
     """Upload a walkthrough video: frames are pulled and checked, the speech is read, and the findings, report fields and a
@@ -204,47 +190,49 @@ async def onsite_video(video: UploadFile = File(...)) -> dict:
     import uuid as _uuid
     from app.agents.tasks import image_check, rule_report
     from app.models.passport import Case, Customer, Event, Finding, OnsiteNote, Photo, Property, Reading, StoredReport
+    from app import onsite_demo
     data = await video.read()
-    prepared = len(data) == PREPARED_SIZE or "walkthrough_clip" in (video.filename or "").lower()
-    if not prepared:
-        raise HTTPException(422, "This demo is prepared for the sample walkthrough clip (02_Walkthrough_clip_client_camera_4m12-7m08.mp4).")
-    tr = _json.loads((ONSITE_DIR / "transcript.json").read_text(encoding="utf-8"))["lines"]
-    cid = "onsite-" + _uuid.uuid4().hex[:5]
+    hit = onsite_demo.match(video.filename or "", len(data))
+    if not hit:
+        raise HTTPException(422, "This demo is prepared for demo-videos/Stittsville_bathroom_walkthrough.mp4 (or the Montreal walkthrough clip).")
+    key, cfg = hit
+    folder = onsite_demo.DEMO_WEB / cfg["dir"]
+    tr = onsite_demo.transcript(cfg)
+    cid = f"{key}-video-" + _uuid.uuid4().hex[:4]
     (config.DATA_DIR / "uploads" / cid).mkdir(parents=True, exist_ok=True)
-    case = Case(id=cid, title="On-site walkthrough · Montréal laundry & kitchen", stage="inspected", language="en", project_no=301,
-                customer=Customer(type="tenant", alias="Montreal client (walkthrough video)"), concern="Mold inside the washing machine and around the washer and dryer; smell.",
-                property=Property(province="QC", postal_prefix="H2X", region_text="Apartment, Montréal, QC", in_service_area=True), intake_mode="upload",
-                seeded_from="sample inspections vol 2.1 (walkthrough clip)")
+    case = Case(id=cid, title=cfg["title"], stage="inspected", language="en", project_no=301, contact_id=cfg["contact"],
+                customer=Customer(type=cfg["type"], alias=cfg["alias"]), concern=cfg["concern"], intake_mode="upload",
+                property=Property(province=cfg["province"], postal_prefix=cfg["fsa"], region_text=cfg["address"], in_service_area=True),
+                seeded_from="sample inspections vol 2.1 (walkthrough video)")
     frames = []
-    for i, t in enumerate(FRAME_T):
-        src = ONSITE_DIR / f"frame_{i + 1:02d}.jpg"
+    for i, t in enumerate(cfg["frames"]):
+        src = folder / f"frame_{i + 1:02d}.jpg"
         rel = f"uploads/{cid}/f{i + 1:02d}.jpg"
         shutil.copyfile(src, config.DATA_DIR / rel)
         an = image_check(src.read_bytes())
-        mo = next((m for m in MOMENTS if m[0] <= t <= m[1]), MOMENTS[-1])
+        mo = next((m for m in cfg["moments"] if m[0] <= t <= m[1]), cfg["moments"][-1])
         said = " ".join(x["text"] for x in tr if t - 6 <= x["start"] <= t + 6)
         an.observations = [mo[3]] + an.observations[:2]
         case.photos.append(Photo(id=f"f{i + 1:02d}", path=rel, room=mo[2], source="inspector", caption_from_pack=f"{t // 60}:{t % 60:02d} · {mo[3][:60]}",
                                  analysis=an, analysis_model="frame check + transcript", analysis_tier="rule"))
-        frames.append({"id": f"f{i + 1:02d}", "t": t, "url": f"/demo/onsite/frame_{i + 1:02d}.jpg", "room": mo[2], "finding": mo[3], "said": said,
+        frames.append({"id": f"f{i + 1:02d}", "t": t, "url": f"/demo/{cfg['dir']}/frame_{i + 1:02d}.jpg", "room": mo[2], "finding": mo[3], "said": said,
                        "regions": [r.model_dump() for r in an.regions], "checks": an.observations[1:]})
-    for k, (a, b, room, text, rd) in enumerate(MOMENTS):
+    for k, (a, b, room, text, rd) in enumerate(cfg["moments"]):
         ev = [f["id"] for f in frames if a <= f["t"] <= b] or [frames[min(k, len(frames) - 1)]["id"]]
         case.findings.append(Finding(id=f"V{k + 1}", room=room, observation=text, evidence_photo_ids=ev, source="ai_structured", confirmed=True,
                                      readings=[Reading(kind=rd[0], result=rd[1], location=room, photo_ids=ev[:1])] if rd else []))
-    case.recommendations = ["Professional remediation of the laundry area: washer surroundings, wall and the ventilation duct",
-                            "Clean or replace the ventilation duct; check where it exhausts", "Remove the abandoned food and clean behind the kitchen cabinets",
-                            "Indoor air quality test, since the smell persists after cleaning"]
-    case.onsite.append(OnsiteNote(id="o" + _uuid.uuid4().hex[:6], kind="walkthrough", by="Inspector (video)", room="Laundry",
+    case.recommendations = cfg["recs"]
+    case.onsite.append(OnsiteNote(id="o" + _uuid.uuid4().hex[:6], kind="walkthrough", by="Inspector (video)", room=cfg["moments"][0][2],
                                   text=" ".join(x["text"] for x in tr), video_path=None, finding_ids=[f.id for f in case.findings]))
     case.report = StoredReport(draft=rule_report(case), tier="rule")
     case.stage = "report_draft"
     case.timeline.append(Event(at=clock.now(), at_text=clock.now().strftime("%b %d %H:%M"), step="Walkthrough video processed", system="MoldFlow",
                                what=f"{len(frames)} frames, {len(tr)} transcript lines, {len(case.findings)} findings, report drafted.", source="moldflow"))
     store.save(case)
-    fields = {"Property": "Apartment, Montréal, QC", "Client": "Tenant", "Areas": "Laundry room, kitchen",
-              "Concern": case.concern, "Moisture / source": "Ventilation duct (worse when running); abandoned food behind cabinets",
-              "Recommended service": "Indoor air quality test + remediation of the laundry area"}
-    return {"case_id": cid, "duration_s": 176, "frames": frames, "transcript": tr,
+    if (ct := db.get(Contact, cfg["contact"])) and cid not in ct.case_ids:
+        ct.case_ids.append(cid)
+        db.put(ct)
+    fields = cfg["fields"]
+    return {"case_id": cid, "duration_s": cfg["duration"], "frames": frames, "transcript": tr,
             "findings": [{"id": f.id, "room": f.room, "text": f.observation, "photos": f.evidence_photo_ids} for f in case.findings],
-            "fields": fields, "recommendations": case.recommendations}
+            "fields": fields, "recommendations": case.recommendations, "title": cfg["title"]}

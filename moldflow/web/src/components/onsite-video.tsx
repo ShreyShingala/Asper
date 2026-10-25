@@ -46,7 +46,7 @@ export function OnsiteVideo() {
       {phase === "idle" && (
         <div className="rounded-ds-sm border border-dashed border-brand/50 p-5 text-center">
           <p className="text-subtitle font-medium text-ink">Upload the walkthrough video from the visit</p>
-          <p className="mt-1 text-[13px] text-ink-muted">The AI pulls the key frames, reads what was said, marks what it sees and fills out the report.</p>
+          <p className="mt-1 text-[13px] text-ink-muted">The AI pulls the key frames, reads what was said, marks what it sees and fills out the report. Demo file: demo-videos/Stittsville_bathroom_walkthrough.mp4</p>
           <input ref={file} type="file" accept="video/*" className="sr-only" aria-label="Walkthrough video" onChange={(e) => e.target.files?.[0] && void go(e.target.files[0])} />
           <Button className="mt-3" leading={<Upload size={16} aria-hidden />} onClick={() => file.current?.click()}>Upload video</Button>
           {err && <p role="alert" className="mt-3 text-[13px] text-kit-red">{err}</p>}
