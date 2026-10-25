@@ -28,9 +28,9 @@ export function MusePanel() {
     <Card className="flex max-h-[calc(100dvh-9rem)] flex-col p-4 xl:sticky xl:top-28">
       <p className="flex items-center gap-1.5 text-subheading font-semibold text-ink"><Sparkles size={16} className="text-brand" aria-hidden />Muse</p>
       <p className="text-caption text-ink-muted">Knows every customer, conversation and project.</p>
-      <ol className="mt-3 flex-1 space-y-3 overflow-y-auto pr-1">
+      <ol className="mt-3 space-y-3 overflow-y-auto pr-1">
         {turns.length === 0 && ASK.map((s) => (
-          <li key={s}><button onClick={() => void ask(s)} className="w-full rounded-ds-sm border border-kit-gray-soft p-2.5 text-left text-caption text-ink hover:border-brand">{s}</button></li>
+          <li key={s}><button onClick={() => void ask(s)} className="w-full rounded-ds-sm border border-kit-gray-soft p-2.5 text-left text-[13px] text-ink hover:border-brand">{s}</button></li>
         ))}
         {turns.map((t, i) => (
           <li key={i} className="space-y-1.5">

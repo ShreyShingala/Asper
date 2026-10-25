@@ -193,8 +193,8 @@ def hub_pillars() -> dict:
                       "case_id": next(iter(c.case_ids), None), "last_at": thread[-1].created_at.isoformat(),
                       "thread": [{"id": m.id, "dir": m.direction, "text": m.body, "at": m.created_at.isoformat(), "status": m.status}
                                  for m in thread if m.status != "draft"][-6:],
-                      "draft": {"id": draft.id, "body": draft.body, "reason": draft.reason, "autonomy": draft.autonomy} if draft else None})
-    convs = sorted(convs, key=lambda x: (x["draft"] is None, -datetime.fromisoformat(x["last_at"]).timestamp()))
+                      "draft": {"id": draft.id, "body": draft.body.replace("{booking_link}", messaging.booking_link(c, draft.id)), "reason": draft.reason, "autonomy": draft.autonomy} if draft else None})
+    convs = sorted(convs, key=lambda x: (x["draft"] is None, x["language"] == "fr", -datetime.fromisoformat(x["last_at"]).timestamp()))
     cases = store.list_all()
     virtual = []
     for c in cases:
@@ -208,7 +208,7 @@ def hub_pillars() -> dict:
                         "summary": c.live.summary if c.live and c.live.summary else (c.pre_assessment.summary if c.pre_assessment else None),
                         "paid": [p.product for p in c.payments], "tenant_pack": c.tenant_pack.status if c.tenant_pack else None,
                         "photo_ids": [p.id for p in c.photos if p.source == "customer"][:4],
-                        "pending": [{"id": m.id, "body": m.body, "reason": m.reason} for m in pending], "created_at": c.created_at.isoformat()})
+                        "pending": [{"id": m.id, "body": m.body.replace("{booking_link}", "https://bustmold.com/book/MB-" + m.id[-4:].upper()), "reason": m.reason} for m in pending], "created_at": c.created_at.isoformat()})
     virtual.sort(key=lambda x: x["created_at"], reverse=True)
     onsite = []
     for c in cases:

@@ -108,7 +108,7 @@ const CARD_TONE = {
 export type CardTone = keyof typeof CARD_TONE;
 
 export function Card({ className, tone, ...p }: React.HTMLAttributes<HTMLDivElement> & { tone?: CardTone }) {
-  return <div {...p} className={cn(tone ? cn("rounded-ds-xsm border shadow-ds-xsm", CARD_TONE[tone]) : cardSurface, className)} />;
+  return <div {...p} className={cn(tone ? cn("rounded-ds-xsm border", CARD_TONE[tone]) : cardSurface, className)} />;
 }
 
 export function Logo({ small }: { small?: boolean }) {
@@ -124,67 +124,57 @@ export function Logo({ small }: { small?: boolean }) {
   );
 }
 
-const NAV = [
-  ["/hub", "Hub"],
-  ["/muse", "Muse"],
-  ["/map", "Map"],
-  ["/customers", "Customers"],
-  ["/projects", "Projects"],
-  ["/outreach", "Outreach"],
-  ["/demo-texts", "Demo texts"],
-] as const;
-const MORE = [
-  ["/people", "People"],
-  ["/schedule", "Schedule"],
-  ["/dashboard", "Cases"],
-  ["/alerts", "Alerts"],
-  ["/research", "Research"],
-  ["/settings", "Settings"],
-  ["/proof", "Proof"],
-] as const;
+const NAV_GROUPS: { label: string; items: [string, string][] }[] = [
+  { label: "Today", items: [["/hub", "Hub"], ["/outreach", "Outreach"], ["/demo-texts", "Demo texts"]] },
+  { label: "Customers", items: [["/map", "Map"], ["/customers", "Customers"], ["/people", "People"], ["/projects", "Projects"]] },
+  { label: "Field work", items: [["/schedule", "Schedule"], ["/dashboard", "Cases"], ["/alerts", "Storm alerts"], ["/research", "Research"]] },
+  { label: "Company", items: [["/settings", "Settings"], ["/proof", "Proof"]] },
+];
+const ALL_NAV = NAV_GROUPS.flatMap((g) => g.items);
 
+/** Staff shell (taste-skill "ruled T-frame"): sidebar + 64px top bar on one ground, divided by 1px rules only. The active page is a
+ *  pale orange row in the hue's dark ink; full orange is kept for small marks and the one primary action. */
 export function StaffShell({ children, title, actions }: { children: React.ReactNode; title?: string; actions?: React.ReactNode }) {
   const path = usePathname();
+  const [open, setOpen] = useState(false);
+  const isOn = (href: string) => path === href || (href !== "/hub" && path.startsWith(href + "/"));
+  const current = ALL_NAV.find(([h]) => isOn(h))?.[1];
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-30 bg-white shadow-ds-sm">
-        <div className="mx-auto flex h-16 max-w-[90rem] items-center gap-6 px-5">
-          <Link href="/hub" className="shrink-0"><Logo small /></Link>
-          <nav aria-label="Primary" className="flex h-full min-w-0 gap-5 overflow-x-auto">
-            {NAV.map(([href, label]) => {
-              const on = path === href || (href !== "/hub" && path.startsWith(href + "/"));
-              return (
-                <Link key={href} href={href} aria-current={on ? "page" : undefined}
-                  className={cn("-mb-px inline-flex items-center whitespace-nowrap border-b-2 text-subtitle font-medium transition-colors",
-                    on ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-ink")}>
+    <div className="min-h-dvh bg-[#f7f7f8] lg:grid lg:grid-cols-[224px_minmax(0,1fr)]">
+      <aside className={cn("fixed inset-0 z-40 flex-col border-r border-[#efe6df] bg-[#f7f7f8] lg:sticky lg:top-0 lg:flex lg:h-dvh", open ? "flex" : "hidden")}>
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-[#efe6df] px-5">
+          <Link href="/hub" onClick={() => setOpen(false)}><Logo small /></Link>
+          <button type="button" className="text-subtitle text-ink-muted lg:hidden" onClick={() => setOpen(false)}>Close</button>
+        </div>
+        <nav aria-label="Primary" className="flex-1 overflow-y-auto px-3 py-4">
+          {NAV_GROUPS.map((g) => (
+            <div key={g.label} className="mb-4">
+              <p className="px-3 pb-1 text-[12px] text-ink-muted">{g.label}</p>
+              {g.items.map(([href, label]) => (
+                <Link key={href} href={href} onClick={() => setOpen(false)} aria-current={isOn(href) ? "page" : undefined}
+                  className={cn("flex h-10 items-center rounded-ds-xsm px-3 text-subtitle transition-colors",
+                    isOn(href) ? "bg-brand-tint font-medium text-brand-strong" : "text-ink-body hover:bg-white")}>
                   {label}
                 </Link>
-              );
-            })}
-            <details className="relative -mb-px flex items-center">
-              <summary className={cn("flex h-full cursor-pointer list-none items-center whitespace-nowrap border-b-2 text-subtitle font-medium",
-                MORE.some(([h]) => path === h || path.startsWith(h + "/")) ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-ink")}>More ▾</summary>
-              <div className="fixed z-40 mt-2 min-w-40 rounded-ds-xsm bg-white py-1 shadow-ds-lg" style={{ top: "3.5rem" }}>
-                {MORE.map(([href, label]) => (
-                  <Link key={href} href={href} aria-current={path === href ? "page" : undefined}
-                    className={cn("block px-4 py-2 text-subtitle hover:bg-brand-tint", path === href ? "font-medium text-brand" : "text-ink")}>{label}</Link>
-                ))}
-              </div>
-            </details>
-          </nav>
-          <div className="ml-auto flex shrink-0 items-center gap-2">{actions}<HubSearch /><PauseButton /><QrLink /></div>
-        </div>
-      </header>
-      <div className="bg-kit-navy text-white">
-        <p className="mx-auto flex max-w-7xl items-center gap-2 px-5 py-2 text-caption">
-          <Info size={14} className="shrink-0" aria-hidden />
+              ))}
+            </div>
+          ))}
+        </nav>
+        <p className="border-t border-[#efe6df] px-5 py-4 text-[11px] leading-snug text-ink-muted">
           Prototype · MoldFlow assists qualified inspectors; it does not identify, diagnose or confirm mold. Sending, booking and CRM sync are simulated; people marked &ldquo;synthetic&rdquo; are invented demo data.
         </p>
+      </aside>
+      <div className="min-w-0">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[#efe6df] bg-[#f7f7f8]/95 px-5 backdrop-blur lg:px-7">
+          <button type="button" onClick={() => setOpen(true)} className="rounded-ds-xsm border border-[#efe6df] px-3 py-1.5 text-subtitle lg:hidden">Menu</button>
+          <p className="min-w-0 truncate text-subtitle font-medium text-ink-body">MoldFlow <span className="text-ink-muted">/</span> {current ?? title ?? "Hub"}</p>
+          <div className="ml-auto flex shrink-0 items-center gap-2">{actions}<HubSearch /><PauseButton /><QrLink /></div>
+        </header>
+        <main className="mx-auto max-w-[88rem] px-5 py-7 lg:px-7">
+          {title && <h1 className="mb-6 text-[24px] font-semibold leading-tight text-ink">{title}</h1>}
+          {children}
+        </main>
       </div>
-      <main className="mx-auto max-w-7xl px-5 py-8">
-        {title && <h1 className="mb-6 text-h6 font-semibold text-ink sm:text-h5">{title}</h1>}
-        {children}
-      </main>
     </div>
   );
 }

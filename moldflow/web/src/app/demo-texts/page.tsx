@@ -31,7 +31,7 @@ export default function DemoTexts() {
       setWho((w) => w || o.people[0]?.id || "");
     } catch (e) { setErr((e as Error).message); }
   }, []);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { const t = setTimeout(() => void load(), 0); return () => clearTimeout(t); }, [load]);
   const person = people.find((p) => p.id === who);
   const drafts = (person?.messages ?? []).filter((m) => m.status === "draft");
 

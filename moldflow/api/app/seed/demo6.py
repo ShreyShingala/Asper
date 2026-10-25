@@ -91,7 +91,6 @@ DRAFTS = {
     "c-stitts": "New caulking alone usually won't fix it: the growth is behind the old silicone and on the ceiling. Removing and treating it first is what stops it coming back.",
 }
 FACTS = {
-    "c-job1": [("home", "Did a home ERMI test (score 13.2) and wants to know the source", "had done an ERMI test at home (score 13.2)", "light")],
     "c-job2": [("health", "Reported headaches and coughing since moving in", "I've had headaches and coughing since I moved in", "never")],
     "c-smiths": [("life_event", "Selling the house; needs the work done before closing", "We're selling the house, can this be done before closing?", "light")],
     "c-laval": [("life_event", "A vendu la maison; les nouveaux propriétaires demandent des documents", "j'ai vendu ma maison", "light")],
@@ -198,7 +197,7 @@ def seed(cases: list[Case]) -> int:
                                 properties=[PropertyRef(address=street, city=city, postal=postal, fsa=fsa, lat=lat, lon=lon,
                                                         province="QC" if fsa[0] == "H" else "ON")],
                                 consent=Consent(sms=purchase, email=purchase.model_copy(), profiling_notice_at=datetime.combine(today, time(9))),
-                                prefs=Prefs(channel="sms", storm_checkin_opt_in=fsa in ("K2S", "H7L")))
+                                prefs=Prefs(channel="sms", storm_checkin_opt_in=fsa == "K2S"))
         if est:
             db.put(Interaction(id=f"i-{cid}-est", contact_id=cid, case_id=case_id, at=now - timedelta(days=20), system="freshbooks", kind="estimate",
                                summary=f"Estimate {est.get('number')}: {est.get('amount')} ({est.get('status')})", amount=amount,
@@ -206,11 +205,17 @@ def seed(cases: list[Case]) -> int:
     for c in cases:
         if c.id in ("job1", "job2") and (k := contacts.get(f"c-{c.id}")):
             k.name = "Kanata client (Job 1, homeowner)" if c.id == "job1" else "Montreal client (Job 2, tenant)"
+            if c.id == "job2":  # vol 2.1 places this virtual assessment in Montreal
+                lat, lon, _ = geo.FSA.setdefault("H2X", (45.512, -73.570, "Metro Montréal - Laval"))
+                k.properties = [PropertyRef(address="Apartment (address removed)", city="Montréal", postal="H2X (sample)", fsa="H2X", lat=lat, lon=lon, province="QC")]
+            elif c.id == "job1":
+                lat, lon, _ = geo.FSA.setdefault("K2M", (45.300, -75.910, "City of Ottawa"))
+                k.properties = [PropertyRef(address="House (address removed)", city="Kanata", postal="K2M (sample)", fsa="K2M", lat=lat, lon=lon, province="ON")]
     for cid, thread in THREADS.items():
         c = contacts.get(cid)
         if not c:
             continue
-        if cid in ("c-job1", "c-job2", "c-stitts", "c-laval"):  # these customers ticked "helpful check-ins and offers" (express consent)
+        if cid in ("c-job1", "c-job2", "c-stitts"):  # these customers ticked "helpful check-ins and offers" (express consent)
             ex = ChannelConsent(basis="express", granted_at=today - timedelta(days=60), granted_via="web_form", evidence_ref="booking form checkbox",
                                 text_version="2026-10-booking-v1")
             c.consent.sms, c.consent.email, c.consent.personalised_reminders = ex, ex.model_copy(), True

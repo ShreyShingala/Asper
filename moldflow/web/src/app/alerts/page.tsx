@@ -6,12 +6,12 @@ import { api } from "@/lib/api";
 import { Button, Card, EmptyState, Spinner, StaffShell, Tag } from "@/components/ui";
 import { SyntheticTag, dayTime, type AlertView } from "@/components/hub";
 
-const ZONES = ["Gatineau", "City of Ottawa", "Metro Montréal - Laval", "City of Toronto"];
+const ZONES = ["City of Ottawa", "City of Toronto", "Gatineau", "Metro Montréal - Laval"];
 const PRI: Record<number, string> = { 1: "asked for storm check-ins", 2: "past water / basement issue", 3: "in the area" };
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<AlertView[] | null>(null);
-  const [zone, setZone] = useState("Gatineau");
+  const [zone, setZone] = useState("City of Ottawa");
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const load = useCallback(() => api.get<AlertView[]>("/alerts").then(setAlerts), []);

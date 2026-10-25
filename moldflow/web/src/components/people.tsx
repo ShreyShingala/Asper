@@ -17,6 +17,29 @@ export type Person = {
 const when = (s: string) => new Date(s).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 /** Everything about one customer: location, case, photos, conversation, what we learned, next follow-up. */
+export function Conversation({ p, tall }: { p: Person; tall?: boolean }) {
+  return (
+    <ol className={cx("space-y-1.5 overflow-y-auto pr-1", tall ? "max-h-[28rem]" : "max-h-72")}>
+      {p.messages.map((m) => (
+        <li key={m.id} className={cx("w-fit max-w-[90%] rounded-ds-xsm px-2.5 py-1.5 text-caption", m.dir === "in" ? "bg-kit-gray-faint text-ink" : "ml-auto bg-brand-tint text-ink",
+          m.status === "draft" && "border border-dashed border-brand")}>
+          {m.status === "draft" && <b className="block text-[11px] uppercase text-brand-strong">AI draft · waiting for approval</b>}
+          {m.text}<span className="mt-0.5 block text-[11px] text-ink-muted">{when(m.at)}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function Learned({ p }: { p: Person }) {
+  return (
+    <ul className="space-y-1">{p.facts.map((f) => (
+      <li key={f.id} className="text-caption text-ink-body">• {f.text} {f.status === "pending" && <Tag tone="brand" soft>new</Tag>}
+        <span className="block pl-2 text-[11px] italic text-ink-muted">&ldquo;{f.quote}&rdquo;</span></li>
+    ))}{p.facts.length === 0 && <li className="text-caption text-ink-muted">Nothing yet.</li>}</ul>
+  );
+}
+
 export function PersonPanel({ p, compact }: { p: Person; compact?: boolean }) {
   const next = p.followups.find((f) => f.status === "upcoming");
   return (
@@ -57,8 +80,8 @@ export function PersonPanel({ p, compact }: { p: Person; compact?: boolean }) {
           {p.messages.map((m) => (
             <li key={m.id} className={cx("w-fit max-w-[90%] rounded-ds-xsm px-2.5 py-1.5 text-caption", m.dir === "in" ? "bg-kit-gray-faint text-ink" : "ml-auto bg-brand-tint text-ink",
               m.status === "draft" && "border border-dashed border-brand")}>
-              {m.status === "draft" && <b className="block text-[10px] uppercase text-brand-strong">AI draft · waiting for approval</b>}
-              {m.text}<span className="mt-0.5 block text-[10px] text-ink-muted">{when(m.at)}</span>
+              {m.status === "draft" && <b className="block text-[11px] uppercase text-brand-strong">AI draft · waiting for approval</b>}
+              {m.text}<span className="mt-0.5 block text-[11px] text-ink-muted">{when(m.at)}</span>
             </li>
           ))}
         </ol>

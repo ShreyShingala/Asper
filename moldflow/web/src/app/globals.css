@@ -85,7 +85,7 @@
 
 html,
 body {
-  background: var(--color-kit-gray-faint);
+  background: #f7f7f8;  /* ground one step toward the palest brand tint (taste-skill accent ladder) */
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-weight: 400;

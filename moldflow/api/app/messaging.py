@@ -14,11 +14,14 @@ from app.models.crm import Contact, FactSource, Interaction, Message, ProfileFac
 
 log = logging.getLogger("moldflow.messaging")
 AUTO_APPROVE = {"home", "preference", "work"}          # grounded, low-risk facts approve themselves
-BOOKING_URL = os.getenv("MOLDFLOW_BOOKING_URL", "https://moldbusters.ca/b")
+BOOKING_URL = os.getenv("MOLDFLOW_BOOKING_URL", "https://bustmold.com/book")  # demo links: unique per message, not live
 
 
-def booking_link(contact: Contact) -> str:
-    return f"{BOOKING_URL}/{contact.id}"
+def booking_link(contact: Contact, msg_id: str = "") -> str:
+    """A unique (fake) booking link per message, e.g. https://bustmold.com/book/MB-7K2Q."""
+    import hashlib
+    code = hashlib.sha1(f"{contact.id}:{msg_id}".encode()).hexdigest()[:4].upper()
+    return f"{BOOKING_URL}/MB-{code}"
 
 
 def autonomy_for(msg: Message) -> str:
@@ -54,7 +57,7 @@ def send(msg: Message, by: str) -> Message:
         return msg
     ident = (contact.phones or [""])[0] if msg.channel == "sms" else (contact.emails or [""])[0]
     decision, reason = consent.check(contact, msg, history(contact.id), db.is_suppressed(msg.channel, consent.ident_hash(ident)))
-    body = msg.body.replace("{booking_link}", booking_link(contact))
+    body = msg.body.replace("{booking_link}", booking_link(contact, msg.id))
     msg.final_body = body + (" " if msg.channel == "sms" else "") + consent.footer(msg, ai_sent=msg.drafted_by != "staff")
     msg.approved_by = msg.approved_by or by
     if decision == "block":

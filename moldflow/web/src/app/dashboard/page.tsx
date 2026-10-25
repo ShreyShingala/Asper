@@ -115,7 +115,7 @@ export default function Dashboard() {
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "red" }) {
   return (
     <Card className="rise p-5">
-      <p className={cx("text-h5 font-semibold tabular-nums", tone === "red" ? "text-kit-red" : "text-ink")}>{value}</p>
+      <p className={cx("text-[24px] font-semibold tabular-nums", tone === "red" ? "text-kit-red" : "text-ink")}>{value}</p>
       <p className="mt-1 text-caption font-light text-ink-body">{label}</p>
     </Card>
   );

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 /** Kit card surface: 4px radius, soft gray border, xsm shadow, white fill. */
-export const cardSurface = "rounded-ds-xsm border border-kit-gray-soft bg-white shadow-ds-xsm";
+export const cardSurface = "rounded-ds-xsm border border-[#efe6df] bg-white";  // flat: 1px rule, no shadow (taste-skill app rules)
 
 export function Card({ title, children, actions, className }: { title?: string; children: ReactNode; actions?: ReactNode; className?: string }) {
   return (

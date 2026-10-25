@@ -23,7 +23,7 @@ export default function Compare() {
   return (
     <StaffShell>
       <Eyebrow>Sample job 1 · same customer, two workflows</Eyebrow>
-      <h1 className="mt-1 text-h5 font-semibold text-ink">Before / After</h1>
+      <h1 className="mt-1 text-[24px] font-semibold text-ink">Before / After</h1>
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         <Counter icon={Clock} label="Inspection → report" before="45h 35m elapsed" after={k.report_ai_draft_seconds ? `${k.report_ai_draft_seconds}s AI draft + review` : "Draft on demand + review"} note={k.report_window_before} />
         <Counter icon={MessageSquareX} label="Follow-ups that answered 'where is it coming from?'" before={`${k.concern_answered_before} of ${k.generic_touches_before}`} after={`${k.concern_specific_followups_after} drafted, all cite findings`} />

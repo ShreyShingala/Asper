@@ -19,6 +19,11 @@ export function Pillars() {
   const [d, setD] = useState<Pillars | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [open, setOpen] = useState({ conversations: false, virtual: false, onsite: false });
+  const more = (k: keyof typeof open, n: number) => n > 3 && (
+    <button type="button" onClick={() => setOpen((o) => ({ ...o, [k]: !o[k] }))} className="mt-3 w-full rounded-ds-sm border border-kit-gray-soft py-2 text-caption font-medium text-brand hover:bg-brand-tint/40">
+      {open[k] ? "Show less" : `View ${n - 3} more`}</button>
+  );
   const load = useCallback(() => api.get<Pillars>("/hub/pillars").then(setD), []);
   useEffect(() => { void load(); }, [load]);
   const act = async (key: string, fn: () => Promise<unknown>, done: string) => {
@@ -35,8 +40,8 @@ export function Pillars() {
 
       <Card className="flex flex-col p-5">
         <Head icon={<MessageSquare size={18} aria-hidden />} title="Customer conversations" n={d.counts.replies_waiting} sub="replies drafted from their case" />
-        <ul className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-          {d.conversations.slice(0, 5).map((c) => (
+        <ul className="mt-3 space-y-3">
+          {d.conversations.slice(0, open.conversations ? undefined : 3).map((c) => (
             <li key={c.contact_id} className="rounded-ds-sm border border-kit-gray-soft p-3">
               <div className="flex items-center gap-2">
                 <Link href={`/people/${c.contact_id}`} className="text-subtitle font-semibold text-ink underline-offset-2 hover:underline">{c.name}</Link>
@@ -45,13 +50,13 @@ export function Pillars() {
               </div>
               <ol className="mt-2 space-y-1">
                 {c.thread.slice(-3).map((m) => (
-                  <li key={m.id} className={cx("w-fit max-w-[92%] rounded-ds-xsm px-2.5 py-1.5 text-caption", m.dir === "in" ? "bg-kit-gray-faint text-ink" : "ml-auto bg-brand-tint text-ink")}>{m.text}</li>
+                  <li key={m.id} className={cx("w-fit max-w-[92%] rounded-ds-xsm px-2.5 py-1.5 text-[13px]", m.dir === "in" ? "bg-kit-gray-faint text-ink" : "ml-auto bg-brand-tint text-ink")}>{m.text}</li>
                 ))}
               </ol>
               {c.draft && (
                 <div className="mt-2 rounded-ds-xsm border border-brand/30 bg-white p-2.5">
                   <p className="text-[11px] font-semibold uppercase text-brand-strong">AI draft · {c.draft.reason}</p>
-                  <p className="mt-1 text-caption text-ink">{c.draft.body}</p>
+                  <p className="mt-1 text-[14px] text-ink">{c.draft.body}</p>
                   <div className="mt-2 flex gap-2">
                     <Button size="sm" leading={<Check size={14} aria-hidden />} state={busy === c.draft.id ? "loading" : undefined} onClick={() => void approve(c.draft!.id)}>Approve</Button>
                     <Button size="sm" variant="text" leading={<X size={14} aria-hidden />} onClick={() => void deny(c.draft!.id)}>Deny</Button>
@@ -61,14 +66,14 @@ export function Pillars() {
             </li>
           ))}
         </ul>
-        <Link href="/people" className="mt-3 text-caption font-medium text-brand underline">All conversations</Link>
+        {more("conversations", d.conversations.length)}
       </Card>
 
       <Card className="flex flex-col p-5">
         <Head icon={<Video size={18} aria-hidden />} title="Virtual assessments" n={d.counts.virtual_waiting} sub="live calls and photo intakes, filed automatically" />
         {d.virtual.length === 0 && <p className="mt-3 text-caption text-ink-muted">New virtual assessments appear here the moment a customer finishes the live call.</p>}
-        <ul className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-          {d.virtual.slice(0, 5).map((v) => (
+        <ul className="mt-3 space-y-3">
+          {d.virtual.slice(0, open.virtual ? undefined : 3).map((v) => (
             <li key={v.case_id} className="rounded-ds-sm border border-kit-gray-soft p-3">
               <div className="flex items-center gap-2">
                 <Link href={`/projects/${v.case_id}`} className="text-subtitle font-semibold text-ink hover:underline">{v.title}</Link>
@@ -99,13 +104,14 @@ export function Pillars() {
             </li>
           ))}
         </ul>
+        {more("virtual", d.virtual.length)}
         <Link href="/?demo=1" className="mt-3 text-caption font-medium text-brand underline">Start a virtual assessment (demo)</Link>
       </Card>
 
       <Card className="flex flex-col p-5">
         <Head icon={<ClipboardCheck size={18} aria-hidden />} title="On-site reviews" n={d.counts.reports_waiting} sub="inspector walkthroughs fill the report" />
-        <ul className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-          {d.onsite.slice(0, 5).map((o) => (
+        <ul className="mt-3 space-y-3">
+          {d.onsite.slice(0, open.onsite ? undefined : 3).map((o) => (
             <li key={o.case_id} className="rounded-ds-sm border border-kit-gray-soft p-3">
               <div className="flex items-center gap-2">
                 <Link href={`/projects/${o.case_id}`} className="text-subtitle font-semibold text-ink hover:underline">{o.title}</Link>
@@ -126,6 +132,7 @@ export function Pillars() {
             </li>
           ))}
         </ul>
+        {more("onsite", d.onsite.length)}
       </Card>
     </section>
   );
@@ -134,7 +141,7 @@ export function Pillars() {
 function Head({ icon, title, n, sub }: { icon: React.ReactNode; title: string; n: number; sub: string }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-tint text-brand">{icon}</span>
+      <span className="mt-0.5 text-ink-muted">{icon}</span>
       <div className="min-w-0 flex-1">
         <h2 className="text-subheading font-semibold text-ink">{title}</h2>
         <p className="text-caption text-ink-muted">{sub}</p>

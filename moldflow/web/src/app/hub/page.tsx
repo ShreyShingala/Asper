@@ -47,7 +47,8 @@ export default function HubPage() {
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <Eyebrow color="text-brand">MoldFlow Hub · {day(h.today)}{h.clock_travelling && " (time travel on)"}</Eyebrow>
-          <h1 className="mt-1 text-h5 font-semibold text-ink">Everything runs itself. Approve or deny what&apos;s waiting.</h1>
+          <h1 className="mt-1 text-[24px] font-semibold leading-tight text-ink">Approve or deny what&apos;s waiting</h1>
+          <p className="mt-1 text-subtitle text-ink-body">Replies, check-ins and reports are drafted for you; routine ones already went out.</p>
         </div>
         <p className="text-caption text-ink-muted">{h.counts.contacts} people · {h.counts.synthetic} synthetic demo customers · one timeline across {h.counts.tools_unified.length} tools</p>
       </div>
@@ -174,7 +175,7 @@ function NeedTile({ href, n, label, sub, tone }: { href: string; n: number; labe
   return (
     <Link href={href} className="group">
       <Card className={cx("h-full p-4 transition-shadow group-hover:shadow-ds-normal", n === 0 && "opacity-70")}>
-        <p className={cx("text-h5 font-semibold tabular-nums", n === 0 ? "text-ink-muted" : tone === "red" ? "text-kit-red" : tone === "brand" ? "text-brand" : "text-ink")}>{n}</p>
+        <p className={cx("text-[24px] font-semibold tabular-nums", n === 0 ? "text-ink-muted" : tone === "red" ? "text-kit-red" : tone === "brand" ? "text-brand" : "text-ink")}>{n}</p>
         <p className="text-subtitle font-medium text-ink">{label}</p>
         <p className="text-caption text-ink-muted">{sub}</p>
       </Card>
@@ -208,7 +209,7 @@ function DemoPanel({ onDone }: { onDone: () => void }) {
         <Button size="sm" leading={<MessageSquarePlus size={14} aria-hidden />} disabled={busy}
           onClick={() => run(async () => {
             const r = await api.post<{ intent: string; reply: { status: string; body: string }; contact_id: string }>("/webhooks/inbound", { from_: from, channel: "sms", body });
-            return `${r.intent}: reply ${r.reply.status === "sent_simulated" ? "sent instantly" : "drafted for approval"} → "${r.reply.body.slice(0, 90)}…"`;
+            return `${r.intent}: reply ${r.reply.status === "sent_simulated" ? "sent instantly" : r.reply.status === "approved" ? "approved instantly, sends after quiet hours" : "drafted for approval"} → "${r.reply.body.slice(0, 90)}…"`;
           })}>Send text</Button>
         <Button size="sm" variant="outline" leading={<CloudRain size={14} aria-hidden />} disabled={busy}
           onClick={() => run(async () => { const r = await api.post<{ matched: unknown[] }>("/alerts/simulate", { zone: "City of Ottawa" }); return `Rainfall warning simulated over Ottawa: ${r.matched.length} customers in the area.`; })}>

@@ -39,7 +39,7 @@ export default function ProofPage() {
       {s && (
         <div className="mt-3 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {Object.entries(s).filter(([, v]) => typeof v !== "object").map(([k, v]) => (
-            <Card key={k} className="p-5"><p className="text-h5 font-semibold tabular-nums text-ink">{String(v)}</p><p className="mt-1 text-caption font-light text-ink-body">{k}</p></Card>
+            <Card key={k} className="p-5"><p className="text-[24px] font-semibold tabular-nums text-ink">{String(v)}</p><p className="mt-1 text-caption font-light text-ink-body">{k}</p></Card>
           ))}
         </div>
       )}

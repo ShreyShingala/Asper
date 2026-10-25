@@ -17,3 +17,6 @@ moldflow/web/.next-e2e/
 # sample inspections vol 2.1: call recordings are too large for git (photos, notes and JSON are committed)
 Mold_Busters_Hackathon_Sample_Inspections/**/Videos/
 Mold_Busters_Hackathon_Sample_Inspections/**/*.mp4
+
+# taste-skill working files (inspector screenshots, dealt direction)
+.taste-skill/

@@ -28,7 +28,7 @@ def _person(c: Contact) -> dict:
                  "visit": case.booking.slot_text if case.booking and case.booking.slot_date else None,
                  "estimate": f"{case.estimate.id} · ${case.estimate.total:,.2f} · {case.estimate.status}" if case.estimate else None,
                  "paid": [x.product for x in case.payments]} if case else None,
-        "messages": [{"id": m.id, "dir": m.direction, "text": m.body, "at": m.created_at.isoformat(), "status": m.status} for m in msgs][-12:],
+        "messages": [{"id": m.id, "dir": m.direction, "text": (m.final_body or m.body).replace("{booking_link}", messaging.booking_link(c, m.id)), "at": m.created_at.isoformat(), "status": m.status} for m in msgs][-12:],
         "drafts": sum(1 for m in msgs if m.status == "draft"),
         "facts": [{"id": f.id, "text": f.text, "category": f.category, "status": f.status, "quote": f.source.quote, "learned": f.learned_at.isoformat()}
                   for f in sorted(facts, key=lambda f: f.learned_at, reverse=True)],
