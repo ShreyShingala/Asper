@@ -17,6 +17,7 @@ export function OnsiteVideo() {
   const [shown, setShown] = useState(0);        // frames revealed so far
   const [phase, setPhase] = useState<"idle" | "upload" | "frames" | "fields" | "done">("idle");
   const [err, setErr] = useState<string | null>(null);
+  const [over, setOver] = useState(false);
   const file = useRef<HTMLInputElement>(null);
 
   async function go(f: File) {
@@ -44,8 +45,10 @@ export function OnsiteVideo() {
   return (
     <div className="space-y-4">
       {phase === "idle" && (
-        <div className="rounded-ds-sm border border-dashed border-brand/50 p-5 text-center">
-          <p className="text-subtitle font-medium text-ink">Upload the walkthrough video from the visit</p>
+        <div className={cx("rounded-ds-sm border border-dashed p-5 text-center transition-colors", over ? "border-brand bg-brand-tint/60" : "border-brand/50")}
+          onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
+          onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files?.[0]; if (f) void go(f); }}>
+          <p className="text-subtitle font-medium text-ink">Upload or drop the walkthrough video from the visit</p>
           <p className="mt-1 text-[13px] text-ink-muted">The AI pulls the key frames, reads what was said, marks what it sees and fills out the report. Demo file: demo-videos/Stittsville_bathroom_walkthrough.mp4</p>
           <input ref={file} type="file" accept="video/*" className="sr-only" aria-label="Walkthrough video" onChange={(e) => e.target.files?.[0] && void go(e.target.files[0])} />
           <Button className="mt-3" leading={<Upload size={16} aria-hidden />} onClick={() => file.current?.click()}>Upload video</Button>

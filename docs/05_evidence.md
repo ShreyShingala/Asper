@@ -38,8 +38,10 @@ These ran on a **stand-in**: the same prompt and tools on a free text model, not
 | Rule violations (mold claims, prices, medical advice, asking for name/phone/email…) | 0 | **0** |
 | Right next step recommended | n/a | **8 / 8** (tenant → landlord letter; Australia → remote report; health → air quality test) |
 
+**Caveat:** these scores are for the earlier Bruce, who asked the screening questions himself (prompts v3/v5). The current Bruce is a photo coach: screening moved to five taps before the call, with a manual shutter and 2 shots per spot. He has **not** been re-scored on the simulator yet.
+
 ### Software checks (latest run)
-- Backend unit tests: **84 passed**, including 21 hub tests (consent windows, safety vs offer, opt-out, caps, quiet hours, footers, geography against real zone outlines, fact grounding, the health guard, moments, booking consent, research brief, the full hero loop, STOP/HUMAN, kill switch).
+- Backend unit tests: **90 passed** (re-run Oct 25), including the hub tests (consent windows, safety vs offer, opt-out, caps, quiet hours, footers, geography against real zone outlines, fact grounding, the health guard, moments, booking consent, research brief, the full hero loop, STOP/HUMAN, kill switch).
 - **The demo script runs every beat through the API**, including the hub loop, with **no AI available** (quota exhausted).
 - Browser tests (Playwright): **22 passed** (+2 desktop-only skips on phone sizes).
   - The live-call screen (pre-call taps → photo plan → plan-driven capture), with the real walkthrough video as the camera, at desktop, iPhone 13 and Pixel 7 sizes.
@@ -61,7 +63,7 @@ These ran on a **stand-in**: the same prompt and tools on a free text model, not
 ## Simulated (labelled in the app)
 - SMS and email sending (`sent_simulated`), until Twilio/Resend keys are added.
 - Payments, booking confirmations and CRM/FreshBooks/Calendar sync.
-- The 28 hub customers and their histories in the 7 tools (marked "synthetic").
+- The customers' text threads: the demo now runs on the 6 real sample-pack customers, with threads reconstructed from each job's timeline (our wording; the events, dates and amounts are the job's).
 - The rainfall warning in the demo (real zone outline, simulated alert; there were no water alerts on demo day).
 - "Recovered by MoldFlow": counts estimates accepted via a MoldFlow reply in the demo.
 
