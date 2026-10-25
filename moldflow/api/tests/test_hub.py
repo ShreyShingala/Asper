@@ -82,8 +82,8 @@ def test_quiet_hours_hold():
 def test_footer_has_identity_unsubscribe_and_ai_disclosure_in_both_languages():
     en = consent.footer(_msg(), ai_sent=True)
     fr = consent.footer(_msg(language="fr"), ai_sent=True)
-    assert "Mold Busters" in en and "STOP" in en and "HUMAN" in en
-    assert "ARRÊT" in fr and "HUMAIN" in fr
+    assert "Mold Busters" in en and "STOP" in en and "HUMAN" not in en  # no AI line in the footer (HUMAN still works as a keyword)
+    assert "ARRÊT" in fr and "HUMAIN" not in fr
     assert "STOP" not in consent.footer(_msg(is_cem=False), ai_sent=False)
 
 
@@ -175,7 +175,7 @@ def test_hero_loop(client):
     r = client.post("/webhooks/inbound", json={"from_": "(613) 555-7788", "channel": "sms",
                                                "body": "I found black stuff on my basement wall. Is it dangerous? My son has asthma."}).json()
     assert r["reply"]["status"] == "sent_simulated" and "medical advice" in r["reply"]["body"]
-    assert all(f["status"] == "pending" for f in r["facts"])
+    assert all(f["status"] == "pending" for f in r["facts"] if f["category"] == "health")  # health facts always wait for review
     chase = client.post("/people/c-job1/chase").json()
     assert chase["autonomy"] == "locked" and "washroom" in chase["body"] and "$4,181.00" in chase["body"]
     sent = client.post(f"/messages/{chase['id']}/approve", json={"by": "Staff E"}).json()

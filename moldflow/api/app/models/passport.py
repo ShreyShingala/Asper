@@ -240,7 +240,7 @@ class OutboxMessage(BaseModel):
     to_name: str = ""
     to_address: str = ""
     channel: Literal["email", "sms", "form"] = "email"
-    from_address: str = "care@bustmold.com"
+    from_address: str = "moldbusters@gmail.com"
     on_behalf_of: str | None = None
     cc: list[str] = []
     subject: str = ""

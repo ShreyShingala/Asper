@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"findings\":[{\"room\":\"Bathroom\",\"observation\":\"Tub faucet is leaking\",\"reading_kind\":null,\"reading_result\":null,\"evidence_photo_ids\":[\"t183b72\"]},{\"room\":\"Bathroom\",\"observation\":\"Moisture meter shows elevated moisture below the faucet\",\"reading_kind\":\"moisture\",\"reading_result\":\"elevated\",\"evidence_photo_ids\":[\"t183b72\"]},{\"room\":\"Bathroom\",\"observation\":\"Ball slope test failed in the shower enclosure\",\"reading_kind\":\"ball_slope\",\"reading_result\":\"failed\",\"evidence_photo_ids\":[\"t183b72\"]},{\"room\":\"Bathroom\",\"observation\":\"Black spots along the silicone at the tub edge\",\"reading_kind\":\"visual\",\"reading_result\":\"anomaly\",\"evidence_photo_ids\":[\"t183b72\"]}]}"
+}

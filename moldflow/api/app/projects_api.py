@@ -71,17 +71,17 @@ class ChatIn(BaseModel):
 
 @router.post("/projects/{case_id}/chat")
 async def project_chat(case_id: str, body: ChatIn) -> dict:
-    """Post to the project chat. Mention @muse (or @bruce) to get an answer with this project's full context."""
+    """Post to the project chat. Mention @asper (or @bruce) to get an answer with this project's full context."""
     text = body.text.strip()[:2000]
     if not text:
         raise HTTPException(422, "Empty message.")
     async with store.editing(case_id) as c:
         c.chat.append(ChatMessage(id="c" + uuid.uuid4().hex[:7], author=body.author, role="staff", text=text))
     reply = None
-    if re.search(r"@(muse|bruce|ai)\b", text, re.I):
-        ans, _ = await muse.ask(re.sub(r"@(muse|bruce|ai)\b", "", text, flags=re.I), store.list_all(), scope=case_id)
+    if re.search(r"@(asper|muse|bruce|ai)\b", text, re.I):
+        ans, _ = await muse.ask(re.sub(r"@(asper|muse|bruce|ai)\b", "", text, flags=re.I), store.list_all(), scope=case_id)
         async with store.editing(case_id) as c:
-            reply = ChatMessage(id="c" + uuid.uuid4().hex[:7], author="Muse", role="ai", text=ans.answer)
+            reply = ChatMessage(id="c" + uuid.uuid4().hex[:7], author="Asper", role="ai", text=ans.answer)
             c.chat.append(reply)
     return {"chat": _get(case_id).chat, "reply": reply}
 

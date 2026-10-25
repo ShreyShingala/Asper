@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Check, ClipboardCheck, MessageSquare, Video, X } from "lucide-react";
 import { api, photoUrl } from "@/lib/api";
 import { Button, Card, Tag, cx } from "@/components/ui";
+import { OnsiteVideo } from "@/components/onsite-video";
 
 type Conv = { contact_id: string; name: string; language: string; synthetic: boolean; owner: string; case_id?: string | null; last_at: string;
   thread: { id: string; dir: "in" | "out"; text: string; at: string; status: string }[];
@@ -37,6 +38,11 @@ export function Pillars() {
   return (
     <section aria-label="Pillars" className="mb-8 space-y-4">
       {msg && <p role="status" className="rounded-ds-sm bg-alert-success-bg p-3 text-subtitle text-alert-success-title ">{msg}</p>}
+
+      <Card className="flex flex-col p-5">
+        <Head icon={<ClipboardCheck size={18} aria-hidden />} title="On-site reviews" n={d.counts.reports_waiting} sub="upload the visit's walkthrough video: it fills out the report" />
+        <div className="mt-3"><OnsiteVideo /></div>
+      </Card>
 
       <Card className="flex flex-col p-5">
         <Head icon={<MessageSquare size={18} aria-hidden />} title="Customer conversations" n={d.counts.replies_waiting} sub="replies drafted from their case" />
@@ -108,32 +114,6 @@ export function Pillars() {
         <Link href="/?demo=1" className="mt-3 text-caption font-medium text-brand underline">Start a virtual assessment (demo)</Link>
       </Card>
 
-      <Card className="flex flex-col p-5">
-        <Head icon={<ClipboardCheck size={18} aria-hidden />} title="On-site reviews" n={d.counts.reports_waiting} sub="inspector walkthroughs fill the report" />
-        <ul className="mt-3 space-y-3">
-          {d.onsite.slice(0, open.onsite ? undefined : 3).map((o) => (
-            <li key={o.case_id} className="rounded-ds-sm border border-kit-gray-soft p-3">
-              <div className="flex items-center gap-2">
-                <Link href={`/projects/${o.case_id}`} className="text-subtitle font-semibold text-ink hover:underline">{o.title}</Link>
-                <Tag tone={o.report === "approved" ? "green" : o.report === "draft" ? "brand" : "gray"} soft>report {o.report}</Tag>
-              </div>
-              <p className="mt-1 text-caption text-ink-muted">{o.findings} findings · {o.inspector_photos} photos · {o.notes} walkthrough{o.notes === 1 ? "" : "s"}{o.has_video ? " · video" : ""}</p>
-              {o.last_note && <p className="mt-1 line-clamp-2 text-caption italic text-ink-body">&ldquo;{o.last_note}&rdquo;</p>}
-              {o.report === "draft" && (o.blocks.length ? (
-                <p className="mt-2 text-caption text-kit-red">{o.blocks.length} check(s) to resolve first · <Link href={`/cases/${o.case_id}/review`} className="underline">Review</Link></p>
-              ) : (
-                <div className="mt-2 flex gap-2">
-                  <Button size="sm" leading={<Check size={14} aria-hidden />} state={busy === `r${o.case_id}` ? "loading" : undefined}
-                    onClick={() => void act(`r${o.case_id}`, () => api.post(`/cases/${o.case_id}/approve`, { what: "report", reviewed_by: "Owner" }), "Report approved; the client email sends itself.")}>Approve report</Button>
-                  <Link href={`/cases/${o.case_id}/review`} className="inline-flex items-center text-caption font-medium text-brand underline">Read it</Link>
-                </div>
-              ))}
-              {o.report === "none" && <Link href={`/cases/${o.case_id}/inspect`} className="mt-2 inline-block text-caption font-medium text-brand underline">Record a walkthrough</Link>}
-            </li>
-          ))}
-        </ul>
-        {more("onsite", d.onsite.length)}
-      </Card>
     </section>
   );
 }

@@ -77,26 +77,21 @@ def check(contact: Contact, msg: Message, history: list[Message], suppressed: bo
             return "block", "safety check-in already sent for this alert"
     if msg.trigger.startswith("moment") and any(f.startswith("life:") for f in msg.facts_used) and not contact.consent.personalised_reminders:
         return "block", "references a life event without personalised-reminders consent"
-    if in_quiet_hours(contact) and not msg.trigger.startswith("inbound"):
+    if in_quiet_hours(contact) and not msg.trigger.startswith("inbound") and not msg.in_reply_to:  # they just texted us: answer now
         return "hold", f"quiet hours ({contact.prefs.quiet_start}:00-{contact.prefs.quiet_end}:00), will send at {contact.prefs.quiet_end}:00"
     return "send", "ok"
 
 
-def footer(msg: Message, ai_sent: bool) -> str:
+def footer(msg: Message, ai_sent: bool) -> str:  # noqa: ARG001 (no AI line: not required by CASL; HUMAN still works as a keyword)
     fr = msg.language == "fr"
     if msg.channel == "sms":
         parts = [f"- {COMPANY}, {SITE}, {PHONE}."]
         if msg.is_cem:
             parts.append("Répondez ARRÊT pour vous désabonner." if fr else "Reply STOP to opt out.")
-        if ai_sent:
-            parts.append("Assistant automatisé: répondez HUMAIN pour une personne." if fr else "Automated assistant: reply HUMAN for a person.")
         return " ".join(parts)
     lines = [f"{COMPANY} · {ADDRESS} · {PHONE} · {SITE}"]
     if msg.is_cem:
         lines.append("Se désabonner : répondez ARRÊT ou visitez " + SITE + "/me" if fr else "Unsubscribe: reply STOP or visit " + SITE + "/me")
-    if ai_sent:
-        lines.append("Envoyé par l'assistant automatisé de Mold Busters. Répondez HUMAIN pour parler à une personne." if fr
-                     else "Sent by Mold Busters' automated assistant. Reply HUMAN to reach a person.")
     return "\n\n" + "\n".join(lines)
 
 

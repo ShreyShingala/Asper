@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"findings\":[{\"room\":\"Basement\",\"observation\":\"No thermal anomalies on foundation walls\",\"reading_kind\":\"thermal\",\"reading_result\":\"none\",\"evidence_photo_ids\":[]},{\"room\":\"Basement\",\"observation\":\"Humidity within normal range\",\"reading_kind\":\"temp_rh_dew\",\"reading_result\":\"normal\",\"evidence_photo_ids\":[]},{\"room\":\"Basement\",\"observation\":\"Swab test under the sink came back positive\",\"reading_kind\":\"swab\",\"reading_result\":\"positive\",\"evidence_photo_ids\":[]}]}"
+}

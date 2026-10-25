@@ -71,6 +71,7 @@ export default function Pack() {
             <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap p-5 font-sans text-subtitle text-ink">{pending.body}</pre>
           )}
           <div className="grid gap-2 border-t border-kit-gray-soft p-4">
+            {pending.channel !== "form" && <MailButtons m={pending} />}
             <Button size="lg" leading={<Send size={18} aria-hidden />} state={busy === "send" ? "loading" : undefined}
               onClick={() => void act(`/cases/${caseId}/outbox/${pending.id}/approve`, { by: "tenant", body: edit === pending.id ? draft : undefined }, "send")}>
               {pending.channel === "form" ? "Approve and file on my behalf" : "Send on my behalf"}
@@ -82,6 +83,17 @@ export default function Pack() {
           </div>
         </Card>
       )}
+
+      {!pending && (() => {
+        const latest = [...d.outbox].reverse().find((m) => m.status === "sent_simulated" && m.channel !== "form");
+        return latest ? (
+          <Card className="mt-5 space-y-3 p-5">
+            <p className="text-subtitle font-semibold text-ink">Sent for you: {latest.subject}</p>
+            <p className="text-caption text-ink-muted">To {latest.to_name} &lt;{latest.to_address}&gt; · CC {latest.cc.join(", ")}. Open it in your mail to send it from your own account too:</p>
+            <MailButtons m={latest} />
+          </Card>
+        ) : null;
+      })()}
 
       <Card className="mt-5 p-5">
         <h2 className="text-subheading font-semibold text-ink">Your escalation steps</h2>
@@ -119,5 +131,25 @@ export default function Pack() {
       )}
       <p className="mt-6 text-caption font-light text-ink-muted">Document preparation, not legal advice. Free tenant legal clinics can help you file with the tribunal.</p>
     </main>
+  );
+}
+
+/** Prefilled compose windows: the letter opens in Gmail or Outlook (signed in as moldbusters@gmail.com); you press Send. */
+function compose(m: Msg) {
+  const q = (o: Record<string, string>) => Object.entries(o).filter(([, v]) => v).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
+  const cc = m.cc.join(",");
+  return {
+    gmail: `https://mail.google.com/mail/?view=cm&fs=1&${q({ to: m.to_address, cc, su: m.subject, body: m.body })}`,
+    outlook: `https://outlook.live.com/mail/0/deeplink/compose?${q({ to: m.to_address, cc, subject: m.subject, body: m.body })}`,
+  };
+}
+
+function MailButtons({ m }: { m: Msg }) {
+  const l = compose(m);
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <a href={l.gmail} target="_blank" rel="noreferrer" className={buttonClass({ variant: "outline" })}><Mail size={16} aria-hidden />Open in Gmail</a>
+      <a href={l.outlook} target="_blank" rel="noreferrer" className={buttonClass({ variant: "outline" })}><Mail size={16} aria-hidden />Open in Outlook</a>
+    </div>
   );
 }

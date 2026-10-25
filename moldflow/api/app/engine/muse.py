@@ -1,4 +1,4 @@
-"""Muse: the company assistant with context from every project (timeline, chat, findings, checks, messages, estimates,
+"""Asper (formerly Muse): the company assistant with context from every project (timeline, chat, findings, checks, messages, estimates,
 approvals, payments). It answers with citations and can act, but only through the approval queue: drafted messages
 go to the Hub's Outreach queue, and read-only actions (evidence bundle, open a project) run immediately."""
 import json
@@ -31,7 +31,7 @@ class MuseAnswer(BaseModel):
     actions: list[MuseAction] = Field(default=[], description="0-3 useful next actions")
 
 
-SYSTEM = """You are Muse, the internal assistant for Mold Busters (mold inspection and remediation). You have snippets from
+SYSTEM = """You are Asper, the internal assistant for Mold Busters (mold inspection and remediation). You have snippets from
 the company's project records (timelines, project chats, findings, checks, messages, estimates, approvals, payments)
 and customer profiles (people, interactions across tools, texts and emails, approved facts).
 Answer ONLY from the snippets and cite their refs. If something isn't in the snippets, say so. Never invent dates, prices
@@ -107,6 +107,46 @@ def retrieve(question: str, cases: list[Case], scope: str | None = None, k: int 
     return [(r, t) for _, r, t in scored[:k]]
 
 
+RISK = re.compile(r"expect|problem|complain|refund|lawyer|sue|dispute|proof|threat|poursuiv|avocat|not mold|asbestos|scope", re.I)
+
+
+def _legal_brief(c, case: Case, msgs) -> MuseAnswer:
+    """Everything a lawyer asks for first, from the records only: engagement, findings, what was agreed and paid, the work,
+    the communications and the points likely to be argued, plus the evidence bundle."""
+    tl = case.timeline
+    when = lambda e: e.at_text or (e.at.strftime("%b %d, %Y") if e.at else "")  # noqa: E731
+    pick = lambda *words: [e for e in tl if any(w in f"{e.step} {e.what}".lower() for w in words)]  # noqa: E731
+    first = tl[0] if tl else None
+    est = next((e for e in tl if e.step.startswith("Estimate ")), None) or next(iter(pick("estimate")), None)
+    work = pick("remediation", "clearance", "paid in full", "payment")
+    risks = [m.text for m in case.chat if RISK.search(m.text)][:2] + [m.body for m in msgs if m.direction == "in" and RISK.search(m.body)][-2:]
+    ins = [m for m in msgs if m.direction == "in"]
+    photos = [p for p in case.photos]
+    out = [f"Evidence package: {c.name}, project #{case.project_no or case.id} ({case.property.region_text or case.property.postal_prefix}).", ""]
+    if first:
+        out.append(f"1. Engagement: {when(first)}, {first.step.lower()}: {first.what}")
+    out.append(f"2. Client's stated concern: {case.concern}")
+    if case.findings:
+        out.append("3. What the inspector documented: " + "; ".join(f.observation.rstrip('.') for f in case.findings[:5]) + ".")
+    if case.recommendations:
+        out.append("4. What we recommended: " + "; ".join(case.recommendations[:4]) + ".")
+    if est:
+        out.append(f"5. Price agreed: {est.what.split(' · ')[0]} ({est.step}); status: {est.what.split(' · ')[1] if ' · ' in est.what else 'see estimate'}.")
+    if work:
+        out.append("6. Work and payment on record: " + " → ".join(f"{when(e)} {e.step.lower()}" for e in work[:4]) + ".")
+    out.append(f"7. Communications: {len(msgs)} texts ({len(ins)} from the client), plus {len(case.chat)} internal notes; "
+               f"last client message {ins[-1].created_at:%b %d}: \"{ins[-1].body[:120]}\"" if ins else f"7. Communications: {len(case.chat)} internal notes.")
+    if risks:
+        out.append("8. Points likely to be argued (verbatim from the record):")
+        out += [f"   - \"{r[:170].strip()}\"" for r in risks]
+    out += ["", f"The ZIP holds the full dated timeline, every message and internal note, {len(photos)} photos with their timestamps and "
+            "captions, the findings, estimate and approvals log, plus a SHA-256 manifest so your lawyer can show nothing was altered.",
+            "This is a factual record, not legal advice."]
+    return MuseAnswer(answer="\n".join(out), cites=[f"person/{c.id}", f"{case.id}/summary"],
+                      actions=[MuseAction(type="evidence_bundle", case_id=case.id, label="Download the evidence bundle (ZIP)"),
+                               MuseAction(type="open_project", case_id=case.id, label="Open the project")])
+
+
 def _person_answer(question: str, cases: list[Case]) -> MuseAnswer | None:
     """Questions naming a customer ('what's going on with Priya?') or about follow-ups, answered straight from the records."""
     from app import crm_store as db
@@ -131,6 +171,8 @@ def _person_answer(question: str, cases: list[Case]) -> MuseAnswer | None:
         facts = [f for f in db.query(ProfileFact, contact_id=c.id, status="approved") if f.category != "health" and f.message_use != "never"]
         nxt = next(iter(sorted(db.query(Moment, contact_id=c.id, status="upcoming"), key=lambda m: m.due)), None)
         last_in = next((m for m in reversed(msgs) if m.direction == "in"), None)
+        if case and LEGAL.search(question):
+            return _legal_brief(c, case, msgs)
         lines = [f"{c.name} ({c.customer_type.replace('_', ' ')}, {c.properties[0].city if c.properties else ''})."]
         if case:
             lines.append(f"Case #{case.project_no or case.id}: {case.concern} Stage: {case.stage.replace('_', ' ')}."
@@ -180,6 +222,8 @@ def _fallback(question: str, hits: list[tuple[str, str]], cases: list[Case]) -> 
 async def ask(question: str, cases: list[Case], scope: str | None = None) -> tuple[MuseAnswer, list[tuple[str, str]]]:
     if not scope and re.search(r"follow.?ups?|who (do|should) (i|we) (call|text|contact|follow)", question, re.I) and (pa := _person_answer(question, cases)):
         return pa, []  # the follow-up queue is exact data: answer from it, not from a model's reading of it
+    if not scope and LEGAL.search(question) and (pa := _person_answer(question, cases)) and pa.actions and pa.actions[0].type == "evidence_bundle":
+        return pa, []  # a legal file is assembled from the record itself, never paraphrased by a model
     hits = retrieve(question, cases, scope)
     if not hits:
         return _fallback(question, hits, cases), hits

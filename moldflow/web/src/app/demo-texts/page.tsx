@@ -31,7 +31,11 @@ export default function DemoTexts() {
       setWho((w) => w || o.people[0]?.id || "");
     } catch (e) { setErr((e as Error).message); }
   }, []);
-  useEffect(() => { const t = setTimeout(() => void load(), 0); return () => clearTimeout(t); }, [load]);
+  useEffect(() => {  // live: the phone and the agent panel refresh every 2.5 s
+    const t = setTimeout(() => void load(), 0);
+    const iv = setInterval(() => void load(), 2500);
+    return () => { clearTimeout(t); clearInterval(iv); };
+  }, [load]);
   const person = people.find((p) => p.id === who);
   const drafts = (person?.messages ?? []).filter((m) => m.status === "draft");
 
@@ -75,7 +79,7 @@ export default function DemoTexts() {
               <div className="mx-auto max-w-sm rounded-[28px] border-8 border-kit-navy bg-kit-gray-faint p-3">
                 <ol className="flex h-[26rem] flex-col gap-1.5 overflow-y-auto">
                   {(person?.messages ?? []).filter((m) => m.status !== "draft").map((m) => (
-                    <li key={m.id} className={cx("w-fit max-w-[85%] rounded-2xl px-3 py-1.5 text-caption", m.dir === "in" ? "ml-auto bg-brand text-white" : "bg-white text-ink")}>{m.text}</li>
+                    <li key={m.id} className={cx("w-fit max-w-[85%] rounded-2xl px-3 py-1.5 text-[13px]", m.dir === "in" ? "ml-auto bg-brand text-white" : "bg-white text-ink")}>{m.text}</li>
                   ))}
                 </ol>
                 <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="mt-2 flex gap-2">

@@ -16,7 +16,7 @@ const SUGGESTIONS = [
   "Which projects have estimates viewed but not accepted?",
 ];
 
-export default function Muse() {
+export default function Asper() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
@@ -36,8 +36,8 @@ export default function Muse() {
   }
 
   return (
-    <StaffShell title="Muse">
-      <p className="-mt-3 mb-5 text-subtitle font-light text-ink-body">Ask anything about any project. Muse reads every timeline, chat, message, check, estimate and approval, answers with sources, and can act: drafts go to Outreach for your OK, evidence bundles download right away.</p>
+    <StaffShell title="Asper">
+      <p className="-mt-3 mb-5 text-subtitle font-light text-ink-body">Ask anything about any project. Asper reads every timeline, chat, message, check, estimate and approval, answers with sources, and can act: drafts go to Outreach for your OK, evidence bundles download right away.</p>
       <div className="mx-auto max-w-3xl space-y-4">
         {turns.length === 0 && (
           <div className="grid gap-2 sm:grid-cols-2">
@@ -50,7 +50,7 @@ export default function Muse() {
           <div key={i} className="space-y-2">
             <p className="ml-auto w-fit max-w-[85%] rounded-ds-sm bg-kit-navy px-4 py-2 text-subtitle text-white">{t.q}</p>
             <Card className="p-5">
-              <Eyebrow color="text-brand" className="mb-2 flex items-center gap-1.5"><Sparkles size={12} aria-hidden />Muse</Eyebrow>
+              <Eyebrow color="text-brand" className="mb-2 flex items-center gap-1.5"><Sparkles size={12} aria-hidden />Asper</Eyebrow>
               {!t.a && !t.err && <p className="text-subtitle text-ink-muted">Reading your projects…</p>}
               {t.err && <p role="alert" className="text-subtitle text-kit-red">{t.err}</p>}
               {t.a && (
@@ -79,7 +79,7 @@ export default function Muse() {
           </div>
         ))}
         <form onSubmit={(e) => { e.preventDefault(); void ask(q); }} className={cx("sticky bottom-4 flex gap-2 rounded-ds-sm bg-white p-2 shadow-ds-lg")}>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ask Muse about any project…" aria-label="Ask Muse"
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ask Asper about any project…" aria-label="Ask Asper"
             className="h-12 min-w-0 flex-1 rounded-ds-xsm px-3 text-[16px] outline-none" />
           <Button type="submit" size="lg" state={busy ? "loading" : undefined} leading={<Send size={16} aria-hidden />}>Ask</Button>
         </form>

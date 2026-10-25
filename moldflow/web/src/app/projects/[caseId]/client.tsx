@@ -124,7 +124,7 @@ export default function Project() {
       {tab === "Chat" && (
         <Card className="flex h-[65vh] flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b border-kit-gray-soft px-4 py-2">
-            <p className="flex items-center gap-1.5 text-caption text-ink-muted"><MessageSquare size={13} aria-hidden />Project chat · mention <b>@muse</b> to ask about this project</p>
+            <p className="flex items-center gap-1.5 text-caption text-ink-muted"><MessageSquare size={13} aria-hidden />Project chat · mention <b>@asper</b> to ask about this project</p>
             <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => e.target.files?.[0] && void importTelegram(e.target.files[0])} />
             <Button size="sm" variant="outline" leading={<Upload size={14} aria-hidden />} onClick={() => fileRef.current?.click()}>Import Telegram chat</Button>
           </div>
@@ -138,7 +138,7 @@ export default function Project() {
             ))}
           </ol>
           <form onSubmit={send} className="flex gap-2 border-t border-kit-gray-soft p-3">
-            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Message the team, or @muse what did we quote?" aria-label="Message"
+            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Message the team, or @asper what did we quote?" aria-label="Message"
               className="h-11 min-w-0 flex-1 rounded-ds-xsm border border-kit-gray-soft px-3 text-[16px] outline-none focus:border-brand" />
             <Button type="submit" state={busy ? "loading" : undefined} leading={<Send size={16} aria-hidden />}>Send</Button>
           </form>

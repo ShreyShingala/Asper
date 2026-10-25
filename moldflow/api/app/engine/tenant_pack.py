@@ -12,7 +12,7 @@ from app.engine import consent
 from app.models.passport import Case, OutboxMessage, TenantPack
 
 PRICES = {"ai_report": "20.00", "tenant_pack": "50.00"}
-FROM = "care@bustmold.com"
+FROM = "moldbusters@gmail.com"  # demo mailbox: letters open prefilled in Gmail or Outlook
 
 # --- demo clock: the app-wide clock (app/clock.py), so tenant-pack deadlines and the Hub's time travel agree ---------
 def today() -> date:

@@ -197,7 +197,7 @@ def seed(cases: list[Case]) -> int:
                                 properties=[PropertyRef(address=street, city=city, postal=postal, fsa=fsa, lat=lat, lon=lon,
                                                         province="QC" if fsa[0] == "H" else "ON")],
                                 consent=Consent(sms=purchase, email=purchase.model_copy(), profiling_notice_at=datetime.combine(today, time(9))),
-                                prefs=Prefs(channel="sms", storm_checkin_opt_in=fsa == "K2S"))
+                                prefs=Prefs(channel="sms", storm_checkin_opt_in=fsa == "K2S", quiet_start=0, quiet_end=0))
         if est:
             db.put(Interaction(id=f"i-{cid}-est", contact_id=cid, case_id=case_id, at=now - timedelta(days=20), system="freshbooks", kind="estimate",
                                summary=f"Estimate {est.get('number')}: {est.get('amount')} ({est.get('status')})", amount=amount,
@@ -215,6 +215,7 @@ def seed(cases: list[Case]) -> int:
         c = contacts.get(cid)
         if not c:
             continue
+        c.prefs.quiet_start = c.prefs.quiet_end = 0  # demo: texts any time of day (real customers default to no texts 21:00-9:00)
         if cid in ("c-job1", "c-job2", "c-stitts"):  # these customers ticked "helpful check-ins and offers" (express consent)
             ex = ChannelConsent(basis="express", granted_at=today - timedelta(days=60), granted_via="web_form", evidence_ref="booking form checkbox",
                                 text_version="2026-10-booking-v1")
