@@ -55,6 +55,8 @@ def _seed_everything() -> list[Case]:
     crm_seed.seed(cases)
     from app.seed import demo6
     demo6.seed(cases)
+    from app.demo_api import seed_tenant_demo
+    seed_tenant_demo()
     from app import messaging
     from app.models.crm import Contact
     for contact in crm_store.query(Contact):

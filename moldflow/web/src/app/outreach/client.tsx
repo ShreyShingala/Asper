@@ -111,6 +111,7 @@ function Row({ r, tab, checked, onCheck, onDone }: { r: MessageRow; tab: string;
           ) : <p className="mt-2 whitespace-pre-line text-subtitle text-ink">{m.final_body ?? m.body}</p>}
           <p className="mt-1 text-caption text-ink-muted">Why: {m.reason}{m.facts_used.length ? ` · uses ${m.facts_used.length} fact(s)` : ""}{m.channel === "sms" && tab === "draft" ? ` · ${body.length} chars + footer` : ""}</p>
           {m.blocked_reason && <p className="mt-1 text-caption font-medium text-kit-red">{m.blocked_reason}</p>}
+          <Earlier contactId={m.contact_id} beforeId={m.id} />
         </div>
         {tab === "draft" && (
           <div className="flex shrink-0 gap-1">
@@ -121,5 +122,39 @@ function Row({ r, tab, checked, onCheck, onDone }: { r: MessageRow; tab: string;
         )}
       </div>
     </Card>
+  );
+}
+
+type Earlier = { id: string; dir: "in" | "out"; text: string; at: string };
+/** Context for a draft: load the previous 3 messages with this customer, and keep loading further back. */
+function Earlier({ contactId, beforeId }: { contactId: string; beforeId: string }) {
+  const [rows, setRows] = useState<Earlier[]>([]);
+  const [more, setMore] = useState(true);
+  const [busy, setBusy] = useState(false);
+  async function load() {
+    setBusy(true);
+    try {
+      const pivot = rows[0]?.id ?? beforeId;
+      const r = await api.get<{ messages: Earlier[]; has_more: boolean }>(`/threads/${contactId}?before=${encodeURIComponent(pivot)}&limit=3`);
+      setRows((x) => [...r.messages, ...x]); setMore(r.has_more);
+    } finally { setBusy(false); }
+  }
+  return (
+    <div className="mt-3 border-t border-[#efe6df] pt-2">
+      {rows.length > 0 && (
+        <ol className="mb-2 space-y-1.5">
+          {rows.map((x) => (
+            <li key={x.id} className={cx("w-fit max-w-[90%] rounded-ds-xsm px-2.5 py-1.5 text-[13px]", x.dir === "in" ? "bg-kit-gray-faint text-ink" : "ml-auto bg-brand-tint text-ink")}>
+              {x.text}<span className="mt-0.5 block text-[11px] text-ink-muted">{x.dir === "in" ? "Customer" : "Mold Busters"} · {dayTime(x.at)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      {more ? (
+        <button type="button" onClick={() => void load()} disabled={busy} className="text-[13px] font-medium text-brand hover:underline disabled:opacity-60">
+          {busy ? "Loading…" : rows.length ? "Load 3 more earlier messages" : "Load previous 3 messages"}
+        </button>
+      ) : <p className="text-[12px] text-ink-muted">Start of the conversation.</p>}
+    </div>
   );
 }

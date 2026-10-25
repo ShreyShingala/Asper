@@ -236,3 +236,48 @@ async def onsite_video(video: UploadFile = File(...)) -> dict:
     return {"case_id": cid, "duration_s": cfg["duration"], "frames": frames, "transcript": tr,
             "findings": [{"id": f.id, "room": f.room, "text": f.observation, "photos": f.evidence_photo_ids} for f in case.findings],
             "fields": fields, "recommendations": case.recommendations, "title": cfg["title"]}
+
+
+@router.get("/threads/{cid}")
+def thread_page(cid: str, before: str | None = None, limit: int = 3) -> dict:
+    """Earlier messages with a customer, newest first in pages of `limit`, for context next to a draft."""
+    msgs = sorted([m for m in db.query(Message, contact_id=cid) if m.status in ("received", "sent_simulated", "approved")], key=lambda m: m.created_at)
+    if before and (pivot := db.get(Message, before)):
+        msgs = [m for m in msgs if m.created_at < pivot.created_at]
+    page = msgs[-max(1, min(limit, 20)):]
+    return {"messages": [{"id": m.id, "dir": m.direction, "text": m.final_body or m.body, "at": m.created_at.isoformat()} for m in page],
+            "has_more": len(msgs) > len(page)}
+
+
+def seed_tenant_demo() -> str:
+    """A tenant case pre-loaded from the real walkthrough video (Montreal sample): frames as the customer's photos, answers,
+    and a pre-assessment, so the $50 tenant action pack can be shown straight from the results page."""
+    from app.agents.tasks import image_check, rule_assess
+    from app.engine import rules
+    from app.models.passport import Case, Customer, LiveSession, Photo, PreAssessment, Property
+    cid = "demo-tenant"
+    case = Case(id=cid, title="Tenant · Laundry · H2X", stage="pre_assessed", language="en", intake_mode="live", seeded_from="demo (walkthrough video frames)",
+                customer=Customer(type="tenant", alias="Demo tenant"), concern="Black and white marks inside the washer and around the dryer vent; musty smell.",
+                answers={"room": "Laundry", "location": "H2X 1Y4", "occupant": "Tenant", "symptoms": "No", "odor": "Yes", "leak": "No",
+                         "spots": '[{"room": "Laundry", "surface": "appliance"}, {"room": "Laundry", "surface": "vent"}]', "size": "door"},
+                property=Property(province="QC", postal_prefix="H2X", region_text="Montréal, QC", in_service_area=True))
+    folder = config.PACK_DIR.parent / "moldflow/web/public/demo/onsite"
+    (config.DATA_DIR / "uploads" / cid).mkdir(parents=True, exist_ok=True)
+    for i, (n, shot) in enumerate([(1, "s1_wide"), (2, "s1_close"), (4, "s2_close")]):
+        src = folder / f"frame_{n:02d}.jpg"
+        if src.is_file():
+            rel = f"uploads/{cid}/p{i + 1}.jpg"
+            (config.DATA_DIR / rel).write_bytes(src.read_bytes())
+            case.photos.append(Photo(id=f"p{i + 1}", path=rel, room="Laundry", source="customer", prompt_id=shot, analysis=image_check(src.read_bytes()),
+                                     analysis_model="image check (on-server)", analysis_tier="rule"))
+    case.live = LiveSession(summary="Guided call from the walkthrough video: washer drum and door seal, the outlet behind the washer, the ceiling vent.",
+                            key_points=["Musty smell even after cleaning", "Landlord says it's dust in the vents"])
+    draft = rule_assess(case)
+    routing = rules.route(case, draft)
+    case.recommended_service = routing.service
+    case.pre_assessment = PreAssessment(summary=draft.summary, observed=draft.observed, cannot_tell=draft.cannot_tell, recommended_service=routing.service,
+                                        service_price_text=rules.price_text(case, routing.service), reasons=routing.reasons,
+                                        annotated_photo_ids=[p.id for p in case.photos if p.analysis and p.analysis.regions],
+                                        next_actions=rules.next_actions(case, routing.service), tier="rule")
+    store.save(case)
+    return cid

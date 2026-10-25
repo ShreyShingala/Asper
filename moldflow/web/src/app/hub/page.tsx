@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowRight, Bot, CalendarClock, CheckCheck, CloudRain, FlaskConical, Inbox, MessageSquarePlus, PiggyBank, Sparkles, Timer } from "lucide-react";
 import { api, money } from "@/lib/api";
-import { Button, Card, Eyebrow, KitTextarea, Spinner, StaffShell, Tag, cx } from "@/components/ui";
+import { Button, Card, Eyebrow, KitTextarea, Spinner, StaffShell, Tag, buttonClass, cx } from "@/components/ui";
 import { SYSTEMS, SourceChip, day, dayTime } from "@/components/hub";
 import { Pillars } from "@/components/pillars";
 import { MusePanel } from "@/components/muse-panel";
@@ -214,6 +214,7 @@ function DemoPanel({ onDone }: { onDone: () => void }) {
         <Button size="sm" variant="outline" leading={<CloudRain size={14} aria-hidden />} disabled={busy}
           onClick={() => run(async () => { const r = await api.post<{ matched: unknown[] }>("/alerts/simulate", { zone: "City of Ottawa" }); return `Rainfall warning simulated over Ottawa: ${r.matched.length} customers in the area.`; })}>
           Simulate storm: Ottawa</Button>
+        <Link href="/assess/demo-tenant" className={buttonClass({ size: "sm", variant: "outline" })}>Tenant pack demo ($50)</Link>
       </div>
       {out && <p role="status" className="mt-3 flex gap-1.5 rounded-ds-xsm bg-kit-gray-faint p-2 text-caption text-ink-body"><Sparkles size={13} className="mt-0.5 shrink-0" aria-hidden />{out}</p>}
       <p className="mt-3 flex items-center gap-1.5 text-caption text-ink-muted"><AlertTriangle size={12} aria-hidden />Nothing is actually sent: SMS/email are simulated until Twilio/Resend keys are added. <CheckCheck size={12} aria-hidden /></p>

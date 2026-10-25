@@ -31,10 +31,7 @@ export default function Pack() {
   if (!d.pack) {
     return (
       <main className="mx-auto grid min-h-dvh max-w-md place-items-center px-5">
-        <Card className="space-y-3 p-6 text-center">
-          <p className="text-body text-ink">No tenant action pack on this case yet.</p>
-          <Link href={`/assess/${caseId}/checkout?product=tenant_pack`} className={buttonClass({ size: "lg", fullWidth: true })}>Get the tenant action pack · $50</Link>
-        </Card>
+        <QuickStart caseId={caseId} onDone={() => void load()} />
       </main>
     );
   }
@@ -151,5 +148,32 @@ function MailButtons({ m }: { m: Msg }) {
       <a href={l.gmail} target="_blank" rel="noreferrer" className={buttonClass({ variant: "outline" })}><Mail size={16} aria-hidden />Open in Gmail</a>
       <a href={l.outlook} target="_blank" rel="noreferrer" className={buttonClass({ variant: "outline" })}><Mail size={16} aria-hidden />Open in Outlook</a>
     </div>
+  );
+}
+
+/** No pack yet: start it here in one step (demo details prefilled, all editable; payment is simulated). */
+function QuickStart({ caseId, onDone }: { caseId: string; onDone: () => void }) {
+  const [f, setF] = useState({ tenant_name: "Sam Tenant", tenant_email: "sam.tenant@example.com", landlord_name: "Lee Landlord", landlord_email: "lee.landlord@example.com" });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
+  async function go() {
+    setBusy(true); setErr(null);
+    try { await api.post(`/cases/${caseId}/checkout`, { product: "tenant_pack", ...f, authorize_auto: true }); onDone(); }
+    catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  }
+  return (
+    <Card className="w-full space-y-3 p-6">
+      <Logo small />
+      <h1 className="text-h6 font-semibold text-ink">Tenant action pack · $50</h1>
+      <p className="text-subtitle text-ink-body">We write to your landlord from a Mold Busters address, follow up, then help with a city complaint. You&apos;re copied on everything.</p>
+      {(["tenant_name", "tenant_email", "landlord_name", "landlord_email"] as const).map((k) => (
+        <label key={k} className="block text-caption text-ink-muted">{k.replace("_", " ").replace(/^./, (c) => c.toUpperCase())}
+          <input value={f[k]} onChange={set(k)} className="mt-1 h-11 w-full rounded-ds-xsm border border-kit-gray-soft px-3 text-[16px] text-ink" /></label>
+      ))}
+      {err && <p role="alert" className="text-subtitle text-kit-red">{err}</p>}
+      <Button size="lg" fullWidth state={busy ? "loading" : undefined} onClick={() => void go()}>Pay $50 and start (test card)</Button>
+      <Link href={`/assess/${caseId}/checkout?product=tenant_pack`} className="block text-center text-caption text-brand underline">Use the full checkout instead</Link>
+    </Card>
   );
 }
