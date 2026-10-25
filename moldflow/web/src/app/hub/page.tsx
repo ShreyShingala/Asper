@@ -208,8 +208,8 @@ function DemoPanel({ onDone }: { onDone: () => void }) {
       <div className="mt-2 flex flex-wrap gap-2">
         <Button size="sm" leading={<MessageSquarePlus size={14} aria-hidden />} disabled={busy}
           onClick={() => run(async () => {
-            const r = await api.post<{ intent: string; reply: { status: string; body: string }; contact_id: string }>("/webhooks/inbound", { from_: from, channel: "sms", body });
-            return `${r.intent}: reply ${r.reply.status === "sent_simulated" ? "sent instantly" : r.reply.status === "approved" ? "approved instantly, sends after quiet hours" : "drafted for approval"} → "${r.reply.body.slice(0, 90)}…"`;
+            const r = await api.post<{ intent: string; reply: { status: string; body: string; final_body?: string | null }; contact_id: string }>("/webhooks/inbound", { from_: from, channel: "sms", body });
+            return `${r.intent}: reply ${r.reply.status === "sent_simulated" ? "sent instantly" : r.reply.status === "approved" ? "approved instantly, sends after quiet hours" : "drafted for approval"} → "${(r.reply.final_body || r.reply.body.replace("{booking_link}", "(booking link)")).slice(0, 90)}…"`;
           })}>Send text</Button>
         <Button size="sm" variant="outline" leading={<CloudRain size={14} aria-hidden />} disabled={busy}
           onClick={() => run(async () => { const r = await api.post<{ matched: unknown[] }>("/alerts/simulate", { zone: "City of Ottawa" }); return `Rainfall warning simulated over Ottawa: ${r.matched.length} customers in the area.`; })}>

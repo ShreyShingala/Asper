@@ -59,6 +59,18 @@ def _rule_facts(text: str) -> list[FactDraft]:
     return out
 
 
+CHILD = re.compile(r"\b(bab(y|ies)|b[ée]b[ée]s?|pregnan\w*|enceinte|grossesse|child(ren)?|kids?|son|daughter|fils|fille|enfants?|nursery)\b", re.I)
+
+
+def enforce_categories(facts: list[FactDraft]) -> list[FactDraft]:
+    """Facts about children are household facts (talking points for a person, never automated texts) whatever the model
+    labelled them. Why: docs/04_decisions.md D9."""
+    for f in facts:
+        if f.category not in ("household", "health") and CHILD.search(f"{f.text} {f.quote}"):
+            f.category = "household"
+    return facts
+
+
 def grounded(fact: FactDraft, source: str) -> bool:
     norm = lambda s: re.sub(r"\s+", " ", s.lower()).strip(" .!?\"'")  # noqa: E731
     return bool(fact.quote.strip()) and norm(fact.quote) in norm(source)
@@ -75,7 +87,7 @@ async def extract_facts(text: str, kind: str) -> tuple[list[FactDraft], str]:
         facts, by = r.value.facts, "ai"
     except AgentFailure:
         facts, by = _rule_facts(text), "rule"
-    return [f for f in facts if grounded(f, text)], by
+    return enforce_categories([f for f in facts if grounded(f, text)]), by
 
 
 def to_follow_up(month: int | None) -> date | None:
@@ -116,7 +128,7 @@ def concern_and_sources(case: Case | None) -> tuple[str, list[str]]:
 
 
 # ---------------------------------------------------------------- triage
-HEALTH = re.compile(r"danger|safe|health|sick|breath|asthma|cough|kids?|baby|toxic|dangereux|santé|respir", re.I)
+HEALTH = re.compile(r"danger|safe|health|sick|breath|asthma|cough|toxic|dangereux|santé|respir", re.I)  # "baby"/"kids" alone isn't a health question
 YES = re.compile(r"\b(ok|okay|yes|yeah|sure|let'?s do it|go ahead|book (it|me)|sounds good|d'accord|oui|allons-y)\b", re.I)
 BOOK = re.compile(r"\b(book|appointment|come (out|by)|inspect|visit|rendez-vous|réserver)\b", re.I)
 RESCHED = re.compile(r"\b(reschedule|another (day|time)|can't make|move my|déplacer|changer)\b", re.I)

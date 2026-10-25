@@ -123,6 +123,21 @@ def test_grounding_requires_verbatim_quote():
     assert not grounded(FactDraft(text="Has twins", category="household", quote="we have twins"), src)
 
 
+def test_children_facts_are_household_whatever_the_ai_says():
+    from app.agents.hub import enforce_categories
+    out = enforce_categories([FactDraft(text="Expecting a baby in March", category="life_event", quote="we're expecting a baby in March"),
+                              FactDraft(text="Selling the house", category="life_event", quote="We're selling the house"),
+                              FactDraft(text="Son has asthma", category="health", quote="My son has asthma")])
+    assert [f.category for f in out] == ["household", "life_event", "health"]
+
+
+def test_baby_news_is_not_answered_as_a_health_question():
+    from app.agents.hub import _rule_triage
+    news = _rule_triage(_contact(), "We just found out we're expecting a baby in May! Can you text me back next week?", None)
+    worry = _rule_triage(_contact(), "Is it dangerous for the baby?", None)
+    assert "medical advice" not in news.reply and "medical advice" in worry.reply
+
+
 def test_rule_fact_extraction():
     from app.agents.hub import _rule_facts
     facts = _rule_facts("ok let's do it. Also we're expecting a baby in March! I work nights at the hospital.")
@@ -162,6 +177,7 @@ def client(monkeypatch):
     from app import config
     monkeypatch.setattr(config, "DB_PATH", config.Path(tmp) / "t.db") if hasattr(config, "Path") else monkeypatch.setattr(config, "DB_PATH", os.path.join(tmp, "t.db"))
     monkeypatch.setattr(config, "OPENROUTER_API_KEY", "")
+    monkeypatch.setattr(config, "EXACT_CACHE_DIR", config.Path(tmp))  # never replay live AI answers cached by a dev server
     monkeypatch.setattr(consent, "in_quiet_hours", lambda c, at=None: False)
     from app.agents import llm
     monkeypatch.setattr(llm, "_quota_until", 4102444800.0)  # behave as if the daily quota is used up: rules only
@@ -189,6 +205,33 @@ def test_hero_loop(client):
     assert any(m["kind"] == "nursery_humidity" and m["human_only"] for m in person["moments"])
     hub = client.get("/hub").json()
     assert hub["money"]["recovered_total"] == 4181.0 and hub["money"]["funnel"]["accepted"] == 1
+
+
+def test_yes_to_an_estimate_chase_accepts_even_if_the_ai_calls_it_booking(client, monkeypatch):
+    """Live AI labelled "ok let's do it" (replying to the estimate follow-up) as a booking: accepting money must not depend on it."""
+    from app.agents import hub as agents
+    from app.models.agents import TriageOut
+
+    async def ai_says_booking(contact, text, est, case, thread=None):
+        return TriageOut(intent="booking", wants_booking=True, reply="Let's book your inspection: {booking_link}"), "ai"
+    monkeypatch.setattr(agents, "triage", ai_says_booking)
+    chase = client.post("/people/c-job1/chase").json()
+    client.post(f"/messages/{chase['id']}/approve", json={"by": "Staff E"})
+    r = client.post("/webhooks/inbound", json={"contact_id": "c-job1", "channel": "sms",
+                                               "body": "ok let's do it. Also we're expecting a baby in March!"}).json()
+    assert r["accepted"]["amount"] == 4181.0 and r["intent"] == "estimate_yes"
+    assert "accepted" in r["reply"]["body"]
+
+
+def test_ok_without_an_estimate_chase_does_not_accept(client, monkeypatch):
+    from app.agents import hub as agents
+    from app.models.agents import TriageOut
+
+    async def ai_says_booking(contact, text, est, case, thread=None):
+        return TriageOut(intent="booking", wants_booking=True, reply="Pick a time: {booking_link}"), "ai"
+    monkeypatch.setattr(agents, "triage", ai_says_booking)
+    r = client.post("/webhooks/inbound", json={"contact_id": "c-job1", "channel": "sms", "body": "ok, can someone come Tuesday?"}).json()
+    assert r.get("accepted") is None
 
 
 def test_stop_and_human_keywords(client):

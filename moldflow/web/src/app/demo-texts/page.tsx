@@ -99,7 +99,7 @@ export default function DemoTexts() {
                 <div className="space-y-2 rounded-ds-sm bg-brand-tint/60 p-3 text-subtitle">
                   <p className="flex items-center gap-1.5 font-semibold text-ink"><Sparkles size={15} aria-hidden />What it just did</p>
                   {last.keyword && <p>Keyword detected: {last.keyword.toUpperCase()}</p>}
-                  {last.reply && <p><Tag tone={last.reply.status === "sent_simulated" ? "green" : "brand"} soft>{last.reply.status === "sent_simulated" ? "replied automatically" : last.reply.status === "draft" ? "drafted, needs your OK" : last.reply.status}</Tag>{" "}{last.reply.body}</p>}
+                  {last.reply && <p><Tag tone={last.reply.status === "sent_simulated" ? "green" : "brand"} soft>{last.reply.status === "sent_simulated" ? "replied automatically" : last.reply.status === "draft" ? "drafted, needs your OK" : last.reply.status}</Tag>{" "}{last.reply.final_body || last.reply.body.replace("{booking_link}", "(booking link)")}</p>}
                   {(last.facts ?? []).length > 0 && <p><b>Remembered:</b> {last.facts!.map((f) => f.text).join("; ")}</p>}
                   {last.followup && <p><b>Follow-up scheduled</b> for {last.followup.due}</p>}
                 </div>

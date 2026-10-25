@@ -122,6 +122,13 @@ def open_estimate(contact: Contact) -> Interaction | None:
                  and i.at.date() + timedelta(days=60) >= clock.today()), None)
 
 
+def _last_out_was_estimate(contact_id: str, est: Interaction) -> bool:
+    sent = [m for m in history(contact_id) if m.direction == "out" and m.status in ("sent_simulated", "approved")]
+    last = max(sent, key=lambda m: m.created_at, default=None)
+    n = est.meta.get("number")
+    return bool(last and (last.trigger == "estimate_chase" or (n and n in (last.final_body or last.body))))
+
+
 async def receive(contact: Contact, channel: str, body: str) -> dict:
     """An inbound SMS/email. Returns what happened (for the UI and tests)."""
     inbound = Message(id=db.new_id("msg"), contact_id=contact.id, channel=channel, direction="in", body=body, language=contact.language,
@@ -150,6 +157,10 @@ async def receive(contact: Contact, channel: str, body: str) -> dict:
     thread = [{"from": "customer" if x.direction == "in" else "mold_busters", "text": x.body}
               for x in sorted(history(contact.id), key=lambda x: x.created_at) if x.status in ("received", "sent_simulated")]
     tri, by = await agents.triage(contact, body, est_ctx, case, thread)
+    if est and tri.intent != "estimate_yes" and agents.YES.search(body) and _last_out_was_estimate(contact.id, est):
+        # Accepting money is decided by the rule, not the model's label: a "yes" to our estimate follow-up is a yes to the estimate.
+        if (rt := agents._rule_triage(contact, body, est_ctx, case)).intent == "estimate_yes":
+            tri, by = rt, "rule"
     facts, fby = await agents.extract_facts(body, channel)
     result["facts"] = [f.model_dump() for f in save_facts(contact, facts, channel, inbound.id, fby)]
     result["intent"], result["triage_by"] = tri.intent, by
