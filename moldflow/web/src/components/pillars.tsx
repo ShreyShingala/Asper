@@ -30,12 +30,12 @@ export function Pillars() {
   if (!d) return null;
 
   return (
-    <section aria-label="Pillars" className="mb-8 grid gap-4 xl:grid-cols-3">
-      {msg && <p role="status" className="rounded-ds-sm bg-alert-success-bg p-3 text-subtitle text-alert-success-title xl:col-span-3">{msg}</p>}
+    <section aria-label="Pillars" className="mb-8 space-y-4">
+      {msg && <p role="status" className="rounded-ds-sm bg-alert-success-bg p-3 text-subtitle text-alert-success-title ">{msg}</p>}
 
       <Card className="flex flex-col p-5">
         <Head icon={<MessageSquare size={18} aria-hidden />} title="Customer conversations" n={d.counts.replies_waiting} sub="replies drafted from their case" />
-        <ul className="mt-3 space-y-3">
+        <ul className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
           {d.conversations.slice(0, 5).map((c) => (
             <li key={c.contact_id} className="rounded-ds-sm border border-kit-gray-soft p-3">
               <div className="flex items-center gap-2">
@@ -67,7 +67,7 @@ export function Pillars() {
       <Card className="flex flex-col p-5">
         <Head icon={<Video size={18} aria-hidden />} title="Virtual assessments" n={d.counts.virtual_waiting} sub="live calls and photo intakes, filed automatically" />
         {d.virtual.length === 0 && <p className="mt-3 text-caption text-ink-muted">New virtual assessments appear here the moment a customer finishes the live call.</p>}
-        <ul className="mt-3 space-y-3">
+        <ul className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
           {d.virtual.slice(0, 5).map((v) => (
             <li key={v.case_id} className="rounded-ds-sm border border-kit-gray-soft p-3">
               <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ export function Pillars() {
 
       <Card className="flex flex-col p-5">
         <Head icon={<ClipboardCheck size={18} aria-hidden />} title="On-site reviews" n={d.counts.reports_waiting} sub="inspector walkthroughs fill the report" />
-        <ul className="mt-3 space-y-3">
+        <ul className="mt-3 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
           {d.onsite.slice(0, 5).map((o) => (
             <li key={o.case_id} className="rounded-ds-sm border border-kit-gray-soft p-3">
               <div className="flex items-center gap-2">

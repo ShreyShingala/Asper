@@ -198,7 +198,7 @@ def seed(cases: list[Case]) -> int:
                                 properties=[PropertyRef(address=street, city=city, postal=postal, fsa=fsa, lat=lat, lon=lon,
                                                         province="QC" if fsa[0] == "H" else "ON")],
                                 consent=Consent(sms=purchase, email=purchase.model_copy(), profiling_notice_at=datetime.combine(today, time(9))),
-                                prefs=Prefs(channel="sms"))
+                                prefs=Prefs(channel="sms", storm_checkin_opt_in=fsa in ("K2S", "H7L")))
         if est:
             db.put(Interaction(id=f"i-{cid}-est", contact_id=cid, case_id=case_id, at=now - timedelta(days=20), system="freshbooks", kind="estimate",
                                summary=f"Estimate {est.get('number')}: {est.get('amount')} ({est.get('status')})", amount=amount,
@@ -210,6 +210,11 @@ def seed(cases: list[Case]) -> int:
         c = contacts.get(cid)
         if not c:
             continue
+        if cid in ("c-job1", "c-job2", "c-stitts", "c-laval"):  # these customers ticked "helpful check-ins and offers" (express consent)
+            ex = ChannelConsent(basis="express", granted_at=today - timedelta(days=60), granted_via="web_form", evidence_ref="booking form checkbox",
+                                text_version="2026-10-booking-v1")
+            c.consent.sms, c.consent.email, c.consent.personalised_reminders = ex, ex.model_copy(), True
+            c.prefs.storm_checkin_opt_in = True
         case_id = c.case_ids[0] if c.case_ids else None
         last_in = None
         for k, (who, days, text) in enumerate(thread):

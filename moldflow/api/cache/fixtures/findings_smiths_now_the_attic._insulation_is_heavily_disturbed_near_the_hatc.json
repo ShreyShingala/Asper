@@ -1,0 +1,4 @@
+{
+ "model": "nvidia/nemotron-3.5-super-vl:free",
+ "value": "{\"findings\":[{\"room\":\"Attic\",\"observation\":\"Insulation heavily disturbed near hatch\",\"reading_kind\":\"visual\",\"reading_result\":\"anomaly\",\"evidence_photo_ids\":[\"v01\",\"v02\",\"v03\",\"v04\"]},{\"room\":\"Attic\",\"observation\":\"Visible discoloration on roof sheathing\",\"reading_kind\":\"visual\",\"reading_result\":\"anomaly\",\"evidence_photo_ids\":[\"v01\",\"v02\",\"v03\",\"v04\"]}]}"
+}

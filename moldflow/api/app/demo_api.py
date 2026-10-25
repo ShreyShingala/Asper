@@ -130,3 +130,47 @@ def demo_advance(body: AdvanceIn) -> dict:
     """Move the demo clock forward and let due follow-ups fire."""
     clock.set_today(clock.today() + timedelta(days=max(1, min(body.days, 90))))
     return {"today": clock.today().isoformat(), "fired": run_due()}
+
+
+PERSONAL = [  # (fact pattern, EN offer, FR offer): proactive, personal, always drafted for approval
+    (r"baby|pregnan|expecting|nursery", "I remember you mentioned the new baby on the way, congratulations! We'd love to do a free home check so the nursery and bedrooms are as safe as possible for them.",
+     "Je me souviens que vous attendez un bébé, félicitations! Nous aimerions faire une vérification gratuite pour que la chambre du bébé soit la plus saine possible."),
+    (r"sell|listing|closing|buyers", "You mentioned you're selling: want a quick pre-listing moisture check so nothing surprises the buyers' inspector?",
+     "Vous avez mentionné la vente de la maison: voulez-vous une vérification d'humidité avant la mise en vente?"),
+    (r"renovat|finish(ing)? the basement|drywall", "You mentioned the renovation: a moisture check before the drywall goes up is the cheapest time to catch a problem.",
+     "Vous avez parlé de rénovations: une vérification d'humidité avant de fermer les murs est le meilleur moment."),
+    (r"asthma|allerg|cough|headache", "How is everyone feeling? If the air still bothers you, an air quality test can check what photos can't.",
+     "Comment allez-vous? Si l'air vous dérange encore, un test de qualité de l'air peut vérifier ce que les photos ne montrent pas."),
+]
+
+
+class ProactiveIn(BaseModel):
+    contact_id: str
+
+
+@router.post("/proactive/draft")
+def proactive_draft(body: ProactiveIn) -> dict:
+    """A personal check-in from what we remember about the person. Uses personal facts, so it is always locked for approval."""
+    c = db.get(Contact, body.contact_id)
+    if not c:
+        raise HTTPException(404, "Unknown customer.")
+    facts = sorted(db.query(ProfileFact, contact_id=c.id), key=lambda f: f.learned_at, reverse=True)
+    for f in facts:
+        for rx, en, fr in PERSONAL:
+            if re.search(rx, f"{f.text} {f.source.quote}", re.I):
+                first = "" if c.name.startswith(("Kanata", "Montreal", "Smiths", "Pembroke", "Stittsville", "Client")) else c.name.split()[0] + ", "
+                text = f"{'Bonjour' if c.language == 'fr' else 'Hi'} {first.rstrip(', ')}".strip() + ", " + (fr if c.language == "fr" else en) + " {booking_link}"
+                msg = messaging.create(c, trigger="moment:personal", body=text, reason=f"Proactive: remembered \"{f.source.quote[:70]}\"",
+                                       drafted_by="rule", case_id=c.case_ids[0] if c.case_ids else None, facts_used=[f.id], is_cem=True)
+                return {"message": msg.model_dump(mode="json"), "fact": f.text}
+    raise HTTPException(422, "Nothing personal to follow up on yet: text a life event (baby, selling, renovation) first.")
+
+
+@router.post("/messages/{mid}/deny-draft")
+def deny_draft(mid: str) -> dict:
+    m = db.get(Message, mid)
+    if not m or m.status != "draft":
+        raise HTTPException(404, "No draft.")
+    m.status, m.blocked_reason = "blocked", "Denied by owner"
+    db.put(m)
+    return {"ok": True}
