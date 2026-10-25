@@ -1,0 +1,168 @@
+{
+  "job": "Job 6 - Website form -> Zendesk -> AI email agent -> free VA",
+  "summary": "Client photos in a Zendesk ticket, booking done by our AI agent 'Bruce', video call, estimate",
+  "service": "Free Virtual Inspection (video call)",
+  "property": "109 Stoney Pond Ct, Stittsville, ON (house)",
+  "client": "Homeowner (returning contact)",
+  "paid": "Free",
+  "people": [
+    {
+      "role": "Booked by",
+      "who": "Bruce - our AI email agent, inside Zendesk"
+    },
+    {
+      "role": "Virtual inspector",
+      "who": "Luka Markovic, MSC ME, CMI"
+    },
+    {
+      "role": "Estimate sent by",
+      "who": "Danica - client support"
+    },
+    {
+      "role": "Follow-up",
+      "who": "Close CRM SMS + Natasa (manual)"
+    }
+  ],
+  "client_concern": "Website form: 'Mold on ceiling in bathroom shower and around edge of bathtub where caulking is. There is a bathroom fan that is used regularly.' The client uploaded 2 photos with the form. She had an older quote from us and in May 2026 texted that she wanted to go ahead with it.",
+  "timeline": [
+    {
+      "when_eastern": "Tue Sep 1, 2026 15:34",
+      "step": "Website form",
+      "system": "bustmold.com form -> Zendesk ticket 52925",
+      "what": "Client fills in the form on her iPhone and uploads 2 photos. A Zendesk ticket is created by email."
+    },
+    {
+      "when_eastern": "Tue Sep 1, 15:41",
+      "step": "AI reply",
+      "system": "Zendesk (Bruce, AI email agent)",
+      "what": "Bruce thanks her for the photos and suggests the free virtual inspection as the first step."
+    },
+    {
+      "when_eastern": "Tue Sep 1, 15:44-15:54",
+      "step": "Choosing a time",
+      "system": "Zendesk email",
+      "what": "Client: 'Let's go ahead and book'. Bruce offers 2 slots for the next day; client picks 9:00 AM."
+    },
+    {
+      "when_eastern": "Tue Sep 1, 16:11",
+      "step": "Booked",
+      "system": "Zendesk + Google Calendar (MB - Virtual Inspections)",
+      "what": "Bruce confirms. Calendar event created: 'Booked by Bruce Text AI Agent', with the Zendesk link. 37 minutes from form to booking, no human involved."
+    },
+    {
+      "when_eastern": "Wed Sep 2, 09:00",
+      "step": "Video call",
+      "system": "Mold Busters Virtual Inspection app",
+      "what": "8-minute call. From about 0:40 to 6:30 the client walks the camera through the bathroom (shower ceiling, tub, toilet area)."
+    },
+    {
+      "when_eastern": "Wed Sep 2, 11:01",
+      "step": "App review request",
+      "system": "Close CRM (SMS)",
+      "what": "SMS asking the client to rate the VA app."
+    },
+    {
+      "when_eastern": "Wed Sep 2, 12:37-12:38",
+      "step": "Raw notes",
+      "system": "Telegram (MB Virtual Inspections 1)",
+      "what": "Inspector posts the booking details and 7 photos ('Area of concern')."
+    },
+    {
+      "when_eastern": "Fri Sep 4, 10:23-10:26",
+      "step": "Estimate sent",
+      "system": "FreshBooks + Asana",
+      "what": "Estimate MO971 ($1,495 + HST) sent. No report - free VAs get an estimate only."
+    },
+    {
+      "when_eastern": "Sep 21 - Sep 28",
+      "step": "Follow-up",
+      "system": "Close CRM (SMS)",
+      "what": "4 follow-up SMS, the last one: 'still interested... or should we close your case?'"
+    },
+    {
+      "when_eastern": "Thu Oct 1",
+      "step": "Manual follow-up",
+      "system": "Asana + Dialpad",
+      "what": "Support follows up by hand (screenshot posted in Asana) and closes the card."
+    },
+    {
+      "when_eastern": "Oct 5 - Oct 9",
+      "step": "Long-term nurture",
+      "system": "Close CRM",
+      "what": "Lead moved to 'Monthly follow up'. An SMS signed by the inspector and an email 'A Special Gift to Thank You for Your Trust!'."
+    }
+  ],
+  "findings": [
+    "Bathroom: mold on the ceiling corner above the shower and along the tub caulking (from the photos and the video call).",
+    "Bathroom fan is used regularly."
+  ],
+  "recommendations": [
+    "Remove the silicone sealant; treat tiles, grout and the drywall ceiling",
+    "Keep humidity at 30-50%; make sure the fan is adequate and clean; consider a dehumidifier"
+  ],
+  "estimate_summary": {
+    "number": "MO971",
+    "amount": "$1,495 + 13% HST = $1,689.35",
+    "time": "4 hours",
+    "status": "Viewed, not accepted. Lead moved to 'Monthly follow up'.",
+    "scope": [
+      "Containment of the bathroom, negative pressure if possible",
+      "Remove silicone sealant; treat tiles, grout, drywall ceiling",
+      "HEPA vacuum + fogging; swab test; Project Clearance Report"
+    ]
+  },
+  "files": [
+    {
+      "file": "Zendesk_ticket_52925_redacted.pdf",
+      "what": "The full email conversation: website form + AI agent booking"
+    },
+    {
+      "file": "Client_photos_from_Zendesk/ (2 JPG)",
+      "what": "The 2 photos the client uploaded with the form"
+    },
+    {
+      "file": "Videos/VA_call_recording_8min.mp4",
+      "what": "Full recording of the video call"
+    },
+    {
+      "file": "Estimate_MO971.pdf",
+      "what": "The estimate, rebuilt from FreshBooks data"
+    },
+    {
+      "file": "Raw_notes_from_Telegram.txt",
+      "what": "What the inspector posted after the call"
+    },
+    {
+      "file": "Job_Story.pdf / job_timeline.json",
+      "what": "This story, and the same data for code"
+    }
+  ],
+  "note": "Client names, emails and phone numbers removed on purpose. Times are Eastern (Ottawa/Montreal).",
+  "estimate_items_from_freshbooks": [
+    {
+      "item": "Solution Center Agent: Bruce",
+      "description": "",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Virtual Inspector: Luka",
+      "description": "The inspector who prepared this estimate is:\nLuka Markovic, MSC ME, CMI\n\nGot questions? Contact Luka by phone at: 343-600-3453, or by email: luka@bustmold.com",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Mold Removal Project",
+      "description": "--1 - Containment of Contaminated Area(s)\nContainment of the bathroom with polyethylene drop sheets and zipper door(s), using negative air pressure (if permitted by actual conditions at the property), or an equivalent method, in order to prevent the cross-contamination of mold spores, dust/debris, and other particulates to other areas of the property.\n\nAdditionally, any personal belongings or large items that cannot be relocated within the affected area will be individually wrapped to protect them against dust and debris during the remediation process.\n\n--2 - Removal of Affected Components\nRemoval & disposal of compromised, contaminated and/or moldy materials from the bathroom, as assessed during the initial inspection, in accordance with mold removal guidelines - https://iaq.is/mold-removal-guidelines\n\n - Location: Bathroom -\n\nMaterials which will be removed and disposed of include:\n• silicone sealant\n• any other organic-based materials on an as-needed basis.\n\nAny affected structural or framing components will be topically, manually and/or abrasively treated prior to the disinfection process.\n\n-Topical Treatment Process:\nRemoval of mold from the areas by means of manual wirebrushing, or other topical and abrasive removal techniques. This is done in conjunction with HEPA vacuuming, and the application of an advanced, two-stage mold remediation protocol, initiating with high-precision stain removal techniques to revitalize the aesthetics of affected surfaces. This is seamlessly followed by the strategic application of our proprietary fungicides, meticulously designed to eliminate mold spores, thereby ensuring your space is restored to its pristine condition and safeguarded against future contamination.\n\nThe areas & materials that require treatment are:\nBathroom:\n- tiles\n- grout\n- drywall ceiling\n- other general surface areas as required\n\nResidual non-fungal staining may be present upon completion.\n\nAll removed materials will be properly packaged in 6ml double bags and will be appropriately disposed of in a discreet fashion.\n\nMold Busters' trained remediation professionals are recommended to wear dust impermeable gloves, half-face air purifying respirator (P-100), full body dust-impervious coveralls, and boot covers or separate work boots.\n\nPrice includes labor, material, travel, disposal, and equipment fees.\nAny additional items and areas that require removal or treatment are subject to revision and discussion with the client.\n\n- In the case additional layers of drywall and flooring are found during the remediation project, a scope increase will be presented to the client for consideration\n\n-- 3 - Cleaning and Disinfection\nThorough HEPA vacuuming is conducted throughout all surfaces in the affected bathroom area in order to remove mold spores, particulates, and dust.\n\nAll remaining surfaces (studs, beams, walls, floors, etc.) in the bathroom will be disinfected, by concentrated fogging, using an approved fungicide. \n\nAdditional vacuuming or HEPA air scrubbing may occur upon completion of the fogging process, along with a general cleaning of all areas traveled by Mold Busters personnel.\n\nMold Busters applies an advanced, two-stage mold remediation protocol, initiating with high-precision stain removal techniques to revitalize the aesthetics of affected surfaces. This is seamlessly followed by the strategic application of our proprietary fungicides, meticulously designed to eliminate mold spores, thereby ensuring your space is restored to its pristine condition and safeguarded against future contamination.\n\n-- 4 - Post-Removal Clearance (Swab)\nPost-remediation verification is conducted to ensure that the environment has been successfully remediated.\n\nThe final clearance inspection includes a visual inspection and an instant swab analysis.\n\nThis will be performed by the Project Supervisor upon completion of the remediation process.\n\n-- Project Clearance Report\nA written report following the remediation process, describing the outcome of the remediation work, any potential source issues, clearance grades, etc.\n\nAdditional recommendations will be made in this report to assist in preventing future fungal contamination.\n\n-- Notes\n\"\n\nEstimated Project Time: 4 hours\n\nPlease note that this is only an estimated timeframe provided for your reference. We do not charge by the hour—our pricing is all-inclusive, covering time, travel, labour, materials, and disposal for the full scope of work.\",",
+      "amount": "1495.00",
+      "taxes": [
+        {
+          "name": "HST",
+          "percent": "13",
+          "amount": "194.35"
+        }
+      ]
+    }
+  ],
+  "raw_notes_from_telegram": "Source: Telegram group \"MB Virtual Inspections 1 (Luka)\" - posted by the virtual inspector (Luka)\nTimes are Eastern. Client details removed.\n\n[Wed Sep 2, 2026 12:37]\n109 Stoney Pond Ct, Stittsville, ON K2S 2E6\nWed, Sept 2 at 9 AM\nName: [removed]\nPhone: [removed]\nEmail: [removed]\n\nMold on ceiling in bathroom shower and around the bathtub. Regularly uses bathroom fan.\n\nPrice: $0 + Tax\n\nBooked by Bruce Text AI Agent\n\nLink: [Zendesk ticket 52925]\n\n[12:37] (1 photo)\n[12:37] (1 photo)\n[12:38] (5 photos) Area of concern\n"
+}

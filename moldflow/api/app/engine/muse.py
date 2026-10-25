@@ -107,7 +107,55 @@ def retrieve(question: str, cases: list[Case], scope: str | None = None, k: int 
     return [(r, t) for _, r, t in scored[:k]]
 
 
+def _person_answer(question: str, cases: list[Case]) -> MuseAnswer | None:
+    """Questions naming a customer ('what's going on with Priya?') or about follow-ups, answered straight from the records."""
+    from app import crm_store as db
+    from app.models.crm import Contact, Message, Moment, ProfileFact
+    q = question.lower()
+    people = db.query(Contact)
+    if re.search(r"follow.?ups?|who (do|should) (i|we) (call|text|contact)|due", q) and not any(
+            part.lower() in q for c in people for part in c.name.split() if len(part) > 3 and part.lower() not in ("sample", "client")):
+        names = {c.id: c.name for c in people}
+        due = sorted(db.query(Moment, status="upcoming"), key=lambda m: m.due)[:8]
+        if due:
+            return MuseAnswer(answer="Upcoming follow-ups:\n" + "\n".join(f"- {m.due:%b %d}: {names.get(m.contact_id, '?')}: {m.reason}" for m in due),
+                              cites=[f"person/{m.contact_id}" for m in due])
+    for c in people:
+        parts = [x.lower() for x in c.name.replace("(", " ").split() if len(x) > 3 and x.lower() not in ("sample", "client", "homeowner", "tenant")]
+        if c.case_ids and c.case_ids[0] in ("job1", "job2") and (c.case_ids[0] in q or ("job 1" in q and c.case_ids[0] == "job1") or ("job 2" in q and c.case_ids[0] == "job2")):
+            parts.append(c.case_ids[0])
+        if not any(x in q for x in parts):
+            continue
+        case = next((k for k in cases if k.id in c.case_ids), None)
+        msgs = sorted([m for m in db.query(Message, contact_id=c.id) if m.status in ("received", "sent_simulated")], key=lambda m: m.created_at)
+        facts = [f for f in db.query(ProfileFact, contact_id=c.id, status="approved") if f.category != "health" and f.message_use != "never"]
+        nxt = next(iter(sorted(db.query(Moment, contact_id=c.id, status="upcoming"), key=lambda m: m.due)), None)
+        last_in = next((m for m in reversed(msgs) if m.direction == "in"), None)
+        lines = [f"{c.name} ({c.customer_type.replace('_', ' ')}, {c.properties[0].city if c.properties else ''})."]
+        if case:
+            lines.append(f"Case #{case.project_no or case.id}: {case.concern} Stage: {case.stage.replace('_', ' ')}."
+                         + (f" Visit: {case.booking.slot_text}." if case.booking and case.booking.slot_date else "")
+                         + (f" Estimate {case.estimate.id}: ${case.estimate.total:,.2f} ({case.estimate.status})." if case.estimate else "")
+                         + f" {len(case.photos)} photos, {len(case.findings)} findings.")
+        if last_in:
+            lines.append(f"Last thing they said ({last_in.created_at:%b %d}): \"{last_in.body}\"")
+        if facts:
+            lines.append("Worth knowing: " + "; ".join(f.text for f in facts[:4]) + ".")
+        if nxt:
+            lines.append(f"Next follow-up {nxt.due:%b %d}: {nxt.reason}.")
+        drafts = [m for m in db.query(Message, contact_id=c.id, status="draft")]
+        if drafts:
+            lines.append(f"A reply is drafted and waiting for your OK: \"{drafts[0].body[:140]}\"")
+        acts = [MuseAction(type="open_project", case_id=case.id, label="Open the project")] if case else []
+        if case and LEGAL.search(question):
+            acts.insert(0, MuseAction(type="evidence_bundle", case_id=case.id, label="Download the evidence bundle"))
+        return MuseAnswer(answer="\n".join(lines), cites=[f"person/{c.id}"] + ([f"{case.id}/summary"] if case else []), actions=acts)
+    return None
+
+
 def _fallback(question: str, hits: list[tuple[str, str]], cases: list[Case]) -> MuseAnswer:
+    if (pa := _person_answer(question, cases)) and not re.search(r"\bcase\s*42\b", question.lower()):
+        return pa
     if not hits:
         return MuseAnswer(answer="I couldn't find anything about that in the project records.")
     cid = next((r.split("/")[0] for r, _ in hits if not r.startswith("person/")), hits[0][0].split("/")[0])
@@ -130,6 +178,8 @@ def _fallback(question: str, hits: list[tuple[str, str]], cases: list[Case]) -> 
 
 
 async def ask(question: str, cases: list[Case], scope: str | None = None) -> tuple[MuseAnswer, list[tuple[str, str]]]:
+    if not scope and re.search(r"follow.?ups?|who (do|should) (i|we) (call|text|contact|follow)", question, re.I) and (pa := _person_answer(question, cases)):
+        return pa, []  # the follow-up queue is exact data: answer from it, not from a model's reading of it
     hits = retrieve(question, cases, scope)
     if not hits:
         return _fallback(question, hits, cases), hits

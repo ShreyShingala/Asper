@@ -1,0 +1,142 @@
+{
+  "job": "Job 5 - Paid Virtual Assessment from the USA",
+  "summary": "Client needed help reading lab results. Video call -> report -> general quote",
+  "service": "Worldwide Paid Virtual Inspection ($100 CAD) + $25 tip (Tip Jar add-on)",
+  "property": "1922 S 6th St, Philadelphia, PA, USA",
+  "client": "Property owner in the USA",
+  "paid": "$125 CAD paid online",
+  "people": [
+    {
+      "role": "Booked by",
+      "who": "Client, online (Acuity booking page)"
+    },
+    {
+      "role": "Virtual inspector",
+      "who": "Luka Markovic, MSC ME, CMI"
+    },
+    {
+      "role": "Report written / reviewed by",
+      "who": "Stefan (admin support) / Goran (admin support)"
+    }
+  ],
+  "client_concern": "From the booking form: 'I have a mold test that I need help with understanding the numbers.' (The form shows typing mistakes in the phone and email fields.)",
+  "timeline": [
+    {
+      "when_eastern": "Thu Aug 27, 2026 15:15",
+      "step": "Online booking",
+      "system": "Acuity -> Google Calendar (MB - Virtual Inspections)",
+      "what": "Client books a paid VA for Aug 28 at 4:15 PM and adds a $25 tip. Paid $125 online."
+    },
+    {
+      "when_eastern": "Fri Aug 28, 16:15",
+      "step": "Video call",
+      "system": "Mold Busters Virtual Inspection app",
+      "what": "Inspector reviews the client's lab results with them. (No recording of this call was found.)"
+    },
+    {
+      "when_eastern": "Mon Aug 31, 15:44-15:58",
+      "step": "Raw notes",
+      "system": "Telegram (MB Virtual Inspections 1)",
+      "what": "Inspector posts 'Client paid $100 CAD, Report required', 2 photos, the report text, and asks if we can send a 'general remediation quote' as a guideline. Office: 'GOOD TO GO!'."
+    },
+    {
+      "when_eastern": "Tue Sep 1",
+      "step": "Invoice + report + quote",
+      "system": "FreshBooks + Brain + Asana",
+      "what": "Invoice MU720 ($125, paid), report written and reviewed, estimate MO947 ($0, general scope) sent. Asana card created at 14:36 and closed at 15:28: 'Nothing left to do here, USA client'."
+    }
+  ],
+  "findings": [
+    "Client's lab report: elevated Aspergillus/Penicillium and Chaetomium, and Stachybotrys ('black mold') in living areas.",
+    "Tape-lift sample from the basement sub-floor: Aspergillus and Cladosporium.",
+    "Client reports health issues that may be linked to the mold."
+  ],
+  "recommendations": [
+    "See a doctor about the health issues",
+    "Professional mold remediation",
+    "Keep humidity at 30-50%",
+    "For small surface spots: white vinegar + distilled water 1:1; fog with a food-grade product"
+  ],
+  "estimate_summary": {
+    "number": "MO947",
+    "amount": "$0 - a general scope with no prices (we do not work in the USA)",
+    "time": "-",
+    "status": "Sent; nothing further. Asana note: 'Nothing left to do here, USA client'",
+    "scope": [
+      "Containment, removal of affected non-structural materials",
+      "Topical treatment of structural parts",
+      "Cleaning and disinfection, swab test",
+      "Given to the client as a guideline for a local contractor"
+    ]
+  },
+  "files": [
+    {
+      "file": "Report_Virtual_Assessment_redacted.pdf",
+      "what": "Report the client received (10 pages). Its photo section is empty."
+    },
+    {
+      "file": "Estimate_MO947.pdf",
+      "what": "The general quote, rebuilt from FreshBooks data"
+    },
+    {
+      "file": "Raw_notes_from_Telegram.txt",
+      "what": "What the inspector posted after the call"
+    },
+    {
+      "file": "Job_Story.pdf / job_timeline.json",
+      "what": "This story, and the same data for code"
+    }
+  ],
+  "note": "Client names, emails and phone numbers removed on purpose. Times are Eastern (Ottawa/Montreal).",
+  "estimate_items_from_freshbooks": [
+    {
+      "item": "Solution Center Agent: Online Booking",
+      "description": "The client via online booking platform",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Virtual Inspector: Luka",
+      "description": "The inspector who prepared this estimate is:\nLuka Markovic, MSC ME, CMI\n\nGot questions? Contact Luka by phone at: 343-600-3453, or by email: luka@bustmold.com",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "1 - Containment of Contaminated Area(s)",
+      "description": "Containment of the contaminated area with polyethylene drop sheets and zipper door(s), using negative air pressure(If permitted by actual conditions at the property), or an equivalent method, in order to prevent the cross contamination of mold spores, dust/debris and other particulates to other areas of the property.\n\nAdditionally, any personal belongings or large items which cannot be relocated within the affected area will be individually wrapped to protect them against dust and debris during the remediation process.",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Removal of Affected Components",
+      "description": "Removal & disposal of compromised, contaminated and/or moldy materials from the area, as assessed during the initial inspection, in accordance to mold removal guidelines\n- https://iaq.is/mold-removal-guidelines\n\nMaterials which will be removed and disposed of include:\n• affected, organic, non-structural components\n• any other organic-based materials on an as-needed basis.\n\nAll removed materials will be properly packaged in 6ml double bags and will be appropriately disposed of in a discreet fashion.\n\nMold Busters' trained remediation professionals are recommended to wear dust impermeable gloves, half-face air purifying respirator (P-100), full body dust-impervious coveralls and boot covers or separate work boots. \n\nPrice includes labor, material, travel, disposal and equipment fees.\nAny additional items and areas that require removal or treatment are subject to revision and discussion with the client.\n\n- In the case additional layers of drywall and flooring are found during the remediation project, a scope increase will be presented to the client for consideration",
+      "amount": "0.00",
+      "taxes": [
+        {
+          "name": "HST",
+          "percent": "13",
+          "amount": "0.00"
+        }
+      ]
+    },
+    {
+      "item": "Topical & Abrasive Mold Treatment",
+      "description": "- Topical Treatment Process\n\nOnce the affected materials are exposed, our team will remove mold from structural surfaces using a combination of specialized cleaning methods, including manual techniques and HEPA vacuuming.\n\nWe then apply a professional two-step treatment process:\n\nStep 1: Detailed cleaning to remove staining and restore the appearance of affected surfaces\nStep 2: Application of an advanced, eco-conscious fungicide designed to eliminate mold spores and help prevent future growth\n\nAreas and materials treated may include:\n\nFoundation walls and floors\n- structural components\n- other surfaces as needed\n\nPlease note that some non-mold-related staining may remain after treatment.\n\nAll work is carried out by trained Mold Busters professionals using appropriate protective equipment and in accordance with industry standards:\n- https://iaq.is/mold-removal-guidelines\n\nPricing includes all labor, materials, and equipment required to complete the work.\n\nIf additional affected areas are discovered during the process, any changes will be reviewed and discussed with you before proceeding.",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "3 - Cleaning and Disinfection",
+      "description": "Thorough HEPA vacuuming is conducted throughout all surfaces in the affected area in order to remove mold spores, particulates and dust.\n\nAll remaining surfaces (studs, beams, walls, floors, etc.) in the affected area will be disinfected, by concentrated fogging, using an approved fungicide. \n\nAdditional vacuuming or HEPA air scrubbing may occur upon completion of the fogging process, along with a general cleaning of all areas traveled by Mold Busters personnel.\n\nMold Busters applies an advanced, two-stage mold remediation protocol, initiating with high-precision stain removal techniques to revitalize the aesthetics of affected surfaces. This is seamlessly followed by the strategic application of our proprietary fungicides, meticulously designed to eliminate mold spores, thereby ensuring your space is restored to its pristine condition and safeguarded against future contamination.",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "4 - Post-Removal Clearance (Swab)",
+      "description": "Post-remediation verification is conducted to ensure that the environment has been successfully remediated.\n\nThe final clearance inspection includes a visual inspection and an instant swab analysis.\n\nThis will be performed by the Project Supervisor upon completion of the remediation process.",
+      "amount": "0.00",
+      "taxes": []
+    }
+  ],
+  "raw_notes_from_telegram": "Source: Telegram group \"MB Virtual Inspections 1 (Luka)\" - posted by the virtual inspector (Luka)\nTimes are Eastern. Client details removed.\n\n[Mon Aug 31, 2026 15:44]\n1922 S 6th St, Philadelphia, PA 19148, USA\n\nClient paid $100 CAD\n\nReport required\n\n[15:45] (1 photo)\n[15:45] (1 photo)\n\n[15:56]\nReport:\n\nObservations:\n- The client contacted Mold Busters to interpret indoor air quality and surface tests\n- The report showed an elevated count of Aspergillus/Penicillium group, Chaetomium, and the presence of Stachybotrys (Black mold) in the habitable area\n- A tape lift sample detected the presence of Aspergillus and Cladosporium on the basement sub-floor\n- The client report health-related issues that could be related to the mold problem\n\nSuggestions and Recommendations\n- Consult with a medical doctor regarding health-related issues\n- Professional Mold remediation services\n- Keep humidity levels between 30-50% at all times\n- For topical treatment use a chemical solution of white vinegar and distilled water in 1:1 ratio\n- Fumigate the area with food-grade Benefect decon\n\n[15:58]\nThis is a special case and the client would like a \"general remediation quote\" for guidelines. Can we send one like this with the list of chemicals we use:\n\n1 - Containment and Wrapping\n2.1 - Removal\n- affected, organic, non-structural components\n- other materials\n\n2.2 - Topical\n- structural components\n- other surfaces\n\n3 - Cleaning and Disinfection\n4 - Swab x1\n\n[15:58] Office reply: GOOD TO GO!\n"
+}

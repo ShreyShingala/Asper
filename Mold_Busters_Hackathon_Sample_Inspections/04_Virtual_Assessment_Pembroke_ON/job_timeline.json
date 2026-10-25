@@ -1,0 +1,161 @@
+{
+  "job": "Job 4 - Virtual Assessment with written report",
+  "summary": "Builder client. Online booking -> video call -> report + estimate -> estimate accepted",
+  "service": "Free Virtual Inspection + paid add-on 'Official Written Report and Recommendations' ($155 + tax)",
+  "property": "24 Stencells Rd, Pembroke, ON (new house, unfinished basement)",
+  "client": "Home builder (repeat business client) - house is under his 2-year warranty",
+  "paid": "$155 + HST = $175.15 (paid online when booking)",
+  "people": [
+    {
+      "role": "Booked by",
+      "who": "Client, online (Acuity booking page)"
+    },
+    {
+      "role": "Virtual inspector",
+      "who": "Danica Radovic, CMI"
+    },
+    {
+      "role": "Report written / reviewed by",
+      "who": "Goran (admin support) / Stefan (admin support)"
+    },
+    {
+      "role": "Follow-up",
+      "who": "Close CRM SMS + Danica"
+    }
+  ],
+  "client_concern": "From the booking form: 'I'm a homebuilder doing a 2 year warranty. There really isn't any mold, maybe a very minor amount, but the client is concerned. It appears to have been caused by high humidity in a storage room with low circulation... I have pictures I can show you.'",
+  "timeline": [
+    {
+      "when_eastern": "Mon Oct 19, 2026 10:27",
+      "step": "Online booking",
+      "system": "Acuity -> Google Calendar (MB - Virtual Inspections)",
+      "what": "Client books a free VA for Oct 20 at 4:15 PM and adds the written report ($155 + tax), paid online ($175.15)."
+    },
+    {
+      "when_eastern": "Mon Oct 19, 16:21",
+      "step": "Reminder",
+      "system": "Close CRM (SMS)",
+      "what": "Reminder SMS with a link to the pre-inspection survey (Google Form)."
+    },
+    {
+      "when_eastern": "Tue Oct 20, 16:15",
+      "step": "Video call",
+      "system": "Mold Busters Virtual Inspection app",
+      "what": "19-minute call. From about 1:40 to 8:30 the client shows his own photos of the basement on his computer screen to the phone camera."
+    },
+    {
+      "when_eastern": "Tue Oct 20, 16:47-16:48",
+      "step": "Raw notes",
+      "system": "Telegram (MB Virtual Inspections 5)",
+      "what": "Inspector posts the booking details and 'Report and estimate required, I'm waiting for the client to send me photos'."
+    },
+    {
+      "when_eastern": "Tue Oct 20, 18:00",
+      "step": "App review request",
+      "system": "Close CRM (SMS)",
+      "what": "SMS asking the client to rate the VA app."
+    },
+    {
+      "when_eastern": "Wed Oct 21, 10:50-10:58",
+      "step": "Report + estimate notes",
+      "system": "Telegram",
+      "what": "Inspector posts the full report text, 3 photos with captions and the estimate ($2,600 + tax, 1 day; on-site check included if accepted)."
+    },
+    {
+      "when_eastern": "Wed Oct 21, 12:37-12:47",
+      "step": "Report + estimate sent",
+      "system": "Brain + FreshBooks + Asana + email",
+      "what": "Report written/reviewed, estimate MP370 created at $2,675 + HST, Asana card created, report link emailed."
+    },
+    {
+      "when_eastern": "Thu Oct 22, 08:12",
+      "step": "Client accepts",
+      "system": "Email -> Zendesk",
+      "what": "Client replies to the report email: 'I've accepted the quote. Can I schedule a date please?'"
+    },
+    {
+      "when_eastern": "Thu Oct 22, 11:09-11:39",
+      "step": "Follow-up",
+      "system": "Close CRM (SMS) + Asana",
+      "what": "Automated SMS: 'I sent you the estimate earlier...'. Inspector notes: estimate accepted, reaching out to schedule the on-site follow-up."
+    }
+  ],
+  "findings": [
+    "House about 2 years old, basement unfinished and used for storage.",
+    "Basement humidity reported above the recommended range; poor ventilation.",
+    "Discoloration on the concrete floor and on wood framing studs.",
+    "HVAC has a built-in humidifier that may add humidity. Sump pit reported dry."
+  ],
+  "recommendations": [
+    "Professional remediation of the concrete and framing",
+    "Better ventilation; dehumidifier to keep humidity at 30-50%",
+    "Check the HVAC humidifier settings",
+    "Remove belongings before the work; keep items off the concrete floor"
+  ],
+  "estimate_summary": {
+    "number": "MP370",
+    "amount": "$2,675 + 13% HST = $3,022.75",
+    "time": "1 day",
+    "status": "Accepted by the client (email, Oct 22). On-site confirmation visit to be scheduled.",
+    "scope": [
+      "Containment of the basement, all belongings removed",
+      "Topical treatment of framing wood and concrete floor",
+      "Swab test + Project Clearance Report",
+      "On-site inspection included after acceptance, to confirm the source and the extent"
+    ]
+  },
+  "files": [
+    {
+      "file": "Report_Virtual_Assessment_redacted.pdf",
+      "what": "Report the client received (13 pages)"
+    },
+    {
+      "file": "Estimate_MP370.pdf",
+      "what": "The estimate, rebuilt from FreshBooks data"
+    },
+    {
+      "file": "Photos/ (3 JPG)",
+      "what": "Photos used in the report (sent by the client)"
+    },
+    {
+      "file": "Videos/VA_call_recording_19min.mp4",
+      "what": "Full recording of the video call"
+    },
+    {
+      "file": "Raw_notes_from_Telegram.txt",
+      "what": "What the inspector posted after the call"
+    },
+    {
+      "file": "Job_Story.pdf / job_timeline.json",
+      "what": "This story, and the same data for code"
+    }
+  ],
+  "note": "Client names, emails and phone numbers removed on purpose. Times are Eastern (Ottawa/Montreal).",
+  "estimate_items_from_freshbooks": [
+    {
+      "item": "Solution Center Agent: Online Booking",
+      "description": "The client via online booking platform",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Virtual Inspector: Danica",
+      "description": "The inspector who prepared this estimate is:\nDanica Radovic, CMI\n\nGot questions? Contact Danica by phone at: 877-566-6653, or by email: danica@bustmold.com",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Mold Removal Project",
+      "description": "--1 - Containment of Contaminated Area(s)\n\nContainment of the basement with polyethylene drop sheets and zipper door(s), using negative air pressure (If permitted by actual conditions at the property), or an equivalent method, in order to prevent the cross contamination of mold spores, dust/debris and other particulates to other areas of the property.\n\n- All personal belongings to be removed.\n\n-- Topical & Abrasive Mold Treatment\n\n-Topical Treatment Process:\nRemoval of mold from the areas by means of manual wirebrushing, or other topical and abrasive removal techniques. This is done in conjunction with HEPA vacuuming, and the application of an advanced, two-stage mold remediation protocol, initiating with high-precision stain removal techniques to revitalize the aesthetics of affected surfaces. This is seamlessly followed by the strategic application of our proprietary fungicides, meticulously designed to eliminate mold spores, thereby ensuring your space is restored to its pristine condition and safeguarded against future contamination.\n\nThe areas & materials that require treatment are:\n - affected framing wood\n - affected concrete floors\n - other general surface areas as required\n\nResidual non-fungal staining may be present upon completion.\n\n-- 4 - Post-Removal Clearance (Swab)\n\nPost-remediation verification is conducted to ensure that the environment has been successfully remediated.\n\nThe final clearance inspection includes a visual inspection and an instant swab analysis.\n\nThis will be performed by the Project Supervisor upon completion of the remediation process.\n\n-- Project Clearance Report\n\nA written report following the remediation process, describing the outcome of the remediation work, any potential source issues, clearance grades, etc.\n\nAdditional recommendations will be made in this report to assist in preventing future fungal contamination.\n\n-- Notes\n\n- On-site inspection included upon acceptance to reconfirm the source and the extent",
+      "amount": "2675.00",
+      "taxes": [
+        {
+          "name": "HST",
+          "percent": "13",
+          "amount": "347.75"
+        }
+      ]
+    }
+  ],
+  "raw_notes_from_telegram": "Source: Telegram group \"MB Virtual Inspections 5 (Danica)\" - posted by the virtual inspector (Danica)\nTimes are Eastern. Client details removed.\n\n[Tue Oct 20, 2026 16:47]\n24 stencells rd\n\nName: [removed]\nPhone: [removed]\nEmail: [removed]\n\nPlease describe your concerns.: I'm a homebuilder doing a 2 year warranty. There really isn't any mold maybe a very minor amount but the client is concerned. It appears to have been caused by high humidity in a storage room with low circulation but  you can assess yourself. I have pictures I can show you\n\n[16:48]\nReport and estimate required, I'm waiting for the client to send me photos to send delivz info because on the video call he showed me screenshots\n\n[Wed Oct 21, 10:50]\n24 stencells rd\n\nReport Info:\n\nObservations\n\n- The home was reportedly completed approximately two years ago, and the basement is unfinished.\n- Basement relative humidity was reported to be above the recommended range.\n- Visible discoloration was noted on the concrete floor and exposed wood framing studs.\n- Ventilation within the basement appeared insufficient, potentially contributing to elevated humidity and conditions favourable to fungal growth.\n- The basement is used for storage. Stored belongings restrict air circulation, particularly around concrete and framing, potentially contributing to localized moisture accumulation.\n- The main HVAC system reportedly includes an integrated humidifier, which may contribute to elevated indoor humidity when operating.\n- The sump pit was reportedly dry. However, this condition could prove that no intermittent groundwater intrusion or foundation seepage happened.\n\nSuggestions and Recommendations\n\n- Professional mold remediation is recommended to address the affected concrete and framing surfaces.\n- Improve basement ventilation and air circulation.\n- Operate a suitably sized dehumidifier to maintain relative humidity between 30% and 50%, both while ventilation improvements are pending and afterward as needed.\n- Have the HVAC humidifier settings reviewed. Humidification should be reduced or disabled when indoor humidity is elevated, particularly during humid periods.\n- Remove personal belongings from the affected area before remediation. Following remediation, organize storage to maintain airflow, and avoid placing items directly on the concrete floor.\n\n[10:51] (1 photo) Discoloration noted on the concrete\n[10:51] (1 photo) discoloration on the concrete\n[10:52] (1 photo) discoloration present on the framing wood\n\n[10:58]\n24 stencells rd\n\nEstimate:\n\nAffected Area: Basement\n\n1. Containment\n-all personal belongings to be removed\n\n2.  Topical treatment\n-affected framing wood\n-affected concrete floors\n\n3. Post Swab\n\n4. PCR\n\nPrice: $2600 + Tax\nTime: 1 Day\n\n-on-site inspection included upon acceptance to reconfirm the source and the extent\n\nInternal notes:\n-the builder is hiring us for his clients it needs to be well documented\n"
+}

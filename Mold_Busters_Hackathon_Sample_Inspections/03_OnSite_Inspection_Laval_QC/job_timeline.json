@@ -1,0 +1,176 @@
+{
+  "job": "Job 3 - On-site Inspection, full job to clearance",
+  "summary": "Attic. Inspection -> estimate -> remediation -> clearance -> paid in full",
+  "service": "Visual & Diagnostic Mold Inspection (on site)",
+  "property": "2575 Rue de la Canardiere, Laval, QC (house)",
+  "client": "Previous owner (sold the house); the new owners asked for an inspection",
+  "paid": "Inspection $195 + GST/QST = $224.20 (paid). Remediation $1,543 + tax = $1,774.06 (paid)",
+  "people": [
+    {
+      "role": "Booked by",
+      "who": "Danica - client support"
+    },
+    {
+      "role": "Inspector",
+      "who": "Joshua Lebrun (Montreal area)"
+    },
+    {
+      "role": "Remediation",
+      "who": "Team 1 (Montreal), Wed Sep 16"
+    },
+    {
+      "role": "Follow-up",
+      "who": "Close CRM SMS + client support"
+    }
+  ],
+  "client_concern": "Booking note: the client sold the house. A bathroom fan problem had caused some discoloration in the attic; he sprayed an anti-mold product and thought it was fine. The new owners contacted him and asked for a proper inspection to confirm if there is mold. Office note: 'Please do a full diagnostic inspection and don't forget a swab test.'",
+  "timeline": [
+    {
+      "when_eastern": "Wed Aug 19, 2026 15:54",
+      "step": "Booking",
+      "system": "Google Calendar (MB - Montreal)",
+      "what": "Client support (Danica) books the inspection for Aug 26 at 1 PM, $195 + tax. The calendar entry also gets an automatic AI 'financial analysis' of the area."
+    },
+    {
+      "when_eastern": "Wed Aug 26, 13:00",
+      "step": "Inspection",
+      "system": "On site",
+      "what": "Inspector checks the attic: humidity, moisture, smell, swab test."
+    },
+    {
+      "when_eastern": "Wed Aug 26, 14:24-14:26",
+      "step": "Raw notes",
+      "system": "Telegram (MTL Deliverables)",
+      "what": "Inspector posts findings, the estimate ('$1500+tax, 4 hours, 1-2 person team') and 17 photos. 'Please invoice.'"
+    },
+    {
+      "when_eastern": "Wed Aug 26",
+      "step": "Invoice + estimate",
+      "system": "FreshBooks + Asana",
+      "what": "Inspection invoice MU693 ($224.20, paid). Inspection report written and reviewed the same day. Estimate MO881 created at $1,543 + tax. Asana card created at 16:33."
+    },
+    {
+      "when_eastern": "Thu Aug 27, 11:11-11:29",
+      "step": "Client says go",
+      "system": "Close CRM (SMS)",
+      "what": "Automated SMS: 'I sent you the estimate earlier...'. 11 minutes later the client replies: 'Go ahead with a job and let me know when'. Support asks them to accept the estimate."
+    },
+    {
+      "when_eastern": "Tue Sep 8",
+      "step": "Accepted + deposit",
+      "system": "FreshBooks + Asana + Close",
+      "what": "Estimate marked accepted, booking deposit ($617.20) sent and paid. Card moves to 'Active Projects'."
+    },
+    {
+      "when_eastern": "Wed Sep 9",
+      "step": "Booked email",
+      "system": "Close CRM (email)",
+      "what": "'Your project is booked - optional add-ons before we start'."
+    },
+    {
+      "when_eastern": "Wed Sep 16, 10:00",
+      "step": "Remediation",
+      "system": "On site (Team 1)",
+      "what": "Crew treats the attic (planned 4 hours)."
+    },
+    {
+      "when_eastern": "Thu Sep 17, 10:43",
+      "step": "Clearance report + final invoice",
+      "system": "Brain + FreshBooks",
+      "what": "Clearance report (grade 4, swab tests negative) and final invoice sent. The report includes 3 screenshots of the crew's Telegram messages with their notes. Card tagged PROJECT COMPLETED."
+    },
+    {
+      "when_eastern": "Fri Sep 18",
+      "step": "Payment",
+      "system": "Close (SMS) + FreshBooks",
+      "what": "SMS with the payment link (card or e-transfer). Paid the same evening."
+    },
+    {
+      "when_eastern": "Fri Sep 25 + Fri Oct 2",
+      "step": "Review requests",
+      "system": "Close CRM (SMS)",
+      "what": "Two automated SMS asking for a Google review."
+    }
+  ],
+  "findings": [
+    "Attic: a few small patches of visible mold (near the bathroom exhaust fan and two other spots).",
+    "Insulation in good condition.",
+    "Humidity OK, no smell, no active moisture.",
+    "Swab test positive."
+  ],
+  "recommendations": [
+    "Remediation / topical treatment of the affected attic areas",
+    "Keep good attic ventilation and humidity to prevent new growth",
+    "No insulation removal needed"
+  ],
+  "estimate_summary": {
+    "number": "MO881",
+    "amount": "$1,543 + 14.975% GST/QST = $1,774.06",
+    "time": "4 hours",
+    "status": "Accepted Sep 8, invoiced (MU763), paid in full Sep 18",
+    "scope": [
+      "Containment + wrapping, negative-pressure air filter",
+      "Topical treatment of the small patches (wire-brushing, HEPA vacuum, stain remover, fungicide)",
+      "Cleaning and disinfection (HEPA vacuum + fogging)",
+      "1 swab test + Project Clearance Report"
+    ]
+  },
+  "files": [
+    {
+      "file": "Report_1_Inspection_redacted.pdf",
+      "what": "Inspection report the client received (16 pages)"
+    },
+    {
+      "file": "Report_2_Clearance_after_remediation_redacted.pdf",
+      "what": "Project Clearance Report after the work (17 pages)"
+    },
+    {
+      "file": "Estimate_MO881.pdf",
+      "what": "The estimate, rebuilt from FreshBooks data"
+    },
+    {
+      "file": "Photos/1_Inspection/ (11 JPG)",
+      "what": "Photos from the inspection report, named by caption"
+    },
+    {
+      "file": "Photos/2_Remediation/ (21 JPG)",
+      "what": "Before / during / after photos from the clearance report, incl. 3 crew notes"
+    },
+    {
+      "file": "Raw_notes_from_Telegram.txt",
+      "what": "What the inspector posted right after the visit"
+    },
+    {
+      "file": "Job_Story.pdf / job_timeline.json",
+      "what": "This story, and the same data for code"
+    }
+  ],
+  "note": "Client names, emails and phone numbers removed on purpose. Times are Eastern (Ottawa/Montreal).",
+  "estimate_items_from_freshbooks": [
+    {
+      "item": "Solution Center Agent: Danica",
+      "description": "",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Inspector: Joshua Lebrun",
+      "description": "The inspector who prepared this estimate is:\nJoshua Lebrun, MSC ME, CMI\n\nGot questions? Contact Josh by phone at: (514) 500-5801",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Mold Removal Project",
+      "description": "--1 - Containment of Contaminated Area(s)\n\nContainment of the affected areas with polyethylene drop sheets and zipper door(s), using negative air pressure (If permitted by actual conditions at the property), or an equivalent method, in order to prevent the cross-contamination of mold spores, dust/debris, and other particulates to other areas of the property.\n\nAdditionally, any personal belongings or large items that cannot be relocated within the affected area will be individually wrapped to \nthem against dust and debris during the remediation process.\n\n- Ordinary air scrubber deployment\n\n\n-Topical Treatment Process:\n\nRemoval of mold from the areas by means of manual wire brushing or other topical and abrasive removal techniques. This is done in conjunction with HEPA vacuuming, and the application of an advanced, two-stage mold remediation protocol, initiating with high-precision stain removal techniques to revitalize the aesthetics of affected surfaces. This is seamlessly followed by the strategic application of our proprietary fungicides, meticulously designed to eliminate mold spores, thereby ensuring your space is restored to its pristine condition and safeguarded against future contamination.\n\nThe areas & materials that require treatment are:\nSmall Areas:\n- near bathroom exhaust fan\n- two other areas with small mold patches\n- any other small patch if the team notices more\n- other surfaces\nResidual non-fungal staining may be present upon completion.\n\n-- 3 - Cleaning and Disinfection\n\nThorough HEPA vacuuming is conducted throughout all surfaces in the affected area in order to remove mold spores, particulates, and dust.\nAll remaining surfaces (studs, beams, walls, floors, etc.) in the affected areas will be disinfected by concentrated fogging, using an approved fungicide.\n\nAdditional vacuuming or HEPA air scrubbing may occur upon completion of the fogging process, along with a general cleaning of all areas traveled by Mold Busters personnel.\nMold Busters applies an advanced, two-stage mold remediation protocol, initiating with high-precision stain removal techniques to revitalize the aesthetics of affected surfaces. This is seamlessly followed by the strategic application of our proprietary fungicides, meticulously designed to eliminate mold spores, thereby ensuring your space is restored to its pristine condition and safeguarded against future contamination.\n\n-- 4 - Post-Removal Clearance (Swab)\nPost-remediation verification is conducted to ensure that the environment has been successfully remediated.\nThe final clearance inspection includes a visual inspection and an instant swab analysis.\n\nThis will be performed by the Project Supervisor upon completion of the remediation process.\n\n-- Project Clearance Report\nA written report following the remediation process, describing the outcome of the remediation work, any potential source issues, clearance grades, etc.\n\nAdditional recommendations will be made in this report to assist in preventing future fungal contamination.",
+      "amount": "1543.00",
+      "taxes": [
+        {
+          "name": "QST/GST",
+          "percent": "14.975",
+          "amount": "231.06"
+        }
+      ]
+    }
+  ],
+  "raw_notes_from_telegram": "Source: Telegram group \"MTL Deliverables\" - posted by the inspector (Joshua)\nTimes are Eastern. Client details removed.\n\n[Wed Aug 26, 2026 14:24]\n2575 Rue de la Canardiere, Laval, QC H7L 6G3, Canada\n\nAttic has a few small patches of mold. Insulation is in good condition.\n\nRelative humidity okay.\nNo smell.\nNo active moisture.\nSwab test result positive.\n\nRecommendation to topically treat the 3 specific small patches where there is visible mold. And any other small area that is noticed by team.\n\nAttic:\n\n1- Containment + Wrapping + negative pressure air filter\n2.2 - Topical\n-3 small areas with mold patches (near bathroom exhaust fan and two others)\n-any other small patch if the team notices more\n-other surfaces\n\n3 - Cleaning and Disinfection\n\n4 - Swab x1\n\n5 - PCR\n\nEstimate: $1500+tax  4 hours, 1-2 person team\n\nPlease invoice.\n\n[14:25] (10 photos)\n[14:25] (6 photos)\n[14:26] (1 photo)\n"
+}

@@ -1,0 +1,195 @@
+{
+  "job": "Job 2 - On-site Inspection, full job to clearance",
+  "summary": "Attic. Inspection -> estimate -> remediation -> clearance report -> paid in full",
+  "service": "Scope of Work Assessment (short on-site visit to price the work)",
+  "property": "31 Ross St E, Smiths Falls, ON (house, out-of-town area)",
+  "client": "Homeowner, selling the house",
+  "paid": "Visit $95 + HST = $107.35 (paid). Remediation $2,700 + HST = $3,051 (paid)",
+  "people": [
+    {
+      "role": "Booked by",
+      "who": "Natasa - client support"
+    },
+    {
+      "role": "Inspector",
+      "who": "Luka Markovic, MSC ME, CMI"
+    },
+    {
+      "role": "Report written / reviewed by",
+      "who": "Stefan (admin support) / Goran (admin support)"
+    },
+    {
+      "role": "Remediation",
+      "who": "Team 2 (out-of-town crew), Tue Sep 22"
+    },
+    {
+      "role": "Follow-up",
+      "who": "Close CRM SMS + client support"
+    }
+  ],
+  "client_concern": "A home inspector found visible traces of mold, probably in the attic. Booking note: 'Visible traces of mold found by home inspector. They think it is attic in question.' The client later said they are selling the house.",
+  "timeline": [
+    {
+      "when_eastern": "Tue Sep 1, 2026 10:23",
+      "step": "Booking",
+      "system": "Google Calendar (MB - Out of Town)",
+      "what": "Client support (Natasa) books a 'SoW - OOT' visit (Scope of Work, $95 + tax) for Sep 3, 2-3 PM."
+    },
+    {
+      "when_eastern": "Thu Sep 3, 14:00",
+      "step": "Site visit",
+      "system": "On site",
+      "what": "Inspector visits the house: attic, thermal camera, moisture meter, hygrometer."
+    },
+    {
+      "when_eastern": "Fri Sep 4, 13:43-13:56",
+      "step": "Raw notes",
+      "system": "Telegram (OTT-GAT & OOT Area Deliverables)",
+      "what": "Inspector posts: 'Please send an invoice for $95 + tax', a note about the client expecting a 3-5 h full home inspection for a $95 service, report bullets, 18 photos with captions, and the estimate ($2,700 + tax, 6-8 h). Office replies 'GOOD TO GO!'."
+    },
+    {
+      "when_eastern": "Tue Sep 8",
+      "step": "Invoice, report, estimate",
+      "system": "FreshBooks + Brain + Asana",
+      "what": "Invoice MU767 ($107.35) and estimate MO994 created. Report written and reviewed the same day. Asana card created automatically at 16:43."
+    },
+    {
+      "when_eastern": "Wed Sep 9, 09:20-12:03",
+      "step": "Report sent",
+      "system": "Asana + email",
+      "what": "'Report and estimate prepared, awaiting payment.' Client pays the $107.35 invoice, then the report and estimate are sent."
+    },
+    {
+      "when_eastern": "Fri Sep 11",
+      "step": "Client question",
+      "system": "Close CRM (SMS)",
+      "what": "Client asks if we can also check two other attic areas. Answer: yes, the crew will look while on site; extra work would get a separate estimate."
+    },
+    {
+      "when_eastern": "Mon Sep 14, 11:51-11:58",
+      "step": "Client says yes",
+      "system": "Close CRM (SMS)",
+      "what": "After a follow-up SMS the client replies: 'Yes, we would like MB to remediate the mold issue... How should we proceed?' Support asks them to click Accept on the estimate."
+    },
+    {
+      "when_eastern": "Tue Sep 15",
+      "step": "Accepted + deposit",
+      "system": "FreshBooks + Close + Asana",
+      "what": "Estimate accepted. 40% booking deposit ($1,080) paid. Card moves to 'Active Projects'."
+    },
+    {
+      "when_eastern": "Wed Sep 16 - Thu Sep 17",
+      "step": "Upsell",
+      "system": "Close CRM (email + SMS)",
+      "what": "Email 'Your project is booked - optional add-ons'. SMS offers Whole-Home Treatment for $600 + tax (or $850 later). Client: 'Not useful to us, as we are selling the house'."
+    },
+    {
+      "when_eastern": "Tue Sep 22, 10:00",
+      "step": "Remediation",
+      "system": "On site (Team 2)",
+      "what": "Crew does the attic job. Supervisor takes swab tests; instant swab negative; clearance grade 4 (best)."
+    },
+    {
+      "when_eastern": "Wed Sep 23, 09:34",
+      "step": "Clearance report + final invoice",
+      "system": "Brain + FreshBooks",
+      "what": "Project Clearance Report (20 photos: before, during, after) and the final invoice are sent. Card tagged PROJECT COMPLETED."
+    },
+    {
+      "when_eastern": "Thu Sep 24, 10:23-10:29",
+      "step": "Paid in full + review",
+      "system": "FreshBooks + Close (SMS)",
+      "what": "Final invoice paid ($3,051 total). Automated SMS asks for a Google review. Second review SMS on Oct 1."
+    }
+  ],
+  "findings": [
+    "Attic: visible discoloration, no rot or structural damage, no moisture problems.",
+    "Only one layer of fiber batt insulation; some soffits blocked by insulation.",
+    "Thermal camera: uneven, disturbed insulation on the ceilings and at the attic hatch.",
+    "Popcorn ceiling that may contain asbestos, with several exposed holes.",
+    "Humidity normal."
+  ],
+  "recommendations": [
+    "Professional mold remediation",
+    "Bring attic insulation to R-50 and spread it evenly",
+    "Unblock soffits, add baffles for airflow",
+    "Contain the holes in the popcorn ceiling until asbestos testing"
+  ],
+  "estimate_summary": {
+    "number": "MO994",
+    "amount": "$2,700 + 13% HST = $3,051",
+    "time": "6-8 hours",
+    "status": "Accepted Sep 15, invoiced (MU815), paid in full Sep 24",
+    "scope": [
+      "Attic job, main attic about 600 sq ft, hard to access, fiber batt insulation",
+      "Containment at the attic hatch, negative pressure if possible",
+      "Wire-brushing + HEPA vacuum + stain remover on sheathing and trusses; remove bad insulation as needed",
+      "HEPA vacuum + fogging with fungicide, air scrubber for odors",
+      "Clearance: visual check + swab tests by the supervisor, written clearance report"
+    ]
+  },
+  "files": [
+    {
+      "file": "Report_1_Inspection_redacted.pdf",
+      "what": "Inspection report the client received (19 pages)"
+    },
+    {
+      "file": "Report_2_Clearance_after_remediation_redacted.pdf",
+      "what": "Project Clearance Report after the work (15 pages)"
+    },
+    {
+      "file": "Estimate_MO994.pdf",
+      "what": "The estimate, rebuilt from FreshBooks data"
+    },
+    {
+      "file": "Photos/1_Inspection/ (15 JPG)",
+      "what": "Photos from the inspection report, named by caption"
+    },
+    {
+      "file": "Photos/2_Remediation/ (20 JPG)",
+      "what": "Before / during / after photos from the clearance report"
+    },
+    {
+      "file": "Raw_notes_from_Telegram.txt",
+      "what": "What the inspector posted right after the visit, before any office work"
+    },
+    {
+      "file": "Job_Story.pdf / job_timeline.json",
+      "what": "This story, and the same data for code"
+    }
+  ],
+  "note": "Client names, emails and phone numbers removed on purpose. Times are Eastern (Ottawa/Montreal).",
+  "estimate_items_from_freshbooks": [
+    {
+      "item": "Solution Center Agent: Natasa",
+      "description": "",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Inspector: Luka",
+      "description": "The inspector who prepared this estimate is:\nLuka Markovic, MSC ME, CMI\n\nGot questions? Contact Luka by phone at: 343-600-3453, or by email: luka@bustmold.com",
+      "amount": "0.00",
+      "taxes": []
+    },
+    {
+      "item": "Attic Mold Removal Project",
+      "description": "-- Containment of the attic entrance area using polyethylene sheets, negative pressure (or an equivalent method, If permitted by actual conditions at the property) in order to help prevent any cross contamination from occurring during the removal process.\n\n- All personal belongings should be relocated away from the attic hatch by the owner prior to the remediation process. This should be done in order for the Mold Busters remediation team to be able to bring in the necessary equipment.\n\n-- Removal of mold from the attic area (sheathing, trusses, etc.) by means of manual wirebrushing, or other topical and abrasive removal techniques. This process is conducted alongside HEPA vacuuming, provided that conditions such as the size of the attic hatch or attic height allow for it. Additionally, we apply concentrated hydrogen peroxide or other approved fungal stain-removing agents to heavily contaminated building materials within the attic space.\nResidual non-fungal staining may be present upon completion.\n\nPortions of affected or compromised insulation may be removed and disposed of, on an as-needed basis. Any remaining insulation will be thoroughly disinfected using a fungicide.\n\nMold Busters' trained mold removal professionals are recommend to wear the appropriate PPE, and to complete the tasks in accordance to mold removal guidelines - https://iaq.is/mold-removal-guidelines\n\n Price includes equipment, materials and labor fees.\n\nAny additional items and areas that require mold removal are subject to revision and discussion with the client.\n\n-- Disinfection\n\nThorough HEPA vacuuming is conducted throughout all surfaces in the affected attic area in order to remove spores, particulates, dust, and additional debris, if conditions such as the size of the attic hatch or attic height permit.\n\nThorough disinfection on all surfaces, including insulation, will be performed by means of concentrated fogging with a fungicide.\n\nAll remaining materials and atmosphere in the attic area will be oxidized in order to remove any residual spores, bacteria, and additional particles. An air scrubber will be deployed in the contained attic entrance area to assist in removing residual odors from products utilized during the treatment process. Residual odors may remain for up to 48-hours, depending on the quality of ventilation within the treated space.\n\n-- Clearance\n\nPost-remediation verification is conducted to ensure that the environment is suitable for re-occupancy. \n\nThe final clearance inspection includes a visual inspection, and surface swab testing of the affected area. \n\nThis will be performed by the Project Supervisor upon completion of the remediation process.",
+      "amount": "2700.00",
+      "taxes": [
+        {
+          "name": "HST",
+          "percent": "13",
+          "amount": "351.00"
+        }
+      ]
+    },
+    {
+      "item": "Mold Clearance Guarantee with Certificate",
+      "description": "A written report following the remediation process, describing the outcome of the remediation work, any potential source issues, clearance grades, etc.\n\nAdditional recommendations will be made in this report to assist in preventing future fungal contamination.",
+      "amount": "0.00",
+      "taxes": []
+    }
+  ],
+  "raw_notes_from_telegram": "Source: Telegram group \"OTT-GAT & OOT Area Deliverables\" - posted by the inspector (Luka)\nTimes are Eastern. Client details removed.\n\n[Fri Sep 4, 2026 13:43]\n31 Ross St E, Smiths Falls, ON K7A 4V7, Canada\nPlease send an invoice for $95 + tax\nI had a slight problem here again. The client wanted \"what was advertised\" on our website for mold inspection: a full HOME INSPECTION with diagnostic tools.\nThey wanted me to do a 3-5h full home inspection with a report, fully knowing they scheduled a $95 service.\nI explained the process and made a compromise to do a quick inspection with diagnostic tools and a small report\nI don't know how to take care of this one without refusing service completely\n\n[13:44]\nIn the end, they were happy with the solution but this is not the first time I had to deal with this situation\n\n[13:44] (1 photo)\n\n[13:53]\nReport:\nObservations:\n- The client contacted Mold Busters to inspect the attic for mold issues after a home inspection pointed out possible issues\n- Visible discoloration was observed in the attic with no apparent structural issues\n- No obvious rot or structural issues were detected during the inspection\n- Only one layer of fiber batt insulation was present\n- Some of the soffits were blocked with insulation during the inspection\n- Thermal imaging camera detected multiple anomalies on the ceiling, pointing to disturbed and unevenly distributed insulation\n- The attic hatch also showed thermal anomalies\n- No moisture issues were detected during the inspection\n- A potentially asbestos-containing material, popcorn ceiling, was present\n- Multiple exposed holes in potentially asbestos-containing materials were observed throughout the property\n- Humidity readings were within standard\n\nSuggestions and Recommendations:\n- Professional Mold Remediation services\n- Make sure that the insulation in the attic is up to standard (R-50) and evenly distributed\n- Unblock the soffits and install baffles for added ventilation\n- Contain the exposed holes on popcorn ceilings throughout the property\n\n[13:54] (5 photos) Attic discoloration and insulation\n[13:54] (5 photos) Thermal anomalies throughout the property\n[13:54] (2 photos) Humidity within standard\n[13:54] (3 photos) No moisture issues detected\n[13:55] (2 photos) Exposed holes on the ceiling\n\n[13:56]\nEstimate:\n\nStandard Attic job, main attic, approx 600 sq ft\n\n- Less accessible\n- Fiber batt insulation\n\nPCR included\n\n$2700.00 + tax, 6-8 hours\n\n[13:56] Office reply: GOOD TO GO!\n"
+}

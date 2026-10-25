@@ -149,4 +149,4 @@ def seed_all(save) -> list[Case]:
     from app.seed import projects
     j1, j2 = job1(), job2()
     projects.add_sample_chats([j1, j2])
-    return [save(j1), save(j2), *projects.seed_projects(save)]
+    return [save(j1), save(j2)]

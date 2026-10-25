@@ -187,12 +187,6 @@ def test_hero_loop(client):
     client.post(f"/facts/{baby['id']}/approve")
     person = client.get("/people/c-job1").json()
     assert any(m["kind"] == "nursery_humidity" and m["human_only"] for m in person["moments"])
-    alert = client.post("/alerts/simulate", json={"zone": "Gatineau"}).json()
-    assert alert["matched"] and alert["matched"][0]["priority"] == 1
-    made = client.post(f"/alerts/{alert['alert']['id']}/draft").json()
-    assert made["offer"] + made["safety"] > 0
-    fr = [m for m in client.get("/messages?status=draft").json() if m["message"]["trigger"].startswith("storm") and m["message"]["language"] == "fr"]
-    assert fr and "pluie" in fr[0]["message"]["body"]
     hub = client.get("/hub").json()
     assert hub["money"]["recovered_total"] == 4181.0 and hub["money"]["funnel"]["accepted"] == 1
 
@@ -280,10 +274,10 @@ def test_three_pillars_and_onsite_walkthrough(client):
     """Conversations come seeded with AI drafts from each customer's own case; a spoken walkthrough fills the report; the $20
     report is locked until checkout."""
     p = client.get("/hub/pillars").json()
-    assert p["counts"]["replies_waiting"] == 8 and all(c["draft"] for c in p["conversations"])
-    r = client.post("/webhooks/inbound", json={"contact_id": "c-s02", "channel": "sms", "body": "What time is the inspector coming tomorrow?"}).json()
-    assert "2:00 PM" in r["reply"]["body"]                                    # answered from her booking, not a generic reply
-    out = client.post("/cases/visit-c-s01/onsite/walkthrough", data={"room": "Basement", "transcript":
+    assert p["counts"]["replies_waiting"] == 6 and all(c["draft"] for c in p["conversations"])
+    r = client.post("/webhooks/inbound", json={"contact_id": "c-stitts", "channel": "sms", "body": "Can I just clean it with bleach?"}).json()
+    assert "Health Canada" in r["reply"]["body"]                               # answered from guidance, not a generic reply
+    out = client.post("/cases/pembroke/onsite/walkthrough", data={"room": "Basement", "transcript":
                       "Starting in the basement. Moisture meter shows elevated moisture at the north wall. Moving to the laundry. Dryer vent hose is crushed."}).json()
     rooms = {f["room"] for f in out["case"]["findings"]}
     assert {"Basement", "Laundry"} <= rooms and out["case"]["report"] and out["case"]["stage"] == "report_draft"

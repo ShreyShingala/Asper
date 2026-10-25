@@ -13,3 +13,7 @@ moldflow/web/e2e/.media/
 moldflow/web/test-results/
 moldflow/web/playwright-report/
 moldflow/web/.next-e2e/
+
+# sample inspections vol 2.1: call recordings are too large for git (photos, notes and JSON are committed)
+Mold_Busters_Hackathon_Sample_Inspections/**/Videos/
+Mold_Busters_Hackathon_Sample_Inspections/**/*.mp4

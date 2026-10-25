@@ -16,16 +16,7 @@ SYSTEM_MAP = {"google calendar": "google_calendar", "freshbooks": "freshbooks", 
               "dialpad": "dialpad", "email": "email", "on site": "moldflow", "booking page": "google_calendar", "mold busters virtual": "moldflow"}
 
 # name, language, type, FSA, street, city
-PEOPLE = [
-    ("Marie Tremblay", "fr", "homeowner", "J8X", "48 rue Laurier", "Gatineau"),
-    ("Daniel Okafor", "en", "homeowner", "K1S", "212 Fifth Ave", "Ottawa"),
-    ("Sophie Gagnon", "fr", "homeowner", "J8Y", "15 rue Wellington", "Gatineau"),
-    ("Priya Raman", "en", "homeowner", "K2K", "77 Terry Fox Dr", "Ottawa"),
-    ("Jean-Luc Bouchard", "fr", "landlord", "J8Z", "301 boul. de la Cité", "Gatineau"),
-    ("Emily Chen", "en", "homeowner", "K1Y", "9 Hamilton Ave N", "Ottawa"),
-    ("Robert Lavoie", "fr", "homeowner", "J9A", "120 rue Principale", "Gatineau"),
-    ("Aisha Mohamed", "en", "tenant", "K1G", "1840 Russell Rd", "Ottawa"),
-]
+PEOPLE: list[tuple] = []  # the demo's people are built in seed/demo6.py (6 customers with real depth)
 
 # (category, fact text, customer quote, source kind, message_use, follow-up (month, day) or None, follow-up reason, status)
 FACTS = [

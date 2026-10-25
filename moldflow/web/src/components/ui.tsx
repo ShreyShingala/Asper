@@ -127,12 +127,15 @@ export function Logo({ small }: { small?: boolean }) {
 const NAV = [
   ["/hub", "Hub"],
   ["/muse", "Muse"],
+  ["/map", "Map"],
+  ["/customers", "Customers"],
   ["/projects", "Projects"],
-  ["/people", "People"],
   ["/outreach", "Outreach"],
-  ["/schedule", "Schedule"],
+  ["/demo-texts", "Demo texts"],
 ] as const;
 const MORE = [
+  ["/people", "People"],
+  ["/schedule", "Schedule"],
   ["/dashboard", "Cases"],
   ["/alerts", "Alerts"],
   ["/research", "Research"],

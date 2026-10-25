@@ -35,6 +35,8 @@ async def lifespan(_app):
 app = FastAPI(title="MoldFlow API", version="1.0", lifespan=lifespan)
 from app.routers import hub as hub_router  # noqa: E402
 
+from app.demo_api import router as demo_router  # noqa: E402
+app.include_router(demo_router)  # before the hub router: /people/overview must win over /people/{cid}
 app.include_router(hub_router.router)
 app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 from app.projects_api import router as projects_router  # noqa: E402
@@ -51,9 +53,8 @@ def _seed_everything() -> list[Case]:
         c.contact_id = f"c-{c.id}"
         store.save(c)
     crm_seed.seed(cases)
-    crm_seed.seed_todays_visits(store.save)
-    from app.seed import conversations
-    conversations.seed(store.save)
+    from app.seed import demo6
+    demo6.seed(cases)
     from app import messaging
     from app.models.crm import Contact
     for contact in crm_store.query(Contact):
